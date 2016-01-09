@@ -1,0 +1,100 @@
+function log(msg) {
+	if (window.console) {
+		console.log(msg);
+	}
+}
+
+function getRandomLetter() {
+    var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	return letters.charAt(Math.floor(Math.random() * letters.length));
+}
+
+// whether the position selected for the letter is valid
+function validPositionSelected() {
+	// TODO - assume ok for now
+	return true;
+}
+
+
+// Whether the current letters that have been played are valid
+function validWordPlayed() {
+	// TODO - assume ok for now
+	return true;
+}
+
+function populateLetters( cells ) {
+	$(cells).each(function() {
+		$(this).text( getRandomLetter() );
+	});
+}
+
+function clearLetterSelection() {
+	$('table.letters td.selected').each(function() {
+		$(this).removeClass( 'selected' );
+	});
+}
+
+function enablePlayButton() {
+	var playButton = $("button.play");
+	var isInPlay = ( $("table.gameboard td.inplay").length > 0 );
+	playButton.prop('disabled', ! isInPlay );
+	return isInPlay;
+}
+
+
+function selectLetterToPlay(selectedCell) {
+	clearLetterSelection();
+
+	if ( $(selectedCell).hasClass('inplay') ) { // if letter already inplay
+		// don't select, just return
+		return;
+	}
+
+	$(selectedCell).addClass( 'selected' );
+}
+
+
+function playLetterOnGameBoard(playedCell) {	
+	var selectedLetterCell = $('table.letters td.selected');
+	var letterPlayed = selectedLetterCell.text();
+	if (letterPlayed.length != 1 ) { // if no selected letter
+		return;
+	}
+
+	if ( ! validPositionSelected() ) {
+		// TODO
+		alert('Invalid position selected');
+		return;
+	}
+
+	$(playedCell).text(letterPlayed)
+	$(playedCell).addClass( 'inplay' );
+
+	clearLetterSelection();
+	$(selectedLetterCell).addClass( 'inplay' );
+
+	enablePlayButton();
+}
+
+function playWord() {
+	if ( ! validWordPlayed () ) {
+		// TODO
+		alert('Invalid word played');
+		return;
+	}
+
+	$('table.gameboard td.inplay').addClass('played');
+	$('table.gameboard td.inplay').removeClass('inplay');
+
+	// repopulate inplay cells
+	populateLetters( $('table.letters td.inplay') );
+	$('table.letters td.inplay').removeClass('inplay');
+
+}
+
+function main() {
+	populateLetters( $('table.letters td') ); // all cells
+	enablePlayButton();	
+}
+

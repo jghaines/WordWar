@@ -1,0 +1,40 @@
+td {
+	text-align:	center;	 
+	vertical-align:	middle;
+}
+
+
+table.gameboard td {
+	height: 25px;
+	width: 25px;
+}
+
+table.gameboard td {
+	background: grey;
+}
+
+table.gameboard td.inplay {
+	background: lightgrey;
+}
+
+table.gameboard td.played {
+	background: darkgrey;
+}
+
+
+table.letters td {
+	height: 25px;
+	width: 25px;
+}
+
+table.letters td {
+	background: lightgrey;
+}
+
+table.letters td.inplay {
+	background: grey;
+}
+
+table.letters td.selected {
+	background: yellow;
+}
