@@ -6,8 +6,17 @@ function log(msg) {
 
 function getRandomLetter() {
     var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var vowels = "AEIOU";
+    var consonants = "BCDFGHJKLMNPQRSTVWXYZ";
 
-	return letters.charAt(Math.floor(Math.random() * letters.length));
+    if ( Math.random() < 0.3 ) {
+		return vowels.charAt(Math.floor(Math.random() * vowels.length));
+    } else if ( Math.random() < 0.6 ) {
+		return consonants.charAt(Math.floor(Math.random() * consonants.length));
+	} else {
+		return letters.charAt(Math.floor(Math.random() * letters.length));
+	}
+
 }
 
 // whether the position selected for the letter is valid
