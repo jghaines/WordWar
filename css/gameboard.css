@@ -7,6 +7,16 @@ table.gameboard td {
 	background: grey;
 }
 
+table.gameboard td.player {
+	background: magenta;
+	content:url( '../images/MadWizardPNG.png' );
+}
+
+table.gameboard td.player  {
+	width: 10;
+	height: 10;
+}
+
 table.gameboard td.x2 {
 	background: red;
 	color: white;
