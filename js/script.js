@@ -23,6 +23,10 @@ function validWordPlayed() {
 	return true;
 }
 
+function loadBoard(url) {
+	$('table.gameboard').load( url );
+}
+
 function populateLetters( cells ) {
 	$(cells).each(function() {
 		$(this).text( getRandomLetter() );
@@ -109,6 +113,7 @@ function createBindings() {
 }
 
 function main() {
+	loadBoard('./boards/1.html');
 	createBindings();
 	populateLetters( $('table.letters td') ); // all cells
 	enablePlayButton();	

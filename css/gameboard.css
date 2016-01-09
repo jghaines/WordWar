@@ -1,0 +1,50 @@
+table.gameboard td {
+	height: 25px;
+	width: 25px;
+}
+
+table.gameboard td {
+	background: grey;
+}
+
+table.gameboard td.x2 {
+	background: red;
+	color: white;
+}
+
+table.gameboard td.x2::after {
+	content: "x2";
+}
+
+table.gameboard td.x3 {
+	background: blue;
+	color: white;
+}
+
+table.gameboard td.x3::after {
+	content: "x3";
+}
+
+table.gameboard td.wildcard {
+	background: purple;
+	color: white;
+}
+
+table.gameboard td.wildcard::after {
+	content: "?";
+}
+
+table.gameboard td.static {
+	background: black;
+	color: white;
+}
+
+
+
+table.gameboard td.inplay {
+	background: lightgrey;
+}
+
+table.gameboard td.played {
+	background: darkgrey;
+}
