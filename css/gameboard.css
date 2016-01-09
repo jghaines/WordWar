@@ -9,12 +9,12 @@ table.gameboard td {
 
 table.gameboard td.player {
 	background: magenta;
-	content:url( '../images/MadWizardPNG.png' );
+	content:url( '../images/MadWizard.png' );
 }
 
-table.gameboard td.player  {
-	width: 10;
-	height: 10;
+table.gameboard td.opponent {
+	background: OldLace;
+	content:url( '../images/BabyDuck.png' );
 }
 
 table.gameboard td.x2 {
