@@ -93,7 +93,23 @@ function playWord() {
 
 }
 
+function createBindings() {
+	$('table.letters td').click( function(){
+		selectLetterToPlay(this);
+	} );
+
+	$('table.gameboard td').click( function(){
+		playLetterOnGameBoard(this);
+	} );
+
+	$("button.play").click( function(){
+		playWord();
+	} );
+
+}
+
 function main() {
+	createBindings();
 	populateLetters( $('table.letters td') ); // all cells
 	enablePlayButton();	
 }
