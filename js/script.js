@@ -49,21 +49,32 @@ function enablePlayButton() {
 	return isInPlay;
 }
 
+function unhighlightValidPositions() {
+	$('table.gameboard td').removeClass( 'playable' );
+}
+
 function highlightValidPositions(){
 	var inPlayCells =  $("table.gameboard td.inplay");
 	var playerCell =  $("table.gameboard td.player");
+	var playerColumnIndex = $(playerCell).index();
 
-	$('table.gameboard td').removeClass( 'playable' );
-
-
+	unhighlightValidPositions();
 
 	if ( inPlayCells.length == 0 ) {
-		var columnIndex = $(playerCell).index();
+		log.info("highlightValidPositions() - direction == any");
 		// no played cells - just highlight around player
-		$(playerCell).next().addClass( 'playable' ); // left
-		$(playerCell).prev().addClass( 'playable' ); // right
-		$(playerCell).parent().prev().children().eq(columnIndex).addClass('playable'); // up
-		$(playerCell).parent().next().children().eq(columnIndex).addClass('playable'); // down
+		$(playerCell).prev().addClass( 'playable' ).attr( 'ww:direction', 'left' );
+		$(playerCell).next().addClass( 'playable' ).attr( 'ww:direction', 'right' );
+		$(playerCell).parent().prev().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'up' );
+		$(playerCell).parent().next().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'down' );
+	} else {
+		var direction = $(inPlayCells).first().attr('ww:direction');
+		log.info("highlightValidPositions() - direction == " + direction);
+		switch(direction) {
+    		case 'right':
+	    		playerCell.siblings('td:gt('+playerColumnIndex+'):not(.inplay)').first().addClass( 'playable' ).attr( 'ww:direction', 'right' );
+	        break;
+		}
 	}
 
 	createGameboardBindings();
@@ -102,6 +113,7 @@ function playLetterOnGameBoard(playedCell) {
 	clearLetterSelection();
 	$(selectedLetterCell).addClass( 'inplay' );
 
+	unhighlightValidPositions();
 	enablePlayButton();
 }
 
@@ -139,6 +151,9 @@ function createBindings() {
 }
 
 function main() {
+	log.setLevel('DEBUG');
+	log.info('main()');
+
 	loadBoard('./boards/1.html');
 	createBindings();
 	populateLetters( $('table.letters td') ); // all cells
