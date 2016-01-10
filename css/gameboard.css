@@ -51,12 +51,15 @@ table.gameboard td.static {
 
 table.gameboard td.inplay {
 	background: lightgrey !important;
+	color: black !important;
 }
 
 table.gameboard td.playable {
 	background: yellow !important;
+	color: yellow !important;
 }
 
 table.gameboard td.played {
 	background: darkgrey !important;
+	color: black !important;
 }
