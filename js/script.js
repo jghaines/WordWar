@@ -14,9 +14,9 @@ function getRandomLetter() {
 }
 
 // whether the position selected for the letter is valid
-function validPositionSelected() {
-	// TODO - assume ok for now
-	return true;
+function validPositionSelected(playedCell) {
+	log.debug('validPositionSelected( ' + playedCell + ')');
+	return $(playedCell).hasClass('playable');
 }
 
 
@@ -29,15 +29,20 @@ function validWordPlayed() {
 
 function loadBoard(url) {
 	log.info('loadBoard('+url+')');
-	$('table.gameboard').load( url, '', function() {
+	$('table.gameboard').load( url, '', function() { // callback - after the board is loaded
 
 		log.info('loadBoard() board height=' + $('table.gameboard tr').length);
 
+		// fill the values
 		$('table.gameboard td').filter(function() { return $(this).attr('ww_value'); }).each(function() {
 			log.debug('.');
 			$(this).text( $(this).attr('ww_value') );
 		});
 	});
+}
+
+function getPlayerCell() {
+	return $("table.gameboard td.player");
 }
 
 function populateLetters( cells ) {
@@ -50,6 +55,13 @@ function clearLetterSelection() {
 	$('table.letters td.selected').each(function() {
 		$(this).removeClass( 'selected' );
 	});
+}
+
+function flash(element, flash_class) {
+	$(element).addClass(flash_class);
+    setTimeout(function() {
+          $(element).removeClass(flash_class);
+    }, 1000);
 }
 
 function enablePlayButton() {
@@ -65,7 +77,7 @@ function unhighlightValidPositions() {
 
 function highlightValidPositions(){
 	var inPlayCells =  $("table.gameboard td.inplay");
-	var playerCell =  $("table.gameboard td.player");
+	var playerCell =  getPlayerCell();
 	var playerColumnIndex = $(playerCell).index();
 
 	unhighlightValidPositions();
@@ -111,14 +123,13 @@ function playLetterOnGameBoard(playedCell) {
 		return;
 	}
 
-	if ( ! validPositionSelected() ) {
-		// TODO
-		alert('Invalid position selected');
+	if ( ! validPositionSelected(playedCell) ) {
+		flash($('table.gameboard'), 'flash-red');
 		return;
 	}
 
-	$(playedCell).text(letterPlayed)
 	$(playedCell).addClass( 'inplay' );
+	$(playedCell).text(letterPlayed)
 
 	clearLetterSelection();
 	$(selectedLetterCell).addClass( 'inplay' );
@@ -130,12 +141,28 @@ function playLetterOnGameBoard(playedCell) {
 function playWord() {
 	if ( ! validWordPlayed () ) {
 		// TODO
-		alert('Invalid word played');
+		flash('table.gameboard td.inplay', 'flash-red');
 		return;
 	}
 
-	$('table.gameboard td.inplay').addClass('played');
-	$('table.gameboard td.inplay').removeClass('inplay');
+	var inPlayCells = $('table.gameboard td.inplay');
+	var direction = $(inPlayCells).first().attr('ww:direction');
+
+	// move avatar
+	var direction = $(inPlayCells).first().attr('ww:direction');
+	log.info("highlightValidPositions() - direction == " + direction);
+	switch(direction) {
+		case 'right':
+    		var playerCell = getPlayerCell();
+    		inPlayCells.last().addClass( 'player' );
+    		playerCell.removeClass('player');
+        break;
+	}
+
+	flash(inPlayCells,'flash-magenta');
+	inPlayCells.addClass('played');
+	inPlayCells.removeClass('inplay');
+
 
 	// repopulate inplay cells
 	populateLetters( $('table.letters td.inplay') );
@@ -144,7 +171,7 @@ function playWord() {
 }
 
 function createGameboardBindings() {
-	$('table.gameboard td.playable').click( function(){
+	$('table.gameboard td').click( function(){
 		playLetterOnGameBoard(this);
 	} );
 }
