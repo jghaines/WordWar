@@ -55,6 +55,10 @@ table.gameboard td.inplay {
 	background: lightgrey;
 }
 
+table.gameboard td.playable {
+	background: yellow;
+}
+
 table.gameboard td.played {
 	background: darkgrey;
 }

@@ -55,6 +55,25 @@ function enablePlayButton() {
 	return isInPlay;
 }
 
+function highlightValidPositions(){
+	var inPlayCells =  $("table.gameboard td.inplay");
+	var playerCell =  $("table.gameboard td.player");
+
+	$('table.gameboard td').removeClass( 'playable' );
+
+
+
+	if ( inPlayCells.length == 0 ) {
+		var columnIndex = $(playerCell).index();
+		// no played cells - just highlight around player
+		$(playerCell).next().addClass( 'playable' ); // left
+		$(playerCell).prev().addClass( 'playable' ); // right
+		$(playerCell).parent().prev().children().eq(columnIndex).addClass('playable'); // up
+		$(playerCell).parent().next().children().eq(columnIndex).addClass('playable'); // down
+	}
+
+	createGameboardBindings();
+}
 
 function selectLetterToPlay(selectedCell) {
 	clearLetterSelection();
@@ -65,6 +84,8 @@ function selectLetterToPlay(selectedCell) {
 	}
 
 	$(selectedCell).addClass( 'selected' );
+
+	highlightValidPositions();
 }
 
 
@@ -106,13 +127,15 @@ function playWord() {
 
 }
 
+function createGameboardBindings() {
+	$('table.gameboard td.playable').click( function(){
+		playLetterOnGameBoard(this);
+	} );
+}
+
 function createBindings() {
 	$('table.letters td').click( function(){
 		selectLetterToPlay(this);
-	} );
-
-	$('table.gameboard td').click( function(){
-		playLetterOnGameBoard(this);
 	} );
 
 	$("button.play").click( function(){
