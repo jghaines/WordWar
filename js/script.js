@@ -95,11 +95,17 @@ function highlightValidPositions(){
 		log.info("highlightValidPositions() - direction == " + direction);
 		var validPositions;
 		switch(direction) {
+    		case 'left':
+    			validPositions = playerCell.siblings('td:lt('+playerColumnIndex+'):not(.inplay)').last();
+	        break;
     		case 'right':
     			validPositions = playerCell.siblings('td:gt('+playerColumnIndex+'):not(.inplay)').first();
 	        break;
     		case 'up':
     			validPositions = playerCell.parent().siblings('tr:lt('+playerRowIndex+')').find('td:eq('+playerColumnIndex+'):not(.inplay)').last();
+	        break;
+    		case 'down':
+    			validPositions = playerCell.parent().siblings('tr:gt('+playerRowIndex+')').find('td:eq('+playerColumnIndex+'):not(.inplay)').first();
 	        break;
 		}
 		validPositions.addClass( 'playable' );
@@ -159,18 +165,20 @@ function playWord() {
 	// move avatar
 	var direction = $(inPlayCells).first().attr('ww:direction');
 	log.info("highlightValidPositions() - direction == " + direction);
+	var playerCell = getPlayerCell();
+	var newPlayerCell;
 	switch(direction) {
-		case 'right':
-    		var playerCell = getPlayerCell();
-    		inPlayCells.last().addClass( 'player' );
-    		playerCell.removeClass('player');
+		case 'right': // fall through
+		case 'down':
+    		newPlayerCell = inPlayCells.last().addClass( 'player' );
         break;
+		case 'left': // fall through
 		case 'up':
-    		var playerCell = getPlayerCell();
-    		inPlayCells.first().addClass( 'player' );
-    		playerCell.removeClass('player');
+    		newPlayerCell = inPlayCells.first().addClass( 'player' );
         break;
 	}
+	newPlayerCell.addClass( 'player' );
+	playerCell.removeClass('player');
 
 	flash(inPlayCells,'flash-magenta');
 	inPlayCells.addClass('played');
