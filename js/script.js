@@ -1,9 +1,3 @@
-function log(msg) {
-	if (window.console) {
-		console.log(msg);
-	}
-}
-
 function getRandomLetter() {
     var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var vowels = "AEIOU";
