@@ -78,25 +78,33 @@ function unhighlightValidPositions() {
 function highlightValidPositions(){
 	var inPlayCells =  $("table.gameboard td.inplay");
 	var playerCell =  getPlayerCell();
-	var playerColumnIndex = $(playerCell).index();
+	var playerColumnIndex = playerCell.index();
+	var playerRowIndex = playerCell.parent().index();
 
 	unhighlightValidPositions();
 
 	if ( inPlayCells.length == 0 ) {
 		log.info("highlightValidPositions() - direction == any");
 		// no played cells - just highlight around player
-		$(playerCell).prev().addClass( 'playable' ).attr( 'ww:direction', 'left' );
-		$(playerCell).next().addClass( 'playable' ).attr( 'ww:direction', 'right' );
-		$(playerCell).parent().prev().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'up' );
-		$(playerCell).parent().next().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'down' );
+		playerCell.prev().addClass( 'playable' ).attr( 'ww:direction', 'left' );
+		playerCell.next().addClass( 'playable' ).attr( 'ww:direction', 'right' );
+		playerCell.parent().prev().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'up' );
+		playerCell.parent().next().children().eq(playerColumnIndex).addClass( 'playable' ).attr( 'ww:direction', 'down' );
 	} else {
 		var direction = $(inPlayCells).first().attr('ww:direction');
 		log.info("highlightValidPositions() - direction == " + direction);
+		var validPositions;
 		switch(direction) {
     		case 'right':
-	    		playerCell.siblings('td:gt('+playerColumnIndex+'):not(.inplay)').first().addClass( 'playable' ).attr( 'ww:direction', 'right' );
+    			validPositions = playerCell.siblings('td:gt('+playerColumnIndex+'):not(.inplay)').first();
+	        break;
+    		case 'up':
+    			validPositions = playerCell.parent().siblings('tr:lt('+playerRowIndex+')').find('td:eq('+playerColumnIndex+'):not(.inplay)').last();
 	        break;
 		}
+		validPositions.addClass( 'playable' );
+		validPositions.attr( 'ww:direction', direction );
+
 	}
 
 	createGameboardBindings();
@@ -155,6 +163,11 @@ function playWord() {
 		case 'right':
     		var playerCell = getPlayerCell();
     		inPlayCells.last().addClass( 'player' );
+    		playerCell.removeClass('player');
+        break;
+		case 'up':
+    		var playerCell = getPlayerCell();
+    		inPlayCells.first().addClass( 'player' );
     		playerCell.removeClass('player');
         break;
 	}
