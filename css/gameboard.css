@@ -17,22 +17,23 @@ table.gameboard td.opponent {
 	content:url( '../images/BabyDuck.png' );
 }
 
-table.gameboard td.x2 {
+table.gameboard td.bonus,
+table.gameboard td.wildcard,
+table.gameboard td.static {
+	border-width: 1px;
+	border-style: solid;
+}
+
+table.gameboard td.bonus[ww_value="x2"] {
 	background: red;
+	border-color: red;
 	color: white;
 }
 
-table.gameboard td.x2::after {
-	content: "x2";
-}
-
-table.gameboard td.x3 {
+table.gameboard td.bonus[ww_value="x3"] {
 	background: blue;
+	border-color: blue;
 	color: white;
-}
-
-table.gameboard td.x3::after {
-	content: "x3";
 }
 
 table.gameboard td.wildcard {
@@ -40,12 +41,9 @@ table.gameboard td.wildcard {
 	color: white;
 }
 
-table.gameboard td.wildcard::after {
-	content: "?";
-}
-
 table.gameboard td.static {
 	background: black;
+	border-color: black;
 	color: white;
 }
 

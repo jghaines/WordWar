@@ -26,8 +26,18 @@ function validWordPlayed() {
 	return true;
 }
 
+
 function loadBoard(url) {
-	$('table.gameboard').load( url );
+	log.info('loadBoard('+url+')');
+	$('table.gameboard').load( url, '', function() {
+
+		log.info('loadBoard() board height=' + $('table.gameboard tr').length);
+
+		$('table.gameboard td').filter(function() { return $(this).attr('ww_value'); }).each(function() {
+			log.debug('.');
+			$(this).text( $(this).attr('ww_value') );
+		});
+	});
 }
 
 function populateLetters( cells ) {
