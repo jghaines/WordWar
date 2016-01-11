@@ -45,12 +45,6 @@ function populateLetters( cells ) {
 	});
 }
 
-function clearLetterSelection() {
-	$('table.letters td.selected').each(function() {
-		$(this).removeClass( 'selected' );
-	});
-}
-
 function flash(element, flash_class) {
 	$(element).addClass(flash_class);
     setTimeout(function() {
@@ -111,7 +105,7 @@ function highlightValidPositions(){
 }
 
 function selectLetterToPlay(selectedCell) {
-	clearLetterSelection();
+	lettersController.clearSelection();
 
 	if ( $(selectedCell).hasClass('inplay') ) { // if letter already inplay
 		// don't select, just return
@@ -139,7 +133,7 @@ function playLetterOnGameBoard(playedCell) {
 	$(playedCell).addClass( 'inplay' );
 	$(playedCell).text(letterPlayed)
 
-	clearLetterSelection();
+	lettersController.clearSelection();
 	$(selectedLetterCell).addClass( 'inplay' );
 
 	unhighlightValidPositions();
@@ -203,9 +197,16 @@ function createBindings() {
 
 }
 
+var lettersView;
+var lettersController;
+
+
 function main() {
 	log.setLevel('DEBUG');
 	log.info('main()');
+
+	lettersView = new LettersView( $('table.letters') );
+	lettersController = new LettersController( lettersView );
 
 	loadBoard('./boards/1.html');
 	createBindings();
