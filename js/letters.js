@@ -28,7 +28,7 @@ function LettersModel() {
 	}
 
 	this.unselect = function() {
-		this._selectedIndex = -1;
+		this._selectedIndex = null;
 	}
 
 	this.getSelectedIndex = function() {
@@ -44,7 +44,7 @@ function LettersModel() {
 	this._LETTER_COUNT = 10
 	this._letters = Array(this._LETTER_COUNT);
 	this._isPlaced = Array.from(Array(this._LETTER_COUNT)).map(() => false);
-	this._selectedIndex = -1;
+	this._selectedIndex = null;
 
 }
 
