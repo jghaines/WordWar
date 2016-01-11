@@ -17,23 +17,3 @@
     from { background: red; }
     to   { background: default; }
 }
-
-.flash-red {
-    animation-name: flash-red-animation;
-    animation-duration: 0.3s;
-}
-
-@keyframes flash-red-animation {  
-    from { background: red; }
-    to   { background: default; }
-}
-
-.flash-magenta {
-    animation-name: flash-magenta-animation;
-    animation-duration: 1s;
-}
-
-@keyframes flash-magenta-animation {  
-    from { background: magenta; }
-    to   { background: default; }
-}
