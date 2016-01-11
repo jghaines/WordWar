@@ -49,17 +49,17 @@ table.gameboard td.static {
 
 
 
-table.gameboard td.inplay {
+table.gameboard td.placed {
 	background: lightgrey !important;
 	color: black !important;
 }
 
-table.gameboard td.playable {
+table.gameboard td.placeable {
 	background: yellow !important;
 	color: yellow !important;
 }
 
-table.gameboard td.played {
-	background: darkgrey !important;
-	color: black !important;
+table.gameboard td.played-player {
+	background: magenta !important;
+	color: magenta !important;
 }

@@ -7,7 +7,7 @@ table.letters td {
 	background: lightgrey;
 }
 
-table.letters td.inplay {
+table.letters td.placed {
 	background: grey;
 }
 

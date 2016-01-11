@@ -1,21 +1,96 @@
 "use strict";
 
-function LettersController(view) {
-	this._view = view;
+function LettersModel() {
 
-	this.clearSelection = function() {
-		log.info('LettersController.clearSelection');
-		this._view.clearSelection();
+	this.letterCount = function() {
+		return this._LETTER_COUNT;
 	}
+
+	this.getLetter = function(index) {
+		return this._letters[index];
+	}
+
+	this.setLetter = function(index, value) {
+		this._letters[index] = value;
+	}
+
+	this.isPlaced = function(index) {
+		return this._isPlaced[index];
+	}
+
+	this.setPlaced = function(index, value) {
+		this._isPlaced[index] = value;
+	}
+
+	this.select = function(index) {
+		log.info('LettersModel.select('+index+')');
+		this._selectedIndex = index;
+	}
+
+	this.unselect = function() {
+		this._selectedIndex = -1;
+	}
+
+	this.getSelectedIndex = function() {
+		return this._selectedIndex;
+	}
+
+	this.getSelectedLetter = function() {
+		return this._letters[this._selectedIndex];
+	}
+
+
+	// constructor
+	this._LETTER_COUNT = 10
+	this._letters = Array(this._LETTER_COUNT);
+	this._isPlaced = Array.from(Array(this._LETTER_COUNT)).map(() => false);
+	this._selectedIndex = -1;
+
 }
 
-function LettersView(lettersTable) {
-	this._lettersTable = lettersTable;
 
-	this.clearSelection = function() {
-		log.info('LettersView.clearSelection');
-		this._lettersTable.find('td.selected').each(function() {
-			$(this).removeClass( 'selected' );
-		});
+function LettersView(lettersModel) {
+
+	this.updateLetters = function() {
+		log.info('LettersView.updateLetters()');
+		var that = this;
+		this._lettersTable.find('td').each( (function(index, value) {
+			log.debug('  LettersView.updateLetters()callback(index='+index+',value='+value+')');
+			log.debug('    LettersView.updateLetters()callback() this=' + this._lettersModel.getLetter(index) );
+
+			$(value).text( index );
+			$(value).text( this._lettersModel.getLetter(index) );
+		}).bind(this) );
 	}
+
+	this.updateSelection = function() {
+		log.info('LettersView.select(.)');
+		this._lettersTable.find('td.selected').removeClass( 'selected' );
+		var index = this._lettersModel.getSelectedIndex();
+		this._lettersTable.find('td:eq(' + index + ')').addClass( 'selected' );
+	}
+
+	this.click = function(callback) {
+		log.info('LettersView.click(.)');
+		this._lettersTable.find('td').click( function() {
+			var index = $(this).index();
+			var letter = $(this).text();
+			callback(index, letter);
+		} );
+	}
+
+	this.selectionUpdated = function(index) {
+		log.info('LettersView.selectionUpdated(index)');
+		this._lettersTable.find('td').removeClass('selected');
+		this._lettersTable.find('td(' + index + ')').addClass('selected');
+	}
+
+	this.flash = function(flash_class) {
+		flash(this._lettersTable, flash_class);
+	}
+
+
+	// constructor code
+	this._lettersModel = lettersModel;
+	this._lettersTable = $('table.letters');
 }

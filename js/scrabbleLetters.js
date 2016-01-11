@@ -1,3 +1,4 @@
+// follows the scrabble letter standard English distribution https://en.wikipedia.org/wiki/Scrabble_letter_distributions#English
 var scrabbleLetters = 
 	"A".repeat(9) +
 	"B".repeat(2) +

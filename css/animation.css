@@ -1,3 +1,23 @@
+.flash-selection {
+    animation-name: flash-selection-animation;
+    animation-duration: 0.8s;
+}
+
+@keyframes flash-selection-animation {  
+    from { background: yellow; }
+    to   { background: default; }
+}
+
+.flash-error {
+    animation-name: flash-error-animation;
+    animation-duration: 0.3s;
+}
+
+@keyframes flash-error-animation {  
+    from { background: red; }
+    to   { background: default; }
+}
+
 .flash-red {
     animation-name: flash-red-animation;
     animation-duration: 0.3s;

@@ -27,3 +27,12 @@ function binaryIndexOf(searchElement) {
 
 
 Array.prototype.binaryIndexOf = binaryIndexOf;
+
+
+
+function flash(element, flash_class) {
+	$(element).addClass(flash_class);
+    setTimeout(function() {
+          $(element).removeClass(flash_class);
+    }, 1000);
+}
