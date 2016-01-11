@@ -20,9 +20,13 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 		log.info('GameController.populateLetters()');
 		for (var i = this._lettersModel.letterCount() - 1; i >= 0; i--) {
 			this._lettersModel.setLetter(i, this._letterGenerator() );
+			this._lettersModel.setPlaced(i, false);
 		};
+		this._lettersModel.unselect();
 
 		this._lettersView.updateLetters();
+		this._lettersView.updatePlaced();
+		this._lettersView.updateSelection();
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
@@ -54,9 +58,10 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 
 		// valid placement
 		this._boardModel.placeLetter(cell,this._lettersModel.getSelectedLetter());
-		this._lettersModel.setPlaced(this._lettersModel.getSelectedIndex, true);
+		this._lettersModel.setPlaced(this._lettersModel.getSelectedIndex(), true);
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
+		this._lettersView.updatePlaced();
 		this._boardController.unhighlightPlaceablePositions();
 		this._buttonsView.enablePlayButton(true);
 	}
@@ -79,6 +84,8 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 
 		var placedCells = this._boardModel.getPlacedCells();
 		this._boardModel.setPlayedCells(placedCells, 'player');
+
+		this.populateLetters();
 	}
 
 

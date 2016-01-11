@@ -64,12 +64,20 @@ function LettersView(lettersModel) {
 	}
 
 	this.updateSelection = function() {
-		log.info('LettersView.select(.)');
+		log.info('LettersView.updateSelection()');
 		this._lettersTable.find('td.selected').removeClass( 'selected' );
 		var index = this._lettersModel.getSelectedIndex();
 		this._lettersTable.find('td:eq(' + index + ')').addClass( 'selected' );
 	}
 
+	this.updatePlaced = function() {
+		log.info('LettersView.updatePlaced()');
+		this._lettersTable.find('td').each( (function(index, value) {
+			$(value).toggleClass( 'placed', this._lettersModel.isPlaced(index) );
+		}).bind(this) );
+	}
+
+	// register click callback handler
 	this.click = function(callback) {
 		log.info('LettersView.click(.)');
 		this._lettersTable.find('td').click( function() {
@@ -77,12 +85,6 @@ function LettersView(lettersModel) {
 			var letter = $(this).text();
 			callback(index, letter);
 		} );
-	}
-
-	this.selectionUpdated = function(index) {
-		log.info('LettersView.selectionUpdated(index)');
-		this._lettersTable.find('td').removeClass('selected');
-		this._lettersTable.find('td(' + index + ')').addClass('selected');
 	}
 
 	this.flash = function(flash_class) {
