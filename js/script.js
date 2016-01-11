@@ -37,10 +37,15 @@ function validPositionSelected(playedCell) {
 }
 
 
+function getWordPlayed() {
+	return 	$.map( $('table.gameboard .inplay'), function( val, i ) {
+	  return $(val).text();
+	}).join('');
+}
+
 // Whether the current letters that have been played are valid
-function validWordPlayed() {
-	// TODO - assume ok for now
-	return true;
+function validWordPlayed(word) {
+	return ( sowpods.binaryIndexOf( word ) >= 0 );
 }
 
 
@@ -170,7 +175,8 @@ function playLetterOnGameBoard(playedCell) {
 }
 
 function playWord() {
-	if ( ! validWordPlayed () ) {
+	var wordPlayed = getWordPlayed();
+	if ( ! validWordPlayed (wordPlayed) ) {
 		// TODO
 		flash('table.gameboard td.inplay', 'flash-red');
 		return;
