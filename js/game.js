@@ -45,7 +45,7 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 
 	this.selectCellToPlace = function(cell) {
 		log.info('GameController.selectCellToPlace(.)');
-		if ( this._lettersModel.getSelectedIndex() < 0 ) { // no letter selected
+		if ( this._lettersModel.getSelectedIndex() == null ) { // no letter selected
 			// nudge the user
 			this._lettersView.flash('flash-selection');
 			return;
