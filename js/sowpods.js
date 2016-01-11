@@ -1,3 +1,7 @@
+// Scrabble SOWPODS dictionary
+// See: https://en.wikipedia.org/wiki/SOWPODS
+// Downloaded from http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt
+
 var sowpods = [
 "AA",
 "AAH",
