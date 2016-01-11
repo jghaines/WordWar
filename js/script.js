@@ -1,16 +1,33 @@
+var scrabbleLetters = 
+	"A".repeat(9) +
+	"B".repeat(2) +
+	"C".repeat(2) +
+	"D".repeat(4) +
+	"E".repeat(12) +
+	"F".repeat(2) +
+	"G".repeat(3) +
+	"H".repeat(2) +
+	"I".repeat(9) +
+	"J".repeat(1) +
+	"K".repeat(1) +
+	"L".repeat(4) +
+	"M".repeat(2) +
+	"N".repeat(6) +
+	"O".repeat(8) +
+	"P".repeat(2) +
+	"Q".repeat(1) +
+	"R".repeat(6) +
+	"S".repeat(4) +
+	"T".repeat(6) +
+	"U".repeat(4) +
+	"V".repeat(2) +
+	"W".repeat(2) +
+	"X".repeat(1) +
+	"Y".repeat(2) +
+	"Z".repeat(1);
+
 function getRandomLetter() {
-    var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var vowels = "AEIOU";
-    var consonants = "BCDFGHJKLMNPQRSTVWXYZ";
-
-    if ( Math.random() < 0.3 ) {
-		return vowels.charAt(Math.floor(Math.random() * vowels.length));
-    } else if ( Math.random() < 0.6 ) {
-		return consonants.charAt(Math.floor(Math.random() * consonants.length));
-	} else {
-		return letters.charAt(Math.floor(Math.random() * letters.length));
-	}
-
+    return scrabbleLetters.charAt(Math.floor(Math.random() * scrabbleLetters.length));
 }
 
 // whether the position selected for the letter is valid
