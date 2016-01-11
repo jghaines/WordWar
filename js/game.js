@@ -85,6 +85,8 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 		var placedCells = this._boardModel.getPlacedCells();
 		this._boardModel.setPlayedCells(placedCells, 'player');
 
+		this._boardModel.unplaceAll();
+
 		this.populateLetters();
 	}
 

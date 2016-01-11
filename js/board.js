@@ -29,7 +29,7 @@ function BoardModel() {
 
 	this.unplaceAll = function() {
 		this.getPlacedCells().each( function() {
-			this.removeClass('placed');
+			$(this).removeClass('placed');
 		});
 	}
 
@@ -43,10 +43,6 @@ function BoardModel() {
 		  return $(val).text();
 		}).join('');
 
-	}
-
-	this.unplaceAll = function() {
-		this.getPlacedCells();
 	}
 
 	this.getEndOfWordCell = function() {
