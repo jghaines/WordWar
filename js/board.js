@@ -47,11 +47,17 @@ function BoardModel() {
 
 	this.getPlacedRange = function() {
 		var placedCells = this.getPlacedCells();
-		var minRow = placedCells.first().parent().index(),
-			minCol = placedCells.first().index(),
-			maxRow = placedCells.last().parent().index(),
-			maxCol = placedCells.last().index();
-		return [ minRow, minCol, maxRow, maxCol ];
+		var minCoordinates = this.getCellCoordinates( placedCells.first() );
+		var maxCoordinates = this.getCellCoordinates( placedCells.last() );
+
+		return {
+			minRow: minCoordinates.row, minCol: minCoordinates.col,
+			maxRow: maxCoordinates.row, maxCol: maxCoordinates.col
+		};
+	}
+
+	this.getCellCoordinates = function( cell ) {
+		return { row: cell.parent().index(), col: cell.index() };
 	}
 
 	this.getEndOfWordCell = function() {
