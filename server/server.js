@@ -11,9 +11,12 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('play message', function(msg){
-		console.log('play message: ' + msg);
+		console.log('recv play message: ' + msg);
 		msg.player = 1 - msg.player; // 0 <-> 1
-		io.emit('play message', msg);
+		setTimeout(function() {
+			console.log('send play message: ' + msg);
+			io.emit('play message', msg);
+		}, 1000);
 	});
 
 	socket.on('disconnect', function(){
