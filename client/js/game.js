@@ -100,8 +100,15 @@ function GameController(remote) {
 
 	// State machine callback
  	this.moveComplete = function() {
-		var playerNewCell = this._boardModel.getEndOfWordCell();
-		this._boardModel.setPlayerCell(playerNewCell);
+ 		this.executePlay( 'local', this._remote.getLocalPlay() );
+	}
+
+
+	this.executePlay = function(who, play) {
+		this._boardModel.setPlayerCell(who, play.newPosition);
+
+
+// TODO
 
 		var placedCells = this._boardModel.getPlacedCells();
 		this._boardModel.setPlayedCells(placedCells, 'player');

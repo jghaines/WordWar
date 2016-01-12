@@ -24,7 +24,7 @@ function StateWaitForRemote() {
 	}
 
 	this.remoteMove = function(context) {
-		log.error('StateWaitForLocal -(remoteMove)-> StateInitial')
+		log.info('StateWaitForLocal -(remoteMove)-> StateInitial')
 		context.setState(new StateTerminal());	
 		context.moveComplete();
 	}
@@ -38,7 +38,7 @@ function StateWaitForRemote() {
 
 function StateWaitForLocal() {
 	this.localMove = function(context) {
-		log.error('StateWaitForLocal -(localMove)-> StateInitial')
+		log.info('StateWaitForLocal -(localMove)-> StateInitial')
 		context.moveComplete();
 		context.setState(new StateTerminal());	
 	}

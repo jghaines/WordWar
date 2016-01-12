@@ -9,12 +9,14 @@ function BoardModel() {
 	}
 
 	this.getPlayerCell = function() {
-		return this._boardView._table.find('td.player');
+		return this._boardView._table.find('td.player-local');
 	}
 
-	this.setPlayerCell = function(cell) {
-		this._boardView._table.find('td.player').removeClass('player'); // remove existing
-		cell.addClass( 'player' );
+	this.setPlayerCell = function(who, coordinates) {
+		log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
+		var cssClass = 'player-' + who;
+		this._boardView._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
+		this._boardView._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass( cssClass);
 	}
 
 	this.isCellPlaceable = function(cell) {

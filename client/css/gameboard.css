@@ -7,12 +7,12 @@ table.gameboard td {
 	background: grey;
 }
 
-table.gameboard td.player {
+table.gameboard td.player-local {
 	background: magenta;
 	content:url( '../images/MadWizard.png' );
 }
 
-table.gameboard td.opponent {
+table.gameboard td.player-remote {
 	background: Black;
 	content:url( '../images/Bowie.png' );
 }
