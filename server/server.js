@@ -6,6 +6,10 @@ var cors = require('cors');
 var app = express();
 app.use(cors());
 
+app.get('/', function(req, res){
+  res.send('<h1>WordWar app server</h1>');
+});
+
 io.on('connection', function(socket){
 	console.log('a user connected');
 
