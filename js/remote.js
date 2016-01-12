@@ -26,8 +26,5 @@ function RemoteController(socket) {
 	this._socket = socket;
 	this._userid = 'unknown';
 	this._player = 0;
-		log.info('  RemoteController callback');
-		this._playReceived(msg);
- 	}).bind(this) );
 
 }
