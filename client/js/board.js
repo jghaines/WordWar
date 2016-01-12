@@ -53,14 +53,34 @@ function BoardModel() {
 		var maxCoordinates = this.getCellCoordinates( placedCells.last() );
 
 		return {
-			minRow: minCoordinates.row, minCol: minCoordinates.col,
-			maxRow: maxCoordinates.row, maxCol: maxCoordinates.col
+			min: { row: minCoordinates.row, col: minCoordinates.col },
+			max: { row: maxCoordinates.row, col: maxCoordinates.col }
 		};
 	}
 
 	this.getCellCoordinates = function( cell ) {
 		return { row: cell.parent().index(), col: cell.index() };
 	}
+
+ 	this.getHeight = function() {
+ 		return this._boardView._table.find('tr').length;
+ 	}
+
+ 	this.getWidth = function() {
+ 		return this._boardView._table.find('tr:eq(0) td').length;
+ 	}
+
+ 	this.rotatePosition = function( position ) {
+ 		return {
+ 			row: ( this.getHeight() - position.row - 1 ),
+ 			col: ( this.getWidth()  - position.col - 1 )
+ 		};
+ 	}
+
+ 	this.rotateRange = function( range ) {
+ 		return { min: this.rotatePosition( range.max ), max: this.rotatePosition( range.min )  };
+ 	}
+
 
 	this.getEndOfWordCell = function() {
 		switch(this._placedDirection) {
