@@ -1,6 +1,6 @@
-var gameController;
+var gameController = {};
 
-function main() {
+window.onload = function(){
 	log.setLevel('DEBUG');
 	log.info('main()');
 
