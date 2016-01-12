@@ -5,10 +5,7 @@ window.onload = function(){
 	log.setLevel('DEBUG');
 	log.info('main()');
 
-	//var app_url = 'https://wordwar.herokuapp.com/';
-	var app_url = 'http://localhost:3000';
-	var socket = io(app_url);
+	var socket = io();
 	remote = new RemoteController(socket);
 	gameController = new GameController(remote);
 }
-
