@@ -10,6 +10,11 @@ function StateInitial() {
 		log.info('StateInitial -(remoteMove)-> StateWaitForLocal')
 		context.setState(new StateWaitForLocal());	
 	}
+
+	this.moveComplete = function(context) {
+		log.error('StateWaitForLocal -(moveComplete)-> ERROR')
+		// error
+	}
 }
 
 function StateWaitForRemote() {
@@ -20,8 +25,13 @@ function StateWaitForRemote() {
 
 	this.remoteMove = function(context) {
 		log.error('StateWaitForLocal -(remoteMove)-> StateInitial')
+		context.setState(new StateTerminal());	
 		context.moveComplete();
-		context.setState(new StateInitial());	
+	}
+
+	this.moveComplete = function(context) {
+		log.error('StateWaitForRemote -(moveComplete)-> ERROR')
+		// error
 	}
 }
 
@@ -30,12 +40,32 @@ function StateWaitForLocal() {
 	this.localMove = function(context) {
 		log.error('StateWaitForLocal -(localMove)-> StateInitial')
 		context.moveComplete();
-		context.setState(new StateInitial());	
+		context.setState(new StateTerminal());	
 	}
 
 	this.remoteMove = function(context) {
 		log.error('StateWaitForLocal -(remoteMove)-> ERROR')
 		// error
 	}
+
+	this.moveComplete = function(context) {
+		log.error('StateWaitForLocal -(moveComplete)-> ERROR')
+		// error
+	}
 }
+
+function StateTerminal() {
+	this.localMove = function(context) {
+		log.error('StateTerminal -(localMove)-> ERROR')
+	}
+
+	this.remoteMove = function(context) {
+		log.error('StateTerminal -(remoteMove)-> ERROR')
+	}
+
+	this.moveComplete = function(context) {
+		context.setState(new StateInitial());
+	}
+}
+
 

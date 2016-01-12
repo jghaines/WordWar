@@ -110,6 +110,8 @@ function GameController(remote) {
 
 		// prepare for next move
 		this.populateLetters();
+
+		this._state.moveComplete(this);
 	}
 
 	// State machine callback
