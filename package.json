@@ -8,13 +8,16 @@
     "socket.io": "^1.4.4"
   },
   "devDependencies": {},
-  "scripts": {
+   "engines": {
+    "node": "5.4.0"
+  },
+ "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "."
+    "url": "https://github.com/jghaines/WordWar"
   },
   "author": "",
-  "license": "ISC"
+  "license": ""
 }
