@@ -5,12 +5,13 @@ function RemoteController(socket) {
 
 	// register callback
 	this.onPlayReceived = function(callback) {
-		this._socket.on('play message', function(msg){
+		log.info('RemoteController.play(.)');
+		this._socket.on('play message', (function(msg){
 			log.info('  RemoteController callback');
 			this._remotePlay = msg;
 
 			callback(msg);
-	 	});
+	 	}).bind(this) );
 	}
 
 	this.play = function(word, score, range, newPosition) {
