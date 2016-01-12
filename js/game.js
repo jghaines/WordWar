@@ -1,6 +1,6 @@
 "use strict";
 
-function GameController(boardModel, boardView, lettersModel, lettersView) {
+function GameController(remote) {
 
 	this.createBindings = function() {
 		log.info('GameController.createBindings()');
@@ -79,6 +79,13 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 			return;
 		}
 
+		this._remote.play(
+			this._boardModel.getPlacedWord(),
+			this._boardModel.getPlacedScore(),
+			this._boardModel.getPlacedRange()
+		);
+ 
+
 		var playerNewCell = this._boardModel.getEndOfWordCell();
 		this._boardModel.setPlayerCell(playerNewCell);
 
@@ -92,6 +99,7 @@ function GameController(boardModel, boardView, lettersModel, lettersView) {
 
 
 	// constructor code
+	this._remote = remote;
 	this._lettersModel = new LettersModel();
 	this._lettersView = new LettersView(this._lettersModel );
 
