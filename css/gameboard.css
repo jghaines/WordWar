@@ -13,8 +13,8 @@ table.gameboard td.player {
 }
 
 table.gameboard td.opponent {
-	background: OldLace;
-	content:url( '../images/BabyDuck.png' );
+	background: Black;
+	content:url( '../images/Bowie.png' );
 }
 
 table.gameboard td.bonus,
