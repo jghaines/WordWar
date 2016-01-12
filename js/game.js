@@ -72,6 +72,7 @@ function GameController(remote) {
 	}
 
 	this.playWord = function() {
+ 		log.info('GameController.playWord(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
@@ -85,7 +86,17 @@ function GameController(remote) {
 			this._boardModel.getPlacedRange()
 		);
  
+ 		this._buttonsView.enablePlayButton(false);
+ 		this._state.localMove(this);
+ 	}
 
+ 	this.remotePlayedWord = function(msg) {
+ 		log.info('GameController.remotePlayedWord(.)');
+ 		this._state.remoteMove(this);
+ 	}
+
+	// State machine callback
+ 	this.moveComplete = function() {
 		var playerNewCell = this._boardModel.getEndOfWordCell();
 		this._boardModel.setPlayerCell(playerNewCell);
 
@@ -94,12 +105,24 @@ function GameController(remote) {
 
 		this._boardModel.unplaceAll();
 
+		// prepare for next move
 		this.populateLetters();
 	}
 
+	// State machine callback
+	this.setState = function(state) {
+		this._state = state;
+	}
 
 	// constructor code
 	this._remote = remote;
+	this._remote.onPlayReceived( (function(msg) { 
+		this.remotePlayedWord(msg);
+	}).bind(this));
+
+	this.setState( new StateInitial(this) );
+
+
 	this._lettersModel = new LettersModel();
 	this._lettersView = new LettersView(this._lettersModel );
 
