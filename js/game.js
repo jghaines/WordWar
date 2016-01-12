@@ -80,10 +80,13 @@ function GameController(remote) {
 			return;
 		}
 
+		var playerNewCell = this._boardModel.getEndOfWordCell();
+
 		this._remote.play(
 			this._boardModel.getPlacedWord(),
 			this._boardModel.getPlacedScore(),
-			this._boardModel.getPlacedRange()
+			this._boardModel.getPlacedRange(),
+			this._boardModel.getCellCoordinates( playerNewCell )
 		);
  
  		this._buttonsView.enablePlayButton(false);
