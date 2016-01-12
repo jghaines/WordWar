@@ -98,17 +98,18 @@ function GameController(remote) {
  		this._state.remoteMove(this);
  	}
 
-	// State machine callback
+	// State machine callback - local player and remote compnent have completed move
  	this.moveComplete = function() {
  		this.executePlay( 'local', this._remote.getLocalPlay() );
-	}
+
+ 		var remotePlay = this._remote.getRemotePlay();
+ 		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
+ 		remotePlay.range = this._boardModel.rotateRange( remotePlay.range );
+
+ 		this.executePlay( 'remote', remotePlay );
 
 
-	this.executePlay = function(who, play) {
-		this._boardModel.setPlayerCell(who, play.newPosition);
-
-
-// TODO
+// TODO remove
 
 		var placedCells = this._boardModel.getPlacedCells();
 		this._boardModel.setPlayedCells(placedCells, 'player');
@@ -119,6 +120,15 @@ function GameController(remote) {
 		this.populateLetters();
 
 		this._state.moveComplete(this);
+
+	}
+
+
+	this.executePlay = function(who, play) {
+		log.info('GameController.executePlay(who=' + who + ', play=.)')
+		this._boardModel.setPlayerCell(who, play.newPosition);
+
+
 	}
 
 	// State machine callback
