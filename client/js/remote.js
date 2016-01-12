@@ -14,14 +14,14 @@ function RemoteController(socket) {
 	 	}).bind(this) );
 	}
 
-	this.play = function(word, score, range, newPosition) {
+	this.play = function(word, score, playRange, newPosition) {
 		log.info('RemoteController.play(.)');
 
 		this._localPlay = { 
 			player: 		this._player,
 			word:			word,
 			score:			score,
-			range:			range,
+			playRange:		playRange,
 			newPosition: 	newPosition
 		};
 

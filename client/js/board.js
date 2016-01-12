@@ -103,6 +103,15 @@ function BoardModel() {
 		return 10;
 	}
 
+	this.addPlayedRange = function(who, range) {
+		log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
+		var cellSelector = 
+			'tr' + ':lt(' + (range.max.row + 1) + ')' + ':gt(' + (range.min.row - 1) + ')' + ' ' +
+			'td' + ':lt(' + (range.max.col + 1) + ')' + ':gt(' + (range.min.col - 1) + ')';
+		log.debug('  BoardModel.addPlayedRange - cellSelector=', cellSelector);
+		this._boardView._table.find( cellSelector ).addClass( 'played-' + who );
+	}
+
 	this.setPlayedCells = function(placedCells, who) {
 		placedCells.each( function() {
 			$(this).addClass( 'played-' + who )

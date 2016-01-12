@@ -4,6 +4,7 @@ function GameController(remote) {
 
 	this.createBindings = function() {
 		log.info('GameController.createBindings()');
+
 		this._lettersView.click( (function(index, letter) {
 			this.selectLetterToPlace(index, letter);
 		}).bind(this) );
@@ -11,6 +12,7 @@ function GameController(remote) {
 		this._boardView.click( (function(cell) {
 			this.selectCellToPlace(cell);
 		}).bind(this) );
+
 		this._buttonsView.clickPlay( (function() {
 			this.playWord();
 		}).bind(this) );
@@ -18,6 +20,7 @@ function GameController(remote) {
 
 	this.populateLetters = function () {
 		log.info('GameController.populateLetters()');
+
 		for (var i = this._lettersModel.letterCount() - 1; i >= 0; i--) {
 			this._lettersModel.setLetter(i, this._letterGenerator() );
 			this._lettersModel.setPlaced(i, false);
@@ -104,15 +107,12 @@ function GameController(remote) {
 
  		var remotePlay = this._remote.getRemotePlay();
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
- 		remotePlay.range = this._boardModel.rotateRange( remotePlay.range );
+ 		remotePlay.playRange = this._boardModel.rotateRange( remotePlay.playRange );
 
  		this.executePlay( 'remote', remotePlay );
 
 
 // TODO remove
-
-		var placedCells = this._boardModel.getPlacedCells();
-		this._boardModel.setPlayedCells(placedCells, 'player');
 
 		this._boardModel.unplaceAll();
 
@@ -127,8 +127,7 @@ function GameController(remote) {
 	this.executePlay = function(who, play) {
 		log.info('GameController.executePlay(who=' + who + ', play=.)')
 		this._boardModel.setPlayerCell(who, play.newPosition);
-
-
+		this._boardModel.addPlayedRange(who, play.playRange);
 	}
 
 	// State machine callback
