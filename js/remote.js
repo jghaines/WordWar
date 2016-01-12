@@ -14,22 +14,18 @@ function RemoteController(socket) {
 
 	}
 
+	// register callback
 	this.onPlayReceived = function(callback) {
-		this._onPlayReceivedCallback = callback;
-	}
-
-	this._playReceived = function(msg) {
-		log.info('RemoteController.playReceived(msg='+msg+')');
-		this._onPlayReceivedCallback(msg);
+		this._socket.on('play message', function(msg){
+			log.info('  RemoteController callback');
+			callback(msg);
+	 	});
 	}
 
 	// constructor code
 	this._socket = socket;
 	this._userid = 'unknown';
 	this._player = 0;
-	this._onPlayReceivedCallback = {};
-
-	socket.on('play message', ( function(msg){
 		log.info('  RemoteController callback');
 		this._playReceived(msg);
  	}).bind(this) );
