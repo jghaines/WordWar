@@ -45,6 +45,15 @@ function BoardModel() {
 
 	}
 
+	this.getPlacedRange = function() {
+		var placedCells = this.getPlacedCells();
+		var minRow = placedCells.first().parent().index(),
+			minCol = placedCells.first().index(),
+			maxRow = placedCells.last().parent().index(),
+			maxCol = placedCells.last().index();
+		return [ minRow, minCol, maxRow, maxCol ];
+	}
+
 	this.getEndOfWordCell = function() {
 		switch(this._placedDirection) {
 			case 'right': // fall through
@@ -59,6 +68,11 @@ function BoardModel() {
 
 	this.getPlacedDirection = function() {
 		return this._placedDirection;
+	}
+
+	this.getPlacedScore = function() {
+		// TODO
+		return 10;
 	}
 
 	this.setPlayedCells = function(placedCells, who) {
