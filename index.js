@@ -21,10 +21,10 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('play message', function(msg){
-		console.log('recv play message: ' + msg);
+		console.log('recv play message: ' + JSON.stringify(msg, null, 2));
 		msg.player = 1 - msg.player; // 0 <-> 1
 		setTimeout(function() {
-			console.log('send play message: ' + msg);
+			console.log('send play message: ' + JSON.stringify(msg, null, 2));
 			io.emit('play message', msg);
 		}, 1000);
 	});
