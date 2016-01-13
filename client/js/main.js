@@ -1,4 +1,4 @@
-var gameController = {};
+var gc = {};
 var remote = {};
 
 window.onload = function(){
@@ -7,5 +7,5 @@ window.onload = function(){
 
 	var socket = io();
 	remote = new RemoteController(socket);
-	gameController = new GameController(remote);
+	gc = new GameController(remote);
 }
