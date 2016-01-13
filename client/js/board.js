@@ -16,7 +16,7 @@ function BoardModel() {
 		log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
 		var cssClass = 'player-' + who;
 		this._boardView._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
-		this._boardView._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass( cssClass);
+		this._boardView._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
 	}
 
 	this.isCellPlaceable = function(cell) {
@@ -118,7 +118,7 @@ function BoardModel() {
 		return  'tr' + ':lt(' + (range.max.row + 1) + ')' + ( range.min.row > 0 ? ':gt(' + (range.min.row - 1) + ')' : '' ) + ' ' +
 				'td' + ':lt(' + (range.max.col + 1) + ')' + ( range.min.col > 0 ? ':gt(' + (range.min.col - 1) + ')' : '' );
 	}
-	*/
+	*/	
 
 	this.addPlayedRange = function(who, range) {
 		log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
