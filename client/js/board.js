@@ -2,6 +2,8 @@
 "use strict";
 
 function BoardModel() {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.DEBUG );
 
 	this.loadBoard = function(url, callback) {
 		this._boardView.loadBoard(url, callback);
@@ -13,7 +15,7 @@ function BoardModel() {
 	}
 
 	this.setPlayerCell = function(who, coordinates) {
-		log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
+		this.log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
 		var cssClass = 'player-' + who;
 		this._boardView._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
 		this._boardView._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
@@ -121,7 +123,7 @@ function BoardModel() {
 	*/	
 
 	this.addPlayedRange = function(who, range) {
-		log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
+		this.log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
 
 		for( var row = range.min.row; row <= range.max.row ; ++row ) {
 			for( var col = range.min.col; col <= range.max.col ; ++col ) {
@@ -142,10 +144,12 @@ function BoardModel() {
 }
 
 function BoardView(boardModel) {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.DEBUG );
 
 	this.fillSpecials = function(cells) {
 		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all cells
-		log.info('BoardView.fillSpecials()');
+		this.log.info('BoardView.fillSpecials()');
 
 		cells.filter( function() {
 			return $(this).attr('ww_value'); }).each( function() {
@@ -155,7 +159,7 @@ function BoardView(boardModel) {
 	}
 
 	this.loadBoard = function(url, callback) {
-		log.info('BoardView.loadBoard('+url+')');
+		this.log.info('BoardView.loadBoard('+url+')');
 
 		var that = this;
 		this._table.load( url, '', function() { // callback - after the board is loaded
@@ -165,7 +169,7 @@ function BoardView(boardModel) {
 	}
 
 	this.click = function(callback) {
-		log.info('BoardView.click(. )');
+		this.log.info('BoardView.click(. )');
 		this._table.find('td').click( function() {
 			callback($(this));
 		} );
@@ -184,14 +188,16 @@ function BoardView(boardModel) {
 
 
 function BoardController(boardModel, boardView) {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.DEBUG );
 
 	this.unhighlightPlaceablePositions = function() {
-		log.info("BoardController.unhighlightPlaceablePositions()");
+		this.log.info("BoardController.unhighlightPlaceablePositions()");
 		this._boardView._table.find('td').removeClass( 'placeable' );
 	}
 
 	this.highlightPlaceablePositions = function() {
-		log.info("BoardController.highlightPlaceablePositions()");
+		this.log.info("BoardController.highlightPlaceablePositions()");
 		var placedCells =  this._boardView._table.find('td.placed');
 		var playerCell =  this._boardModel.getPlayerCell('local');
 		var playerColumnIndex = playerCell.index();
@@ -200,7 +206,7 @@ function BoardController(boardModel, boardView) {
 		this.unhighlightPlaceablePositions();
 
 		if ( placedCells.length == 0 ) {
-			log.info("highlightPlaceablePositions() - direction == any");
+			this.log.info("highlightPlaceablePositions() - direction == any");
 			// no placed cells - just highlight around player
 			playerCell.prev().addClass( 'placeable' ).attr( 'ww:direction', 'left' );
 			playerCell.next().addClass( 'placeable' ).attr( 'ww:direction', 'right' );
@@ -208,7 +214,7 @@ function BoardController(boardModel, boardView) {
 			playerCell.parent().next().children().eq(playerColumnIndex).addClass( 'placeable' ).attr( 'ww:direction', 'down' );
 		} else {
 			var direction = $(placedCells).first().attr('ww:direction');
-			log.info("highlightPlaceablePositions() - direction == " + direction);
+			this.log.info("highlightPlaceablePositions() - direction == " + direction);
 			var validPositions;
 			switch(direction) {
 	    		case 'left':

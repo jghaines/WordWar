@@ -1,9 +1,11 @@
 "use strict";
 
 function GameController(remote) {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.DEBUG );
 
 	this.createBindings = function() {
-		log.info('GameController.createBindings()');
+		this.log.info('GameController.createBindings()');
 
 		this._lettersView.click( (function(index, letter) {
 			this.selectLetterToPlace(index, letter);
@@ -19,7 +21,7 @@ function GameController(remote) {
 	}
 
 	this.populateLetters = function () {
-		log.info('GameController.populateLetters()');
+		this.log.info('GameController.populateLetters()');
 
 		for (var i = this._lettersModel.letterCount() - 1; i >= 0; i--) {
 			this._lettersModel.setLetter(i, this._letterGenerator() );
@@ -33,8 +35,8 @@ function GameController(remote) {
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
-		log.info('GameController.selectLetterToPlace(index=' + index + ', letter=' + letter + ')');
-		log.debug('GameController.selectLetterToPlace  (this=' + this + ')');
+		this.log.info('GameController.selectLetterToPlace(index=' + index + ', letter=' + letter + ')');
+		this.log.debug('GameController.selectLetterToPlace  (this=' + this + ')');
 
 		if ( this._lettersModel.isPlaced(index) ) {
 			// don't select, just return
@@ -47,7 +49,7 @@ function GameController(remote) {
 	}
 
 	this.selectCellToPlace = function(cell) {
-		log.info('GameController.selectCellToPlace(.)');
+		this.log.info('GameController.selectCellToPlace(.)');
 		if ( this._lettersModel.getSelectedIndex() == null ) { // no letter selected
 			// nudge the user
 			this._lettersView.flash('flash-selection');
@@ -75,7 +77,7 @@ function GameController(remote) {
 	}
 
 	this.playWord = function() {
- 		log.info('GameController.playWord(.)');
+ 		this.log.info('GameController.playWord(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
@@ -98,7 +100,7 @@ function GameController(remote) {
 
  	// we are notified when the remote has played
  	this.remotePlayedWord = function(msg) {
- 		log.info('GameController.remotePlayedWord(.)');
+ 		this.log.info('GameController.remotePlayedWord(.)');
  		this._state.remoteMove(this);
  	}
 
@@ -127,7 +129,7 @@ function GameController(remote) {
 
 
 	this.executePlay = function(who, play) {
-		log.info('GameController.executePlay(who=' + who + ', play=.)')
+		this.log.info('GameController.executePlay(who=' + who + ', play=.)')
 		this._boardModel.setPlayerCell(who, play.newPosition);
 		this._boardModel.addPlayedRange(who, play.playRange);
 	}

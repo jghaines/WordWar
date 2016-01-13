@@ -1,6 +1,8 @@
 "use strict";
 
 function LettersModel() {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.INFO );
 
 	this.letterCount = function() {
 		return this._LETTER_COUNT;
@@ -23,7 +25,7 @@ function LettersModel() {
 	}
 
 	this.select = function(index) {
-		log.info('LettersModel.select('+index+')');
+		this.log.info('LettersModel.select('+index+')');
 		this._selectedIndex = index;
 	}
 
@@ -50,13 +52,15 @@ function LettersModel() {
 
 
 function LettersView(lettersModel) {
+	this.log = log.getLogger( this.constructor.name );
+	log.setLevel( log.levels.DEBUG );
 
 	this.updateLetters = function() {
-		log.info('LettersView.updateLetters()');
+		this.log.info('LettersView.updateLetters()');
 		var that = this;
 		this._lettersTable.find('td').each( (function(index, value) {
-			log.debug('  LettersView.updateLetters()callback(index='+index+',value='+value+')');
-			log.debug('    LettersView.updateLetters()callback() this=' + this._lettersModel.getLetter(index) );
+			this.log.debug('  LettersView.updateLetters()callback(index='+index+',value='+value+')');
+			this.log.debug('    LettersView.updateLetters()callback() this=' + this._lettersModel.getLetter(index) );
 
 			$(value).text( index );
 			$(value).text( this._lettersModel.getLetter(index) );
@@ -64,14 +68,14 @@ function LettersView(lettersModel) {
 	}
 
 	this.updateSelection = function() {
-		log.info('LettersView.updateSelection()');
+		this.log.info('LettersView.updateSelection()');
 		this._lettersTable.find('td.selected').removeClass( 'selected' );
 		var index = this._lettersModel.getSelectedIndex();
 		this._lettersTable.find('td:eq(' + index + ')').addClass( 'selected' );
 	}
 
 	this.updatePlaced = function() {
-		log.info('LettersView.updatePlaced()');
+		this.log.info('LettersView.updatePlaced()');
 		this._lettersTable.find('td').each( (function(index, value) {
 			$(value).toggleClass( 'placed', this._lettersModel.isPlaced(index) );
 		}).bind(this) );
@@ -79,7 +83,7 @@ function LettersView(lettersModel) {
 
 	// register click callback handler
 	this.click = function(callback) {
-		log.info('LettersView.click(.)');
+		this.log.info('LettersView.click(.)');
 		this._lettersTable.find('td').click( function() {
 			var index = $(this).index();
 			var letter = $(this).text();
