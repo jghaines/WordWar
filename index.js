@@ -1,7 +1,16 @@
+var log = require('loglevel');
+log.setLevel('INFO');
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var sio = require('socket.io')(http);
+
+
+var UUID = require('node-uuid');
+
+var gameServer = require('./game.server.js');
+
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -12,27 +21,30 @@ app.get('/hello', function(req, res){
 });
 
 
-io.on('connection', function(socket){
-	console.log('a user connected');
+sio.on('connection', function (client) {
+	log.debug('connection');
+    
+        //Generate a new UUID, looks something like
+        //5b2ca132-64bd-4513-99da-90e838ca47d1
+        //and store this on their socket/connection
+    client.userid = UUID();
 
-	socket.on('chat message', function(msg){
-		console.log('message: ' + msg);
-		io.emit('chat message', msg);
-	});
+        //tell the player they connected, giving them their id
+    client.emit('onconnected', { id: client.userid } );
 
-	socket.on('play message', function(msg){
-		console.log('recv play message: ' + JSON.stringify(msg, null, 2));
-		msg.player = 1 - msg.player; // 0 <-> 1
-		setTimeout(function() {
-			console.log('send play message: ' + JSON.stringify(msg, null, 2));
-			io.emit('play message', msg);
-		}, 1000);
-	});
+        //now we can find them a game to play with someone.
+        //if no game exists with someone waiting, they create one and wait.
+    gameServer.findGame(client);
 
-	socket.on('disconnect', function(){
-		console.log('user disconnected');
-	});
+        //Now we want to handle some of the messages that clients will send.
+        //They send messages here, and we send them to the game_server to handle.
+    client.on('play message', function(m) {
+
+        gameServer.onMessage(client, m);
+
+    }); //client.on message
 });
+
 
 http.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));

@@ -5,13 +5,15 @@
   "main": "index.js",
   "dependencies": {
     "express": "^4.13.3",
+    "loglevel": "^1.4.0",
+    "node-uuid": "^1.4.7",
     "socket.io": "^1.4.4"
   },
   "devDependencies": {},
-   "engines": {
+  "engines": {
     "node": "5.4.0"
   },
- "scripts": {
+  "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
