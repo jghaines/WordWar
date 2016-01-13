@@ -2,7 +2,7 @@
 
 function LettersModel() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.INFO );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.letterCount = function() {
 		return this._LETTER_COUNT;
@@ -53,7 +53,7 @@ function LettersModel() {
 
 function LettersView(lettersModel) {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.updateLetters = function() {
 		this.log.info('LettersView.updateLetters()');

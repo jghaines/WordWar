@@ -2,7 +2,7 @@
 
 function GameController(remote) {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.createBindings = function() {
 		this.log.info('GameController.createBindings()');
@@ -106,17 +106,15 @@ function GameController(remote) {
 
 	// State machine callback - local player and remote compnent have completed move
  	this.moveComplete = function() {
+ 		// show the local player updates
  		this.executePlay( 'local',  this._remote.getLocalPlay() );
 
  		// map the remote play coordinates
 		var remotePlay = this._remote.getRemotePlay();
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange = this._boardModel.rotateRange( remotePlay.playRange );
-
+ 		// show the remote player updates
  		this.executePlay( 'remote', remotePlay );
-
-
-// TODO remove
 
 		this._boardModel.unplaceAll();
 

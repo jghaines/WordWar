@@ -3,7 +3,7 @@
 
 function BoardModel() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.loadBoard = function(url, callback) {
 		this._boardView.loadBoard(url, callback);
@@ -145,7 +145,7 @@ function BoardModel() {
 
 function BoardView(boardModel) {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.fillSpecials = function(cells) {
 		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all cells
@@ -189,7 +189,7 @@ function BoardView(boardModel) {
 
 function BoardController(boardModel, boardView) {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.unhighlightPlaceablePositions = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
@@ -206,7 +206,7 @@ function BoardController(boardModel, boardView) {
 		this.unhighlightPlaceablePositions();
 
 		if ( placedCells.length == 0 ) {
-			this.log.info("highlightPlaceablePositions() - direction == any");
+			this.log.debug("  BoardController.highlightPlaceablePositions() - direction == any");
 			// no placed cells - just highlight around player
 			playerCell.prev().addClass( 'placeable' ).attr( 'ww:direction', 'left' );
 			playerCell.next().addClass( 'placeable' ).attr( 'ww:direction', 'right' );
@@ -214,7 +214,7 @@ function BoardController(boardModel, boardView) {
 			playerCell.parent().next().children().eq(playerColumnIndex).addClass( 'placeable' ).attr( 'ww:direction', 'down' );
 		} else {
 			var direction = $(placedCells).first().attr('ww:direction');
-			this.log.info("highlightPlaceablePositions() - direction == " + direction);
+			this.log.debug("  BoardController.highlightPlaceablePositions() - direction == " + direction);
 			var validPositions;
 			switch(direction) {
 	    		case 'left':

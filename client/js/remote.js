@@ -3,13 +3,13 @@
 
 function RemoteController(socket) {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 
 	// register callback
 	this.onPlayReceived = function(callback) {
 		this.log.info('RemoteController.onPlayReceived(.)');
 		this._socket.on('play message', (function(msg){
-			log.info('  RemoteController callback - we received remote message');
+			this.log.debug('  RemoteController callback - we received remote message');
 			this._remotePlay = msg;
 
 			callback(msg);

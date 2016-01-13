@@ -1,6 +1,6 @@
 function ButtonsView() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.enablePlayButton = function(isEnabled) {
 		this._playButton.prop('disabled', ! isEnabled );

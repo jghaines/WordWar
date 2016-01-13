@@ -2,7 +2,7 @@
 
 function StateInitial() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.localMove = function(context) {
 		this.log.info('StateInitial -(localMove)-> StateWaitForRemote')
@@ -22,7 +22,7 @@ function StateInitial() {
 
 function StateWaitForRemote() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.localMove = function(context) {
 		this.log.error('StateWaitForRemote -(localMove)-> ERROR')
@@ -44,12 +44,12 @@ function StateWaitForRemote() {
 
 function StateWaitForLocal() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.localMove = function(context) {
-		this.log.info('StateWaitForLocal -(localMove)-> StateInitial')
-		context.moveComplete();
+		this.log.info('StateWaitForLocal -(localMove)-> StateTerminal')
 		context.setState(new StateTerminal());	
+		context.moveComplete();
 	}
 
 	this.remoteMove = function(context) {
@@ -65,7 +65,7 @@ function StateWaitForLocal() {
 
 function StateTerminal() {
 	this.log = log.getLogger( this.constructor.name );
-	log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.DEBUG );
 	
 	this.localMove = function(context) {
 		this.log.error('StateTerminal -(localMove)-> ERROR')
@@ -76,6 +76,7 @@ function StateTerminal() {
 	}
 
 	this.moveComplete = function(context) {
+		this.log.info('StateTerminal -(moveComplete)-> StateInitial')
 		context.setState(new StateInitial());
 	}
 }
