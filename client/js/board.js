@@ -112,13 +112,22 @@ function BoardModel() {
 		return 10;
 	}
 
+	// this doesn't work fully - http://stackoverflow.com/questions/34757734/getting-a-range-of-table-cells-with-jquery-selectors
+	/*
+	this._getSelectorForRange = function(range) {
+		return  'tr' + ':lt(' + (range.max.row + 1) + ')' + ( range.min.row > 0 ? ':gt(' + (range.min.row - 1) + ')' : '' ) + ' ' +
+				'td' + ':lt(' + (range.max.col + 1) + ')' + ( range.min.col > 0 ? ':gt(' + (range.min.col - 1) + ')' : '' );
+	}
+	*/
+
 	this.addPlayedRange = function(who, range) {
 		log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
-		var cellSelector = 
-			'tr' + ':lt(' + (range.max.row + 1) + ')' + ( range.min.row > 0 ? ':gt(' + (range.min.row - 1) + ')' : '' ) + ' ' +
-			'td' + ':lt(' + (range.max.col + 1) + ')' + ( range.min.col > 0 ? ':gt(' + (range.min.col - 1) + ')' : '' );
-		log.debug('  BoardModel.addPlayedRange - cellSelector=', cellSelector);
-		this._boardView._table.find( cellSelector ).addClass( 'played-' + who );
+
+		for( var row = range.min.row; row <= range.max.row ; ++row ) {
+			for( var col = range.min.col; col <= range.max.col ; ++col ) {
+				this._boardView._table.find('tr:eq(' + row + ') td:eq(' + col + ')').addClass('played-' + who);
+			}			
+		}
 	}
 
 	this.setPlayedCells = function(placedCells, who) {
