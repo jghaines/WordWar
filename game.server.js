@@ -23,6 +23,7 @@ gameServer.findGame = function(player) {
 				game.players.push( player );
 				player.game = game;
 				joinedGame = true;
+				continue;
 			}
 			this.log.info('G', game.id, 'P[1]', player.userid, 'joined game ' );
 			this.startGame(game);
