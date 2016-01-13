@@ -8,8 +8,8 @@ function BoardModel() {
 		this._boardView._table
 	}
 
-	this.getPlayerCell = function() {
-		return this._boardView._table.find('td.player-local');
+	this.getPlayerCell = function(who) {
+		return this._boardView._table.find('td.player-' + who);
 	}
 
 	this.setPlayerCell = function(who, coordinates) {
@@ -62,6 +62,15 @@ function BoardModel() {
 		return { row: cell.parent().index(), col: cell.index() };
 	}
 
+	// get 1x1 range of given cell
+	this.getCellRange = function( cell ) {
+		var coords = this.getCellCoordinates( cell );
+		return {
+			min: { row: coords.row, col: coords.col },
+			max: { row: coords.row, col: coords.col }
+		};
+	}
+
  	this.getHeight = function() {
  		return this._boardView._table.find('tr').length;
  	}
@@ -106,8 +115,8 @@ function BoardModel() {
 	this.addPlayedRange = function(who, range) {
 		log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
 		var cellSelector = 
-			'tr' + ':lt(' + (range.max.row + 1) + ')' + ':gt(' + (range.min.row - 1) + ')' + ' ' +
-			'td' + ':lt(' + (range.max.col + 1) + ')' + ':gt(' + (range.min.col - 1) + ')';
+			'tr' + ':lt(' + (range.max.row + 1) + ')' + ( range.min.row > 0 ? ':gt(' + (range.min.row - 1) + ')' : '' ) + ' ' +
+			'td' + ':lt(' + (range.max.col + 1) + ')' + ( range.min.col > 0 ? ':gt(' + (range.min.col - 1) + ')' : '' );
 		log.debug('  BoardModel.addPlayedRange - cellSelector=', cellSelector);
 		this._boardView._table.find( cellSelector ).addClass( 'played-' + who );
 	}
@@ -175,7 +184,7 @@ function BoardController(boardModel, boardView) {
 	this.highlightPlaceablePositions = function() {
 		log.info("BoardController.highlightPlaceablePositions()");
 		var placedCells =  this._boardView._table.find('td.placed');
-		var playerCell =  this._boardModel.getPlayerCell();
+		var playerCell =  this._boardModel.getPlayerCell('local');
 		var playerColumnIndex = playerCell.index();
 		var playerRowIndex = playerCell.parent().index();
 

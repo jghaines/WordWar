@@ -96,6 +96,7 @@ function GameController(remote) {
  		this._state.localMove(this);
  	}
 
+ 	// we are notified when the remote has played
  	this.remotePlayedWord = function(msg) {
  		log.info('GameController.remotePlayedWord(.)');
  		this._state.remoteMove(this);
@@ -103,9 +104,10 @@ function GameController(remote) {
 
 	// State machine callback - local player and remote compnent have completed move
  	this.moveComplete = function() {
- 		this.executePlay( 'local', this._remote.getLocalPlay() );
+ 		this.executePlay( 'local',  this._remote.getLocalPlay() );
 
- 		var remotePlay = this._remote.getRemotePlay();
+ 		// map the remote play coordinates
+		var remotePlay = this._remote.getRemotePlay();
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange = this._boardModel.rotateRange( remotePlay.playRange );
 
@@ -158,8 +160,9 @@ function GameController(remote) {
 	this.populateLetters();
 	this._boardModel.loadBoard('./boards/1.html', (function() { 
 		this.createBindings();
-		this._boardModel.setPlayedCells(this._boardModel.getPlayerCell(), 'player');
 
+		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
+		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
 	}).bind(this));
 
 
