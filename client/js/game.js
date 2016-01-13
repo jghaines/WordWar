@@ -85,17 +85,17 @@ function GameController(remote) {
 			return;
 		}
 
-		var playerNewCell = this._boardModel.getEndOfWordCell();
+ 		this._buttonsView.enablePlayButton(false);
 
-		this._remote.play(
+		var myPlay = new Play(
 			this._boardModel.getPlacedWord(),
 			this._boardModel.getPlacedScore(),
 			this._boardModel.getPlacedRange(),
-			this._boardModel.getCellCoordinates( playerNewCell )
+			this._boardModel.getCellCoordinates( this._boardModel.getEndOfWordCell() )
 		);
  
- 		this._buttonsView.enablePlayButton(false);
- 		this._state.localMove(this);
+		this._remote.play( myPlay );
+ 		this._state.localMove( this );
  	}
 
  	// we are notified when the remote has played
@@ -114,7 +114,7 @@ function GameController(remote) {
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange = this._boardModel.rotateRange( remotePlay.playRange );
  		// show the remote player updates
- 		this.executePlay( 'remote', remotePlay );
+		this.executePlay( 'remote', remotePlay );
 
 		this._boardModel.unplaceAll();
 
