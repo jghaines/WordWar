@@ -2,10 +2,10 @@
 
 function GameController(remote) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.createBindings = function() {
-		this.log.info('GameController.createBindings()');
+		this.log.info( this.constructor.name + '.createBindings()');
 
 		this._lettersView.onClick( (function(index, letter) {
 			this.selectLetterToPlace(index, letter);
@@ -20,11 +20,28 @@ function GameController(remote) {
 		}).bind(this) );
 	}
 
-	this.populateLetters = function () {
-		this.log.info('GameController.populateLetters()');
+	this.newGame = function(gameInfo) {
+		this.log.info( this.constructor.name + '.newGame(.)' );
+		this.log.debug( this.constructor.name, '.newGame( gameInfo=', gameInfo, ')' );
 
-		for (var i = this._lettersModel.getLetterCount() - 1; i >= 0; i--) {
-			this._lettersModel.setLetter(i, this._letterGenerator() );
+		var boardUrl = gameInfo.board;
+
+		this._lettersModel.setLetterCount( gameInfo.letterCount );
+		this._lettersView.updateLetters();
+
+		//this.populateLetters();
+
+		this._boardModel.loadBoard(boardUrl, (function() { 
+			this._boardLoaded();
+		}).bind(this));
+	}
+
+	this.newTurn = function( turnInfo ) {
+		this.log.info( this.constructor.name + '.newTurn(.)' );
+		this.log.debug( this.constructor.name, '.newTurn( turnInfo=', turnInfo, ')' );
+
+		for (var i = turnInfo.letters.length - 1; i >= 0; i--) {
+			this._lettersModel.setLetter(i, turnInfo.letters[i] );
 			this._lettersModel.setPlaced(i, false);
 		};
 		this._lettersModel.unselect();
@@ -32,23 +49,11 @@ function GameController(remote) {
 		this._lettersView.updateLetters();
 		this._lettersView.updatePlaced();
 		this._lettersView.updateSelection();
+
 	}
 
-	this.newGame = function(gameInfo) {
-		var boardUrl = gameInfo.board;
-
-		this._lettersModel.setLetterCount( gameInfo.letterCount );
-		this._lettersView.updateLetters();
-
-		this.populateLetters();
-
-		this._boardModel.loadBoard(boardUrl, (function() { 
-			this.boardLoaded();
-		}).bind(this));
-	}
-
-	this.boardLoaded = function() {
-
+	this._boardLoaded = function() {
+		this.log.info( this.constructor.name + '._boardLoaded()' );
 		this.createBindings();
 
 		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
@@ -56,7 +61,7 @@ function GameController(remote) {
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
-		this.log.info('GameController.selectLetterToPlace(index=' + index + ', letter=' + letter + ')');
+		this.log.info(this.constructor.name, '.selectLetterToPlace(index=' + index + ', letter=' + letter + ')');
 		this.log.debug('GameController.selectLetterToPlace  (this=' + this + ')');
 
 		if ( this._lettersModel.isPlaced(index) ) {
@@ -70,7 +75,8 @@ function GameController(remote) {
 	}
 
 	this.selectCellToPlace = function(cell) {
-		this.log.info('GameController.selectCellToPlace(.)');
+		this.log.info( this.constructor.name + '.selectCellToPlace(.)');
+
 		if ( this._lettersModel.getSelectedIndex() == null ) { // no letter selected
 			// nudge the user
 			this._lettersView.flash('flash-selection');
@@ -98,7 +104,7 @@ function GameController(remote) {
 	}
 
 	this.playWord = function() {
- 		this.log.info('GameController.playWord(.)');
+		this.log.info( this.constructor.name + '.playWord(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
@@ -120,6 +126,8 @@ function GameController(remote) {
 
 	// State machine callback - local player and remote compnent have completed move
  	this.moveComplete = function() {
+		this.log.info( this.constructor.name + '.moveComplete()' );
+
  		// show the local player updates
  		this.executePlay( 'local',  this._stateContext.getLocalPlay() );
 
@@ -131,14 +139,11 @@ function GameController(remote) {
 		this.executePlay( 'remote', remotePlay );
 
 		this._boardModel.unplaceAll();
-
-		// prepare for next move
-		this.populateLetters();
 	}
 
 
 	this.executePlay = function(who, play) {
-		this.log.info('GameController.executePlay(who=' + who + ', play=.)')
+		this.log.info( this.constructor.name + '.executePlay(who=' + who + ', play=.)');
 		this._boardModel.setPlayerCell(who, play.newPosition);
 		this._boardModel.addPlayedRange(who, play.playRange);
 	}
@@ -156,10 +161,12 @@ function GameController(remote) {
 
 	this._buttonsView = new ButtonsView();
 
-	this._letterGenerator = getScrabbleLetter;
-	
 	this._stateContext.onNewGame( (function(msg) { 
 		this.newGame(msg);
+	}).bind(this));
+
+	this._stateContext.onNewTurn( (function(msg) { 
+		this.newTurn(msg);
 	}).bind(this));
 
 	this._stateContext.onMoveComplete( (function() {

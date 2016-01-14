@@ -4,7 +4,8 @@
 
 var
     gameServer = module.exports = { games : [] },
-    UUID       = require('node-uuid');
+    UUID       = require('node-uuid'),
+    letterbag  = require('./scrabbleLetters.js');
 
 
 gameServer.log = require('loglevel');
@@ -42,6 +43,7 @@ gameServer.createGame = function(player) {
 	    id : 			UUID(),
 	    players: 		[ player ],
 	    turn: 			0,
+	    playsThisTurn: 	0,
 	    board: 			'./boards/1.html',
 		letterCount: 	10
 	};
@@ -59,21 +61,24 @@ gameServer.startGame = function(game) {
 	for ( var i = 0; i < game.players.length; ++i ) {
 		game.players[i].emit( 'new game', JSON.stringify( game, ['board', 'letterCount'] ));
 	}
+
+	this.nextTurn(game);
 }
 
-gameServer.startTurn = function(game) {
-	this.log.info('G', game.id, ' start turn ' );
-
+gameServer.nextTurn = function(game) {
 	var msg = {
 		turnNumber: game.turn,
-		letters: Array.from(Array( game.letterCount )).map( () => 'X' )
+		letters: Array.from(Array( game.letterCount )).map( () =>  letterbag.getLetter() )
 	}
 
 	++game.turn;
+	game.playsThisTurn = 0;
 
+	this.log.info('G', game.id, 'start turn[' + msg.turnNumber + ']', msg.letters );
 	for ( var i = 0; i < game.players.length; ++i ) {
-		game.players[i].emit('new turn', msg);
+		game.players[i].emit('start turn', msg);
 	}
+
 }
 
 gameServer.onMessage = function(player, msg) {
@@ -82,8 +87,13 @@ gameServer.onMessage = function(player, msg) {
 	for ( var i = 0; i < game.players.length; ++i ) {
 		if ( game.players[i] != player ) {
 			this.log.info('G', game.id, 'P['+(1-i)+']', player.userid, '-send move-> P['+i+']', game.players[i].userid );
-			game.players[i].emit('play message', msg);
+			game.players[i].emit('play message', msg);			
 		}
+	}
+
+	++game.playsThisTurn;
+	if ( game.playsThisTurn >= game.players.length ) {
+		this.nextTurn(game);
 	}
 
 }

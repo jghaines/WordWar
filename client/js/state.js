@@ -4,12 +4,18 @@ function StateContext(remote) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	// new game - callback from remote proxy
+	// new game - callback from Remote proxy
 	this.newGame = function(gameInfo) {
 		this.log.info(this.constructor.name + '.newGame(.)');
 		this._newGameCallbacks.fire(gameInfo);
 
 		this._state.gameStart(this);
+	}
+
+	// new turn - callback from Remote proxy
+	this.newTurn = function(turnInfo) {
+		this.log.info(this.constructor.name + '.newTurn(.)');
+		this._newTurnCallbacks.fire(turnInfo);
 	}
 
 	// local move - called by GameController
@@ -60,6 +66,10 @@ function StateContext(remote) {
 		this._newGameCallbacks.add(callback);
 	}
 
+	this.onNewTurn = function(callback) {
+		this._newTurnCallbacks.add(callback);
+	}
+
 	// register callback
 	this.onMoveComplete = function(callback) {
 		this._moveCompleteCallbacks.add(callback);
@@ -69,20 +79,24 @@ function StateContext(remote) {
 	this._localPlay = {};
 	this._remotePlay = {};
 
-
 	this._newGameCallbacks = $.Callbacks();
+	this._newTurnCallbacks = $.Callbacks();
 	this._moveCompleteCallbacks = $.Callbacks();
 
 
 	this._state = new StateWaitForGameStart();
 	this._remote = remote;
 
-	this._remote.onPlayReceived( (function(msg) { 
-		this.remoteMove(msg);
+	this._remote.onStartGame( (function(msg) { 
+		this.newGame(msg);
 	}).bind(this));
 
-	this._remote.onNewGame( (function(msg) { 
-		this.newGame(msg);
+	this._remote.onStartTurn( (function(msg) { 
+		this.newTurn(msg);
+	}).bind(this));
+
+	this._remote.onPlayReceived( (function(msg) { 
+		this.remoteMove(msg);
 	}).bind(this));
 }
 

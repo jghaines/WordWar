@@ -1,3 +1,5 @@
+'use strict';
+
 // follows the scrabble letter standard English distribution https://en.wikipedia.org/wiki/Scrabble_letter_distributions#English
 var scrabbleLetters = 
 	"A".repeat(9) +
@@ -29,6 +31,6 @@ var scrabbleLetters =
 
 
 
-function getScrabbleLetter() {
+exports.getLetter = function () {
     return scrabbleLetters.charAt(Math.floor(Math.random() * scrabbleLetters.length));
 }
