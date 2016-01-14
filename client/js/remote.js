@@ -18,8 +18,8 @@ function RemoteController(socket) {
 	this.onNewGame = function(callback) {
 		this.log.info( this.constructor.name + '.onNewGame(.)');
 		this._socket.on('new game', (function(msg){
-			this.log.debug('  RemoteController(new game) callback - we received new game message');
-			callback(msg);
+			this.log.debug('  RemoteController(new game) callback - we received new game message', msg);
+			callback( JSON.parse( msg ));
 	 	}).bind(this) );
 	}
 

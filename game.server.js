@@ -39,8 +39,11 @@ gameServer.findGame = function(player) {
 gameServer.createGame = function(player) {
 
 	var newGame = {
-	    id : 		UUID(),
-	    players: 	[ player ],
+	    id : 			UUID(),
+	    players: 		[ player ],
+	    turn: 			0,
+	    board: 			'./boards/1.html',
+		letterCount: 	10
 	};
 
 	player.game = newGame;
@@ -53,12 +56,23 @@ gameServer.createGame = function(player) {
 gameServer.startGame = function(game) {
 	this.log.info('G', game.id, 'started' );
 
+	for ( var i = 0; i < game.players.length; ++i ) {
+		game.players[i].emit( 'new game', JSON.stringify( game, ['board', 'letterCount'] ));
+	}
+}
+
+gameServer.startTurn = function(game) {
+	this.log.info('G', game.id, ' start turn ' );
+
 	var msg = {
-		board: './boards/1.html',
+		turnNumber: game.turn,
+		letters: Array.from(Array( game.letterCount )).map( () => 'X' )
 	}
 
+	++game.turn;
+
 	for ( var i = 0; i < game.players.length; ++i ) {
-		game.players[i].emit('new game', msg);
+		game.players[i].emit('new turn', msg);
 	}
 }
 
