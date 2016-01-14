@@ -22,11 +22,12 @@ gameServer.findGame = function(player) {
 			if ( game.players.length < 2 ) {
 				game.players.push( player );
 				player.game = game;
+				this.log.info('G', game.id, 'P[1]', player.userid, 'joined game' );
+				this.startGame(game);
+
 				joinedGame = true;
 				continue;
 			}
-			this.log.info('G', game.id, 'P[1]', player.userid, 'joined game ' );
-			this.startGame(game);
 		}
 	}
 
@@ -50,6 +51,7 @@ gameServer.createGame = function(player) {
 }
 
 gameServer.startGame = function(game) {
+	this.log.info('G', game.id, 'started' );
 
 }
 
