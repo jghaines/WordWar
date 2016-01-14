@@ -83,7 +83,7 @@ function StateContext(remote) {
 
 	this.onStatusUpdate = function(callback) {
 		this._statusUpdateCallbacks.add(callback);
-		callback(_state.statusMessage); // give the caller the current status
+		callback( this._state.statusMessage ); // give the caller the current status
 	}
 
 	// our buffer for most recent plays

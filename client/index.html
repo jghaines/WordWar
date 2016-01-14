@@ -5,8 +5,10 @@
 		<link rel="stylesheet" type="text/css" href="./css/gameboard.css" />
 		<link rel="stylesheet" type="text/css" href="./css/letters.css" />
 		<link rel="stylesheet" type="text/css" href="./css/animation.css" />
+		<link rel="stylesheet" type="text/css" href="./lib/jquery-ui.min.css" />
 
 		<script type="text/javascript" src="./lib/jquery.min.js"></script>
+		<script type="text/javascript" src="./lib/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="./lib/loglevel.min.js"></script>
 		<script type="text/javascript" src="./lib/socket.io.js"></script>
 		<script type="text/javascript" src="./js/util.js"></script>
@@ -26,9 +28,24 @@
 	</head>
 
 	<body>
-		<table class="gameboard">
-			<!-- Gamboard will be populated by script -->
-		</table>
+		<div class="top">
+			<table><tr>
+			<td rowspan='2'>
+				<table class="gameboard">
+					<!-- Gamboard will be populated by script -->
+				</table>
+			</td>
+			<td>
+				<div class="playedwords remote">
+					<ul />
+				</div>
+			</td>
+			</tr><tr><td>
+				<div class="playedwords local">
+					<ul />
+				</div>
+			</td></tr></table>
+		</div>
 
 		<div class="interstitial">
 			<span class="status"></span>

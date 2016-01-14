@@ -146,6 +146,7 @@ function GameController(remote) {
 		this.log.info( this.constructor.name + '.executePlay(who=' + who + ', play=.)');
 		this._boardModel.setPlayerCell(who, play.newPosition);
 		this._boardModel.addPlayedRange(who, play.playRange);
+		this._boardView.addPlayedWord(who, play.word + ' (' + play.score + ')' );
 	}
 
 	// State machine callback

@@ -118,9 +118,14 @@ function LettersView(lettersModel) {
 		flash(this._lettersTable, flash_class);
 	}
 
+	this._bindDragDrop = function() {
+		$_lettersTable.find('td').draggable({ revert: "invalid", snap: "table.gameboard td" })
+	}
 
 	// constructor code
 	this._lettersModel = lettersModel;
 	this._lettersTable = $('table.letters');
 	this._clickCallbacks = $.Callbacks();
+
+
 }

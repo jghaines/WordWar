@@ -8,6 +8,17 @@ body {
 	background: #EEEEEE;
 }
 
+.playedwords {
+	border: 4px;
+	border-style: solid;
+}
+
+.playedwords ul {
+    list-style-type: none;
+    padding:0;
+    margin:0;
+}
+
 div.interstitial {
 	max-width: 400px;
 }
@@ -16,11 +27,6 @@ span.buttons {
 	float: right;
 }
 
-td {
-	text-align:	center;	 
-	vertical-align:	middle;
-	cursor: grab;
-}
 
 button {
 	padding: 6px 12px;

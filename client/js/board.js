@@ -179,9 +179,23 @@ function BoardView(boardModel) {
 		this._status.text( statusMessage );
 	}
 
+	this.addPlayedWord = function ( who, wordText ) {
+		this._wordLists[who].append( $('<li/>').text(wordText) );
+	}
+
 
 	this.flash = function(flash_class) {
 		flash(this._table, flash_class);
+	}
+
+	this._bindDragDrop = function() {
+		$_table.find('td' ).droppable( {
+			drop: function( event, ui ) {
+				$( this )
+					.addClass( "ui-state-highlight" )
+					.text('X');
+				}
+			});
 	}
 
 	// constructor code
@@ -190,6 +204,10 @@ function BoardView(boardModel) {
 
 	this._table = $('table.gameboard');
 	this._status = $('.status');
+	this._wordLists = {
+		'local': 	$('div.playedwords.local ul'),
+		'remote': 	$('div.playedwords.remote ul'),
+	};
 }
 
 
