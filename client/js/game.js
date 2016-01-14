@@ -93,26 +93,19 @@ function GameController(remote) {
 			this._boardModel.getPlacedRange(),
 			this._boardModel.getCellCoordinates( this._boardModel.getEndOfWordCell() )
 		);
- 
-		this._remote.play( myPlay );
- 		this._state.localMove( this );
- 	}
 
- 	// we are notified when the remote has played
- 	this.remotePlayedWord = function(msg) {
- 		this.log.info('GameController.remotePlayedWord(.)');
- 		this._state.remoteMove(this);
+		this._stateContext.localMove( myPlay );
  	}
 
 	// State machine callback - local player and remote compnent have completed move
  	this.moveComplete = function() {
  		// show the local player updates
- 		this.executePlay( 'local',  this._remote.getLocalPlay() );
+ 		this.executePlay( 'local',  this._stateContext.getLocalPlay() );
 
  		// map the remote play coordinates
-		var remotePlay = this._remote.getRemotePlay();
+		var remotePlay = this._stateContext.getRemotePlay();
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
- 		remotePlay.playRange = this._boardModel.rotateRange( remotePlay.playRange );
+ 		remotePlay.playRange   = this._boardModel.rotateRange( remotePlay.playRange );
  		// show the remote player updates
 		this.executePlay( 'remote', remotePlay );
 
@@ -120,9 +113,6 @@ function GameController(remote) {
 
 		// prepare for next move
 		this.populateLetters();
-
-		this._state.moveComplete(this);
-
 	}
 
 
@@ -132,19 +122,9 @@ function GameController(remote) {
 		this._boardModel.addPlayedRange(who, play.playRange);
 	}
 
-	// State machine callback
-	this.setState = function(state) {
-		this._state = state;
-	}
-
 	// constructor code
 	this._remote = remote;
-	this._remote.onPlayReceived( (function(msg) { 
-		this.remotePlayedWord(msg);
-	}).bind(this));
-
-	this.setState( new StateInitial(this) );
-
+	this._stateContext = new StateContext( this._remote );
 
 	this._lettersModel = new LettersModel();
 	this._lettersView = new LettersView(this._lettersModel );
@@ -165,6 +145,9 @@ function GameController(remote) {
 		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
 	}).bind(this));
 
+	this._stateContext.onMoveComplete( (function() {
+		this.moveComplete();
+	}).bind(this) );
 
 
 }

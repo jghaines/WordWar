@@ -10,18 +10,14 @@ function RemoteController(socket) {
 		this.log.info('RemoteController.onPlayReceived(.)');
 		this._socket.on('play message', (function(msg){
 			this.log.debug('  RemoteController callback - msg = ', msg);
-			this._remotePlay = new Play();
-			this._remotePlay.loadFromJson( JSON.parse( msg ));
 
 			callback(msg);
 	 	}).bind(this) );
 	}
 
-	this.play = function(localPlay) {
+	this.executeLocalPlay = function(localPlay) {
 		this.log.info('RemoteController.play(.)');
-
-		this._localPlay = localPlay; 
-		this._socket.emit('play message', JSON.stringify( this._localPlay ));
+		this._socket.emit('play message', JSON.stringify( localPlay ));
 	}
 
 	this.getLocalPlay = function() {
@@ -36,7 +32,4 @@ function RemoteController(socket) {
 	this._socket = socket;
 	this._userid = 'unknown';
 	this._player = 0;
-
-	this._localPlay = {};
-	this._remotePlay = {};
 }
