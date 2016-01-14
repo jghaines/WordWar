@@ -5,7 +5,7 @@
 var
     gameServer = module.exports = { games : [] },
     UUID       = require('node-uuid'),
-    letterbag  = require('./scrabbleLetters.js');
+    letterbag  = require('./wordyLetters.js');
 
 
 gameServer.log = require('loglevel');
