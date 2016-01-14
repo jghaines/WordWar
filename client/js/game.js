@@ -7,7 +7,7 @@ function GameController(remote) {
 	this.createBindings = function() {
 		this.log.info('GameController.createBindings()');
 
-		this._lettersView.click( (function(index, letter) {
+		this._lettersView.onClick( (function(index, letter) {
 			this.selectLetterToPlace(index, letter);
 		}).bind(this) );
 
@@ -23,7 +23,7 @@ function GameController(remote) {
 	this.populateLetters = function () {
 		this.log.info('GameController.populateLetters()');
 
-		for (var i = this._lettersModel.letterCount() - 1; i >= 0; i--) {
+		for (var i = this._lettersModel.getLetterCount() - 1; i >= 0; i--) {
 			this._lettersModel.setLetter(i, this._letterGenerator() );
 			this._lettersModel.setPlaced(i, false);
 		};
@@ -36,6 +36,9 @@ function GameController(remote) {
 
 	this.newGame = function(gameInfo) {
 		var boardUrl = gameInfo.board;
+
+		this._lettersModel.setLetterCount( gameInfo.letterCount );
+		this._lettersView.updateLetters();
 
 		this.populateLetters();
 

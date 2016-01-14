@@ -4,8 +4,14 @@ function LettersModel() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
-	this.letterCount = function() {
-		return this._LETTER_COUNT;
+	this.getLetterCount = function() {
+		return this._letterCount;
+	}
+
+	this.setLetterCount = function( letterCount ) {
+		this._letterCount = letterCount;
+		this._letters =  Array(this._letterCount);
+		this._isPlaced = Array.from(Array(this._letterCount)).map(() => false);
 	}
 
 	this.getLetter = function(index) {
@@ -43,9 +49,9 @@ function LettersModel() {
 
 
 	// constructor
-	this._LETTER_COUNT = 10
-	this._letters = Array(this._LETTER_COUNT);
-	this._isPlaced = Array.from(Array(this._LETTER_COUNT)).map(() => false);
+	this._letterCount = 0
+	this._letters = [];
+	this._isPlaced = [];
 	this._selectedIndex = null;
 
 }
@@ -57,7 +63,23 @@ function LettersView(lettersModel) {
 
 	this.updateLetters = function() {
 		this.log.info('LettersView.updateLetters()');
-		var that = this;
+
+		// update letter count if mismatch
+		if ( this._lettersModel.getLetterCount() != this._lettersTable.find('td').length ) {
+			var that = this;
+			this._lettersTable.find('tbody tr').remove();
+			var tr = $('<tr />');
+			this._lettersTable.find('tbody').append(tr);
+			for ( var i = this._lettersModel.getLetterCount(); i > 0; --i ) {
+				var td = $( '<td />' ).click( function(callback) {
+					var index = $(this).index();
+					var letter = $(this).text();
+					that._click(index, letter);
+				} );
+				tr.append(td);
+			}
+		}
+
 		this._lettersTable.find('td').each( (function(index, value) {
 			this.log.debug('  LettersView.updateLetters()callback(index='+index+',value='+value+')');
 			this.log.debug('    LettersView.updateLetters()callback() this=' + this._lettersModel.getLetter(index) );
@@ -81,14 +103,15 @@ function LettersView(lettersModel) {
 		}).bind(this) );
 	}
 
+	// when a letter is clicked, trigger the callbacks
+	this._click = function( index, letter ) {
+ 		this._clickCallbacks.fire( index, letter );
+	}
+
 	// register click callback handler
-	this.click = function(callback) {
-		this.log.info('LettersView.click(.)');
-		this._lettersTable.find('td').click( function() {
-			var index = $(this).index();
-			var letter = $(this).text();
-			callback(index, letter);
-		} );
+	this.onClick = function( callback ) {
+		this.log.info('LettersView.onClick(.)');
+ 		this._clickCallbacks.add( callback );
 	}
 
 	this.flash = function(flash_class) {
@@ -99,4 +122,5 @@ function LettersView(lettersModel) {
 	// constructor code
 	this._lettersModel = lettersModel;
 	this._lettersTable = $('table.letters');
+	this._clickCallbacks = $.Callbacks();
 }
