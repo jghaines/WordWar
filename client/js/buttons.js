@@ -12,5 +12,5 @@ function ButtonsView() {
 		});
 	}
 
-	this._playButton = $("button.play");
+	this._playButton = $("button.move");
 }
