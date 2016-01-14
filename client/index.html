@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" type="text/css" href="./css/style.css" />
-	<link rel="stylesheet" type="text/css" href="./css/gameboard.css" />
-	<link rel="stylesheet" type="text/css" href="./css/letters.css" />
-	<link rel="stylesheet" type="text/css" href="./css/animation.css" />
+	<head>
+		<link rel="stylesheet" type="text/css" href="./css/style.css" />
+		<link rel="stylesheet" type="text/css" href="./css/gameboard.css" />
+		<link rel="stylesheet" type="text/css" href="./css/letters.css" />
+		<link rel="stylesheet" type="text/css" href="./css/animation.css" />
 
-	<script type="text/javascript" src="./lib/jquery.min.js"></script>
-	<script type="text/javascript" src="./lib/loglevel.min.js"></script>
-	<script type="text/javascript" src="./lib/socket.io.js"></script>
-	<script type="text/javascript" src="./js/util.js"></script>
+		<script type="text/javascript" src="./lib/jquery.min.js"></script>
+		<script type="text/javascript" src="./lib/loglevel.min.js"></script>
+		<script type="text/javascript" src="./lib/socket.io.js"></script>
+		<script type="text/javascript" src="./js/util.js"></script>
 
-	<script type="text/javascript" src="./js/sowpods.js"></script>
+		<script type="text/javascript" src="./js/sowpods.js"></script>
 
-	<script type="text/javascript" src="./js/letters.js"></script>
-	<script type="text/javascript" src="./js/board.js"></script>
-	<script type="text/javascript" src="./js/buttons.js"></script>
-	<script type="text/javascript" src="./js/game.js"></script>
-	<script type="text/javascript" src="./js/play.js"></script>
-	<script type="text/javascript" src="./js/remote.js"></script>
-	<script type="text/javascript" src="./js/state.js"></script>
+		<script type="text/javascript" src="./js/letters.js"></script>
+		<script type="text/javascript" src="./js/board.js"></script>
+		<script type="text/javascript" src="./js/buttons.js"></script>
+		<script type="text/javascript" src="./js/game.js"></script>
+		<script type="text/javascript" src="./js/play.js"></script>
+		<script type="text/javascript" src="./js/remote.js"></script>
+		<script type="text/javascript" src="./js/state.js"></script>
 
-	<script type="text/javascript" src="./js/main.js"></script>
+		<script type="text/javascript" src="./js/main.js"></script>
 
-</head>
+	</head>
 
-<body>
-<table class="gameboard">
-	<!-- Gamboard will be populated by script -->
-</table>
+	<body>
+		<table class="gameboard">
+			<!-- Gamboard will be populated by script -->
+		</table>
 
-<span class="status"></span>
+		<div class="interstitial">
+			<span class="status"></span>
 
-<button type="button" class="play">Play</button>
+			<span class="buttons">
+				<button type="button" class="move">Move</button>
+			</span>
+		</div>
 
-<table class="letters">
-<tbody>
-	<!-- Letters will be populated by script -->
-</tbody>
-</table>
-
-</body>
+		<table class="letters">
+			<tbody>
+				<!-- Letters will be populated by script -->
+			</tbody>
+		</table>
+	</body>
 </html>
