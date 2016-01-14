@@ -9,7 +9,7 @@ function StateContext(remote) {
 		this.log.info(this.constructor.name + '.newGame(.)');
 		this._newGameCallbacks.fire(gameInfo);
 
-		this._state.gameStart(this);
+		this._state.gameStart();
 	}
 
 	// new turn - callback from Remote proxy
@@ -26,7 +26,7 @@ function StateContext(remote) {
 		this._localPlay = localPlay; 
 		this._remote.executeLocalPlay( localPlay );
 
-		this._state.localMove( this );
+		this._state.localMove();
 	}
 
  	// remote move - callback from remote proxy
@@ -37,7 +37,7 @@ function StateContext(remote) {
 		this._remotePlay = new Play();
 		this._remotePlay.loadFromJson( JSON.parse( msg ));
 
- 		this._state.remoteMove(this);
+ 		this._state.remoteMove();
  	}
 
  	// local & remove moves complete - callback from States
@@ -84,7 +84,7 @@ function StateContext(remote) {
 	this._moveCompleteCallbacks = $.Callbacks();
 
 
-	this._state = new StateWaitForGameStart();
+	this._state = new StateWaitForGameStart( this );
 	this._remote = remote;
 
 	this._remote.onStartGame( (function(msg) { 
@@ -101,83 +101,92 @@ function StateContext(remote) {
 }
 
 
-function StateWaitForGameStart() {
+function StateWaitForGameStart( context ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.gameStart = function(context) {
+	this.context = context;
+
+
+	this.gameStart = function() {
 		this.log.info(this.constructor.name, '-(gameStart)-> StateWaitForMove');
-		context.setState(new StateWaitForMove());
+		context.setState( new StateWaitForMove( this.context ));
 	}
 
-	this.localMove = function(context) {
+	this.localMove = function() {
 		throw this.constructor.name + '.localMove' + ' invalid state transition';
 	}
 
-	this.remoteMove = function(context) {
+	this.remoteMove = function() {
 		throw this.constructor.name + '.remoteMove' + ' invalid state transition';
 	}
 
-	this.moveComplete = function(context) {
+	this.moveComplete = function() {
 		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
 	}
 }
 
 
-function StateWaitForMove() {
+function StateWaitForMove( context ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.localMove = function(context) {
+	this.context = context;
+
+	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForRemote')
-		context.setState(new StateWaitForRemote());	
+		context.setState( new StateWaitForRemote( this.context ));	
 	}
 
-	this.remoteMove = function(context) {
+	this.remoteMove = function() {
 		this.log.info(this.constructor.name, '-(remoteMove)-> StateWaitForLocal')
-		context.setState(new StateWaitForLocal());	
+		context.setState( new StateWaitForLocal( this.context ));	
 	}
 
-	this.moveComplete = function(context) {
+	this.moveComplete = function() {
 		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
 	}
 }
 
-function StateWaitForRemote() {
+function StateWaitForRemote( context ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.localMove = function(context) {
+	this.context = context;
+
+	this.localMove = function() {
 		throw this.constructor.name + '.localMove' + ' invalid state transition';
 	}
 
-	this.remoteMove = function(context) {
+	this.remoteMove = function() {
 		this.log.info(this.constructor.name, ' -(remoteMove)-> StateWaitForMove')
 		context.moveComplete();
-		context.setState(new StateWaitForMove());	
+		context.setState( new StateWaitForMove( this.context ));	
 	}
 
-	this.moveComplete = function(context) {
+	this.moveComplete = function() {
 		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
 	}
 }
 
 
-function StateWaitForLocal() {
+function StateWaitForLocal( context ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.localMove = function(context) {
+	this.context = context;
+
+	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForMove')
 		context.moveComplete();
-		context.setState(new StateWaitForMove());	
+		context.setState( new StateWaitForMove( this.context ));	
 	}
 
-	this.remoteMove = function(context) {
+	this.remoteMove = function() {
 		throw this.constructor.name + '.remoteMove' + ' invalid state transition';
 	}
 
-	this.moveComplete = function(context) {
+	this.moveComplete = function() {
 		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
 	}
 }
