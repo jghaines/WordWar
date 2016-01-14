@@ -51,8 +51,13 @@ function StateContext(remote) {
 	this.setState = function(newState) {
  		this.log.debug(this.constructor.name + '.setState() - state =', newState);
 		this._state = newState;
+
+		this._statusUpdateCallbacks.fire( newState.statusMessage );
 	}
 
+	//
+	// Accessors
+	//
 	this.getLocalPlay = function() {
 		return this._localPlay;
 	}
@@ -61,7 +66,9 @@ function StateContext(remote) {
 		return this._remotePlay;
 	}
 
-	// register callback
+	//
+	// register callbacks
+	//
 	this.onNewGame = function(callback) {
 		this._newGameCallbacks.add(callback);
 	}
@@ -70,9 +77,13 @@ function StateContext(remote) {
 		this._newTurnCallbacks.add(callback);
 	}
 
-	// register callback
 	this.onMoveComplete = function(callback) {
 		this._moveCompleteCallbacks.add(callback);
+	}
+
+	this.onStatusUpdate = function(callback) {
+		this._statusUpdateCallbacks.add(callback);
+		callback(_state.statusMessage); // give the caller the current status
 	}
 
 	// our buffer for most recent plays
@@ -82,7 +93,7 @@ function StateContext(remote) {
 	this._newGameCallbacks = $.Callbacks();
 	this._newTurnCallbacks = $.Callbacks();
 	this._moveCompleteCallbacks = $.Callbacks();
-
+	this._statusUpdateCallbacks = $.Callbacks();
 
 	this._state = new StateWaitForGameStart( this );
 	this._remote = remote;
@@ -106,6 +117,8 @@ function StateWaitForGameStart( context ) {
 	this.log.setLevel( log.levels.DEBUG );
 
 	this.context = context;
+
+	this.statusMessage = "Waiting for opponent to join";
 
 
 	this.gameStart = function() {
@@ -133,6 +146,8 @@ function StateWaitForMove( context ) {
 
 	this.context = context;
 
+	this.statusMessage = "Place your word";
+
 	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForRemote')
 		context.setState( new StateWaitForRemote( this.context ));	
@@ -153,6 +168,8 @@ function StateWaitForRemote( context ) {
 	this.log.setLevel( log.levels.DEBUG );
 
 	this.context = context;
+
+	this.statusMessage = "Waiting for opponent's move";
 
 	this.localMove = function() {
 		throw this.constructor.name + '.localMove' + ' invalid state transition';
@@ -175,6 +192,8 @@ function StateWaitForLocal( context ) {
 	this.log.setLevel( log.levels.DEBUG );
 
 	this.context = context;
+
+	this.statusMessage = "Place your word";
 
 	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForMove')

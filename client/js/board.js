@@ -175,6 +175,11 @@ function BoardView(boardModel) {
 		} );
 	}
 
+	this.setStatus = function ( statusMessage ) {
+		this._status.text( statusMessage );
+	}
+
+
 	this.flash = function(flash_class) {
 		flash(this._table, flash_class);
 	}
@@ -184,6 +189,7 @@ function BoardView(boardModel) {
 	this._boardModel._boardView = this;
 
 	this._table = $('table.gameboard');
+	this._status = $('.status');
 }
 
 

@@ -148,6 +148,11 @@ function GameController(remote) {
 		this._boardModel.addPlayedRange(who, play.playRange);
 	}
 
+	// State machine callback
+	this.statusUpdate = function ( statusMessage ) {
+		this._boardView.setStatus( statusMessage );
+	}
+
 	// constructor code
 	this._remote = remote;
 	this._stateContext = new StateContext( this._remote );
@@ -171,6 +176,10 @@ function GameController(remote) {
 
 	this._stateContext.onMoveComplete( (function() {
 		this.moveComplete();
+	}).bind(this) );
+
+	this._stateContext.onStatusUpdate( (function(statusMessage) {
+		this.statusUpdate(statusMessage);
 	}).bind(this) );
 
 }
