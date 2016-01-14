@@ -7,16 +7,24 @@ function RemoteController(socket) {
 
 	// register callback
 	this.onPlayReceived = function(callback) {
-		this.log.info('RemoteController.onPlayReceived(.)');
+		this.log.info( this.constructor.name + '.onPlayReceived(.)');
 		this._socket.on('play message', (function(msg){
 			this.log.debug('  RemoteController callback - msg = ', msg);
+			callback(msg);
+	 	}).bind(this) );
+	}
 
+	// register callback
+	this.onNewGame = function(callback) {
+		this.log.info( this.constructor.name + '.onNewGame(.)');
+		this._socket.on('new game', (function(msg){
+			this.log.debug('  RemoteController(new game) callback - we received new game message');
 			callback(msg);
 	 	}).bind(this) );
 	}
 
 	this.executeLocalPlay = function(localPlay) {
-		this.log.info('RemoteController.play(.)');
+		this.log.info( this.constructor.name + '.play(.)');
 		this._socket.emit('play message', JSON.stringify( localPlay ));
 	}
 

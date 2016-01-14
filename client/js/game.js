@@ -34,6 +34,24 @@ function GameController(remote) {
 		this._lettersView.updateSelection();
 	}
 
+	this.newGame = function(gameInfo) {
+		var boardUrl = gameInfo.board;
+
+		this.populateLetters();
+
+		this._boardModel.loadBoard(boardUrl, (function() { 
+			this.boardLoaded();
+		}).bind(this));
+	}
+
+	this.boardLoaded = function() {
+
+		this.createBindings();
+
+		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
+		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
+	}
+
 	this.selectLetterToPlace = function(index, letter) {
 		this.log.info('GameController.selectLetterToPlace(index=' + index + ', letter=' + letter + ')');
 		this.log.debug('GameController.selectLetterToPlace  (this=' + this + ')');
@@ -136,18 +154,13 @@ function GameController(remote) {
 	this._buttonsView = new ButtonsView();
 
 	this._letterGenerator = getScrabbleLetter;
-
-	this.populateLetters();
-	this._boardModel.loadBoard('./boards/1.html', (function() { 
-		this.createBindings();
-
-		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
-		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
+	
+	this._stateContext.onNewGame( (function(msg) { 
+		this.newGame(msg);
 	}).bind(this));
 
 	this._stateContext.onMoveComplete( (function() {
 		this.moveComplete();
 	}).bind(this) );
-
 
 }

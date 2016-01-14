@@ -4,6 +4,14 @@ function StateContext(remote) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
+	// new game - callback from remote proxy
+	this.newGame = function(gameInfo) {
+		this.log.info(this.constructor.name + '.newGame(.)');
+		this._newGameCallbacks.fire(gameInfo);
+
+		this._state.gameStart(this);
+	}
+
 	// local move - called by GameController
 	this.localMove = function(localPlay) {
 		this.log.info(this.constructor.name + '.localMove(.)');
@@ -26,6 +34,13 @@ function StateContext(remote) {
  		this._state.remoteMove(this);
  	}
 
+ 	// local & remove moves complete - callback from States
+ 	this.moveComplete = function(args) {
+ 		this.log.info( this.constructor.name + '.moveComplete(.)'); 		
+ 		this._moveCompleteCallbacks.fire(args);
+ 	}
+
+
 	// callback from States
 	this.setState = function(newState) {
  		this.log.debug(this.constructor.name + '.setState() - state =', newState);
@@ -41,35 +56,61 @@ function StateContext(remote) {
 	}
 
 	// register callback
-	this.onMoveComplete = function(callback) {
-		this._moveCompletCallbacks.add(callback);
+	this.onNewGame = function(callback) {
+		this._newGameCallbacks.add(callback);
 	}
 
- 	// local & remove moves complete - callback from States
- 	this.moveComplete = function(args) {
- 		this.log.info(this.constructor.name + '.moveComplete(.)'); 		
- 		this._moveCompletCallbacks.fire(args);
- 	}
-
+	// register callback
+	this.onMoveComplete = function(callback) {
+		this._moveCompleteCallbacks.add(callback);
+	}
 
 	// our buffer for most recent plays
 	this._localPlay = {};
 	this._remotePlay = {};
 
 
-	this._moveCompletCallbacks = $.Callbacks();
+	this._newGameCallbacks = $.Callbacks();
+	this._moveCompleteCallbacks = $.Callbacks();
 
 
-	this._state = new StateInitial();
+	this._state = new StateWaitForGameStart();
 	this._remote = remote;
 
 	this._remote.onPlayReceived( (function(msg) { 
 		this.remoteMove(msg);
 	}).bind(this));
+
+	this._remote.onNewGame( (function(msg) { 
+		this.newGame(msg);
+	}).bind(this));
 }
 
 
-function StateInitial() {
+function StateWaitForGameStart() {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.DEBUG );
+
+	this.gameStart = function(context) {
+		this.log.info(this.constructor.name, '-(gameStart)-> StateWaitForMove');
+		context.setState(new StateWaitForMove());
+	}
+
+	this.localMove = function(context) {
+		throw this.constructor.name + '.localMove' + ' invalid state transition';
+	}
+
+	this.remoteMove = function(context) {
+		throw this.constructor.name + '.remoteMove' + ' invalid state transition';
+	}
+
+	this.moveComplete = function(context) {
+		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
+	}
+}
+
+
+function StateWaitForMove() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
@@ -97,9 +138,9 @@ function StateWaitForRemote() {
 	}
 
 	this.remoteMove = function(context) {
-		this.log.info(this.constructor.name, ' -(remoteMove)-> StateInitial')
+		this.log.info(this.constructor.name, ' -(remoteMove)-> StateWaitForMove')
 		context.moveComplete();
-		context.setState(new StateInitial());	
+		context.setState(new StateWaitForMove());	
 	}
 
 	this.moveComplete = function(context) {
@@ -113,9 +154,9 @@ function StateWaitForLocal() {
 	this.log.setLevel( log.levels.DEBUG );
 
 	this.localMove = function(context) {
-		this.log.info(this.constructor.name, '-(localMove)-> StateInitial')
+		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForMove')
 		context.moveComplete();
-		context.setState(new StateInitial());	
+		context.setState(new StateWaitForMove());	
 	}
 
 	this.remoteMove = function(context) {
@@ -126,5 +167,3 @@ function StateWaitForLocal() {
 		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
 	}
 }
-
-

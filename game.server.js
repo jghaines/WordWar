@@ -53,17 +53,22 @@ gameServer.createGame = function(player) {
 gameServer.startGame = function(game) {
 	this.log.info('G', game.id, 'started' );
 
+	var msg = {
+		board: './boards/1.html',
+	}
+
+	for ( var i = 0; i < game.players.length; ++i ) {
+		game.players[i].emit('new game', msg);
+	}
 }
 
 gameServer.onMessage = function(player, msg) {
-
-
 	var game = player.game;
 
 	for ( var i = 0; i < game.players.length; ++i ) {
 		if ( game.players[i] != player ) {
 			this.log.info('G', game.id, 'P['+(1-i)+']', player.userid, '-send move-> P['+i+']', game.players[i].userid );
-			game.players[i].emit	('play message', msg);
+			game.players[i].emit('play message', msg);
 		}
 	}
 
