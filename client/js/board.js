@@ -110,8 +110,21 @@ function BoardModel() {
 	}
 
 	this.getPlacedScore = function() {
-		// TODO
-		return 10;
+		var score = 0;
+		var wordBonus = 1;
+		this.getPlacedCells().each( function() {
+			var letterBonus = 1;
+			var letterScore = scoreForLetter( $( this ).text() );
+			if ( $(this).hasClass('bonus') ) {
+				if ( $(this).hasClass('letter') ) {
+					letterBonus *= $(this).attr('ww_value');
+				} else if ( $(this).hasClass('word') ) {
+					wordBonus *= $(this).attr('ww_value');
+				} 
+			}
+			score += letterBonus * letterScore;
+		} );
+		return wordBonus * score;
 	}
 
 	// this doesn't work fully - http://stackoverflow.com/questions/34757734/getting-a-range-of-table-cells-with-jquery-selectors
@@ -148,14 +161,20 @@ function BoardView(boardModel) {
 	this.log.setLevel( log.levels.SILENT );
 
 	this.fillSpecials = function(cells) {
-		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all cells
-		this.log.info('BoardView.fillSpecials()');
+		this.log.info('BoardView.fillSpecials(.)');
+		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all gameboard cells
 
-		cells.filter( function() {
-			return $(this).attr('ww_value'); }).each( function() {
+		cells.each( function() {
+			if ( $(this).hasClass( 'bonus' ) ) {
+				$(this).html(
+					'x' + $(this).attr( 'ww_value' ) + '<br />' +
+					 ( $(this).hasClass( 'letter' ) ? "<span class='bonusType'>letter</span>": '' ) +
+					 ( $(this).hasClass( 'word' ) ? "<span class='bonusType'>word</span>": '' )
+					);
+			} else if ( $(this).attr('ww_value') ) {
 				$(this).text( $(this).attr('ww_value') );
-			});
-
+			}
+		});
 	}
 
 	this.loadBoard = function(url, callback) {
