@@ -64,12 +64,12 @@ function BoardModel() {
 		return { row: cell.parent().index(), col: cell.index() };
 	}
 
-	this.getCellAtCoordinates = function( row, col ) {
-		if ( row < 0 || row >= this.getHeight() ||
-			col < 0 || col >= this.getWidth() ) {
+	this.getCellAtCoordinates = function( coords ) {
+		if ( coords.row < 0 || coords.row >= this.getHeight() ||
+			 coords.col < 0 || coords.col >= this.getWidth() ) {
 			return null;
 		}
-		return this._boardView._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' )
+		return this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )
 	}
 
 	// get 1x1 range of given cell
@@ -248,30 +248,29 @@ function BoardController(boardModel, boardView) {
 	}
 
 	this._highlightNextPlaceable = function(fromCell, direction) {
-		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction);
-		var colIndex = fromCell.index();
-		var rowIndex = fromCell.parent().index();
+		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction + ')');
+		var coords = this._boardModel.getCellCoordinates( fromCell );
 
 		var placeableCell;
 		do {
 			switch(direction) {
 				case 'left':
-		    		--colIndex;
+		    		coords.col--;
 					break;
 	    		case 'right':
-		    		++colIndex;
+		    		coords.col++;
 					break;
 	    		case 'up':
-	    			--rowIndex;
+	    			coords.row--;
 		        	break;
 	    		case 'down':
-	    			++rowIndex;
+	    			coords.row++;
 		        	break;
 		        default:
 		        	throw this.constructor.name + '._highlightNextPlaceable() - invalid direction=' + direction;
-				this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop row=', rowIndex, 'col=', colIndex );
+				this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop coords=', coords );
 		    }
-	    	placeableCell = this._boardModel.getCellAtCoordinates( rowIndex, colIndex );
+	    	placeableCell = this._boardModel.getCellAtCoordinates( coords );
 		} while ( placeableCell && ( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )));
 
 		if ( placeableCell ) {
