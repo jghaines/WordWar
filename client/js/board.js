@@ -10,6 +10,46 @@ function BoardModel() {
 		this._boardView._table
 	}
 
+ 	this.getHeight = function() {
+ 		return this._boardView._table.find('tr').length;
+ 	}
+
+ 	this.getWidth = function() {
+ 		return this._boardView._table.find('tr:eq(0) td').length;
+ 	}
+
+	this.getCellCoordinates = function( cell ) {
+		return { row: cell.parent().index(), col: cell.index() };
+	}
+
+	this.getCellAtCoordinates = function( coords ) {
+		if ( coords.row < 0 || coords.row >= this.getHeight() ||
+			 coords.col < 0 || coords.col >= this.getWidth() ) {
+			return null;
+		}
+		return this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )
+	}
+
+	// get 1x1 range of given cell
+	this.getCellRange = function( cell ) {
+		var coords = this.getCellCoordinates( cell );
+		return {
+			min: { row: coords.row, col: coords.col },
+			max: { row: coords.row, col: coords.col }
+		};
+	}
+
+ 	this.rotatePosition = function( position ) {
+ 		return {
+ 			row: ( this.getHeight() - position.row - 1 ),
+ 			col: ( this.getWidth()  - position.col - 1 )
+ 		};
+ 	}
+
+ 	this.rotateRange = function( range ) {
+ 		return { min: this.rotatePosition( range.max ), max: this.rotatePosition( range.min )  };
+ 	}
+
 	this.getPlayerCell = function(who) {
 		return this._boardView._table.find('td.player-' + who);
 	}
@@ -60,47 +100,6 @@ function BoardModel() {
 		};
 	}
 
-	this.getCellCoordinates = function( cell ) {
-		return { row: cell.parent().index(), col: cell.index() };
-	}
-
-	this.getCellAtCoordinates = function( coords ) {
-		if ( coords.row < 0 || coords.row >= this.getHeight() ||
-			 coords.col < 0 || coords.col >= this.getWidth() ) {
-			return null;
-		}
-		return this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )
-	}
-
-	// get 1x1 range of given cell
-	this.getCellRange = function( cell ) {
-		var coords = this.getCellCoordinates( cell );
-		return {
-			min: { row: coords.row, col: coords.col },
-			max: { row: coords.row, col: coords.col }
-		};
-	}
-
- 	this.getHeight = function() {
- 		return this._boardView._table.find('tr').length;
- 	}
-
- 	this.getWidth = function() {
- 		return this._boardView._table.find('tr:eq(0) td').length;
- 	}
-
- 	this.rotatePosition = function( position ) {
- 		return {
- 			row: ( this.getHeight() - position.row - 1 ),
- 			col: ( this.getWidth()  - position.col - 1 )
- 		};
- 	}
-
- 	this.rotateRange = function( range ) {
- 		return { min: this.rotatePosition( range.max ), max: this.rotatePosition( range.min )  };
- 	}
-
-
 	this.getEndOfWordCell = function() {
 		switch(this._placedDirection) {
 			case 'right': // fall through
@@ -135,14 +134,6 @@ function BoardModel() {
 		return wordBonus * score;
 	}
 
-	// this doesn't work fully - http://stackoverflow.com/questions/34757734/getting-a-range-of-table-cells-with-jquery-selectors
-	/*
-	this._getSelectorForRange = function(range) {
-		return  'tr' + ':lt(' + (range.max.row + 1) + ')' + ( range.min.row > 0 ? ':gt(' + (range.min.row - 1) + ')' : '' ) + ' ' +
-				'td' + ':lt(' + (range.max.col + 1) + ')' + ( range.min.col > 0 ? ':gt(' + (range.min.col - 1) + ')' : '' );
-	}
-	*/	
-
 	this.addPlayedRange = function(who, range) {
 		this.log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
 
@@ -152,13 +143,6 @@ function BoardModel() {
 			}			
 		}
 	}
-
-	this.setPlayedCells = function(placedCells, who) {
-		placedCells.each( function() {
-			$(this).addClass( 'played-' + who )
-		});
-	}
-
 
 	this._boardView = null;
 	this._placedDirection = 'any';
