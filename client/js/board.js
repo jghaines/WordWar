@@ -27,7 +27,7 @@ function BoardModel() {
 			 coords.col < 0 || coords.col >= this.getWidth() ) {
 			return null;
 		}
-		return this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )
+		return $( this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )[0] );
 	}
 
 	// get 1x1 range of given cell
@@ -37,6 +37,54 @@ function BoardModel() {
 			min: { row: coords.row, col: coords.col },
 			max: { row: coords.row, col: coords.col }
 		};
+	}
+
+	this.getNextCellInDirection = function( startCell, direction ) {
+		var coords = this.getCellCoordinates( startCell );
+		switch(direction) {
+			case 'left':
+	    		coords.col--;
+				break;
+    		case 'right':
+	    		coords.col++;
+				break;
+    		case 'up':
+    			coords.row--;
+	        	break;
+    		case 'down':
+    			coords.row++;
+	        	break;
+	        default:
+	        	throw this.constructor.name + '.getNextCellInDirection() - invalid direction=' + direction;
+		}	      
+		return this.getCellAtCoordinates( coords );
+	}
+
+	this.getAllCellsInDirection = function( startCell, direction ) {
+		var cells = [];
+		var nextCell = this.getNextCellInDirection( startCell, direction );
+		while ( nextCell ) {
+			cells.push( nextCell );
+			nextCell = this.getNextCellInDirection( nextCell, direction );
+		}
+
+		return cells;
+	}
+
+	this.getWordCandidateCellInDirection = function( startCell, direction ) {
+		var cells = this.getAllCellsInDirection( startCell, direction );
+		var lastPlacedIndex = cells.lastIndexWhere( function() { return $(this).hasClass( 'placed' ) } );
+
+		if ( lastPlacedIndex < 0 ) {
+			throw this.constructor.name + '.getWordCandidateCellInDirection() - No placed cells';
+		}
+
+		// anything after and including the first blank (i.e. non-static) cell after the lastPlaced cell, isn't candidate
+		var trailingBlankIndex =  cells.firstIndexWhere( function() { return ! $(this).hasClass( 'static' ) }, lastPlacedIndex + 1 );
+		if ( trailingBlankIndex >= 0 ) {
+			cells.splice( trailingBlankIndex + 1 );
+		}
+		return cells;
 	}
 
  	this.rotatePosition = function( position ) {
