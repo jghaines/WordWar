@@ -64,6 +64,14 @@ function BoardModel() {
 		return { row: cell.parent().index(), col: cell.index() };
 	}
 
+	this.getCellAtCoordinates = function( row, col ) {
+		if ( row < 0 || row >= this.getHeight() ||
+			col < 0 || col >= this.getWidth() ) {
+			return null;
+		}
+		return this._boardView._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' )
+	}
+
 	// get 1x1 range of given cell
 	this.getCellRange = function( cell ) {
 		var coords = this.getCellCoordinates( cell );
@@ -232,50 +240,63 @@ function BoardView(boardModel) {
 
 function BoardController(boardModel, boardView) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.unhighlightPlaceablePositions = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
 		this._boardView._table.find('td').removeClass( 'placeable' );
 	}
 
+	this._highlightNextPlaceable = function(fromCell, direction) {
+		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction);
+		var colIndex = fromCell.index();
+		var rowIndex = fromCell.parent().index();
+
+		var placeableCell;
+		do {
+			switch(direction) {
+				case 'left':
+		    		--colIndex;
+					break;
+	    		case 'right':
+		    		++colIndex;
+					break;
+	    		case 'up':
+	    			--rowIndex;
+		        	break;
+	    		case 'down':
+	    			++rowIndex;
+		        	break;
+		        default:
+		        	throw this.constructor.name + '._highlightNextPlaceable() - invalid direction=' + direction;
+				this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop row=', rowIndex, 'col=', colIndex );
+		    }
+	    	placeableCell = this._boardModel.getCellAtCoordinates( rowIndex, colIndex );
+		} while ( placeableCell && ( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )));
+
+		if ( placeableCell ) {
+			placeableCell.addClass( 'placeable' );
+			placeableCell.attr( 'ww:direction', direction );
+		}
+	}
+
 	this.highlightPlaceablePositions = function() {
 		this.log.info("BoardController.highlightPlaceablePositions()");
 		var placedCells =  this._boardView._table.find('td.placed');
 		var playerCell =  this._boardModel.getPlayerCell('local');
-		var playerColumnIndex = playerCell.index();
-		var playerRowIndex = playerCell.parent().index();
 
 		this.unhighlightPlaceablePositions();
 
 		if ( placedCells.length == 0 ) {
 			this.log.debug("  BoardController.highlightPlaceablePositions() - direction == any");
-			// no placed cells - just highlight around player
-			playerCell.prev().addClass( 'placeable' ).attr( 'ww:direction', 'left' );
-			playerCell.next().addClass( 'placeable' ).attr( 'ww:direction', 'right' );
-			playerCell.parent().prev().children().eq(playerColumnIndex).addClass( 'placeable' ).attr( 'ww:direction', 'up' );
-			playerCell.parent().next().children().eq(playerColumnIndex).addClass( 'placeable' ).attr( 'ww:direction', 'down' );
+			// no placed cells - all directions
+			this._highlightNextPlaceable(playerCell, 'up');
+			this._highlightNextPlaceable(playerCell, 'down');
+			this._highlightNextPlaceable(playerCell, 'left');
+			this._highlightNextPlaceable(playerCell, 'right');
 		} else {
 			var direction = $(placedCells).first().attr('ww:direction');
-			this.log.debug("  BoardController.highlightPlaceablePositions() - direction == " + direction);
-			var validPositions;
-			switch(direction) {
-	    		case 'left':
-	    			validPositions = playerCell.siblings('td:lt('+playerColumnIndex+'):not(.placed)').last();
-		        break;
-	    		case 'right':
-	    			validPositions = playerCell.siblings('td:gt('+playerColumnIndex+'):not(.placed)').first();
-		        break;
-	    		case 'up':
-	    			validPositions = playerCell.parent().siblings('tr:lt('+playerRowIndex+')').find('td:eq('+playerColumnIndex+'):not(.placed)').last();
-		        break;
-	    		case 'down':
-	    			validPositions = playerCell.parent().siblings('tr:gt('+playerRowIndex+')').find('td:eq('+playerColumnIndex+'):not(.placed)').first();
-		        break;
-			}
-			validPositions.addClass( 'placeable' );
-			validPositions.attr( 'ww:direction', direction );
-
+			this._highlightNextPlaceable(playerCell, direction);
 		}
 	}
 
