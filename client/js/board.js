@@ -43,40 +43,43 @@ function BoardModel() {
 		var coords = this.getCellCoordinates( startCell );
 		switch(direction) {
 			case 'left':
-	    		coords.col--;
+				coords.col--;
 				break;
-    		case 'right':
-	    		coords.col++;
+			case 'right':
+				coords.col++;
 				break;
-    		case 'up':
-    			coords.row--;
-	        	break;
-    		case 'down':
-    			coords.row++;
-	        	break;
-	        default:
-	        	throw this.constructor.name + '.getNextCellInDirection() - invalid direction=' + direction;
+			case 'up':
+				coords.row--;
+				break;
+			case 'down':
+				coords.row++;
+				break;
+			default:
+				throw this.constructor.name + '.getNextCellInDirection() - invalid direction=' + direction;
 		}	      
 		return this.getCellAtCoordinates( coords );
 	}
 
-	this.getAllCellsInDirection = function( startCell, direction ) {
+	this._getAllCellsInDirection = function( startCell, direction ) {
+		if ( 'any' === direction ) {
+			return [];
+		}
+
 		var cells = [];
 		var nextCell = this.getNextCellInDirection( startCell, direction );
 		while ( nextCell ) {
 			cells.push( nextCell );
 			nextCell = this.getNextCellInDirection( nextCell, direction );
 		}
-
 		return cells;
 	}
 
-	this.getWordCandidateCellInDirection = function( startCell, direction ) {
-		var cells = this.getAllCellsInDirection( startCell, direction );
+	this._getWordCandidateCellsInDirection = function( startCell, direction ) {
+		var cells = this._getAllCellsInDirection( startCell, direction );
 		var lastPlacedIndex = cells.lastIndexWhere( function() { return $(this).hasClass( 'placed' ) } );
 
 		if ( lastPlacedIndex < 0 ) {
-			throw this.constructor.name + '.getWordCandidateCellInDirection() - No placed cells';
+			return [];
 		}
 
 		// anything after and including the first blank (i.e. non-static) cell after the lastPlaced cell, isn't candidate
@@ -86,6 +89,11 @@ function BoardModel() {
 		}
 		return cells;
 	}
+
+	this.getWordCandidateCells = function() {
+		return this._getWordCandidateCellsInDirection( this.getPlayerCell( 'local' ), this.getPlacedDirection() );
+	}
+
 
  	this.rotatePosition = function( position ) {
  		return {
@@ -123,6 +131,7 @@ function BoardModel() {
 		this.getPlacedCells().each( function() {
 			$(this).removeClass('placed');
 		});
+		this._placedDirection = 'any';
 	}
 
 	// list of cells that are placed
@@ -329,6 +338,21 @@ function BoardController(boardModel, boardView) {
 			var direction = $(placedCells).first().attr('ww:direction');
 			this._highlightNextPlaceable(playerCell, direction);
 		}
+	}
+
+	this.validPlacement = function() { 
+		var cells = this._boardModel.getWordCandidateCells();
+
+		if ( cells.length <= 0 ) {
+			return false;
+		}
+
+		for ( var i = cells.length - 1; i >=0 ; --i ) {
+			if ( '' == cells[i].text() ) { // blank cell
+				return false;
+			}
+		}
+		return true;
 	}
 
 
