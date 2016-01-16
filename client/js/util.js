@@ -1,7 +1,7 @@
-// http://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
-function binaryIndexOf(searchElement) {
-    'use strict';
+ 'use strict';
  
+ // http://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
+function binaryIndexOf(searchElement) {
     var minIndex = 0;
     var maxIndex = this.length - 1;
     var currentIndex;
@@ -26,8 +26,29 @@ function binaryIndexOf(searchElement) {
 }
 
 
-Array.prototype.binaryIndexOf = binaryIndexOf;
+// last array element where callback function returns true
+function lastIndexWhere( callback ) {
+    for ( var i = this.length -1; i >= 0; --i ) {
+        if ( callback.call( this[i] ) ) {
+            return i;
+        }
+    }
+    return -1;
+}
 
+function firstIndexWhere( callback, fromIndex ) {
+    fromIndex = (typeof fromIndex === 'undefined') ? 0 : fromIndex; // fromIndex defaults to 0
+    for ( var i = fromIndex; i < this.length; ++i ) {
+        if ( callback.call( this[i] ) ) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+Array.prototype.binaryIndexOf   = binaryIndexOf;
+Array.prototype.lastIndexWhere  = lastIndexWhere;
+Array.prototype.firstIndexWhere = firstIndexWhere;
 
 
 function flash(element, flash_class) {
