@@ -5,12 +5,12 @@ describe('BoardModel', function() {
 		this._boardModel = new BoardModel();
 		this._boardModel._table = $( `
 <table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
-	<tr> <td></td><td></td><td class="middle"></td><td></td><td></td> </tr>
-	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
-	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
-	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='player-local'></td><td></td><td></td><td></td><td class='test-bottom-right'></td> </tr>
 </tbody></table>
 `);
 	});
@@ -43,10 +43,63 @@ describe('BoardModel', function() {
 	});
 
 	describe('#getCellAtCoordinates()', function () {
-		it('should return cell', function () {
+		it('should return correct cell', function () {
 			var cell = this._boardModel.getCellAtCoordinates( { row: 2, col: 2 } );
-			expect( cell.hasClass('middle') ).to.equal( true );
+			expect( cell.hasClass('test-middle') ).to.equal( true );
 		});
 	});
+
+	describe('#getCellCoordinates()', function () {
+		it('should give correct coords', function () {
+			var cell = this._boardModel.getCellAtCoordinates( { row: 2, col: 2 } );
+			expect( this._boardModel.getCellCoordinates( cell ).row ).to.equal( 2 );
+			expect( this._boardModel.getCellCoordinates( cell ).col ).to.equal( 2 );
+		});
+	});
+
+	describe('#getPlayerCell("local")', function () {
+		it('should return correct cell', function () {
+			var cell = this._boardModel.getPlayerCell( 'local' );
+			expect( cell.hasClass( 'player-local' ) ).to.equal( true );
+			expect( cell.length ).to.equal( 1 );
+		});
+	});
+
+	describe("#_getAllCellsInDirection(,'right')", function () {
+		before( function() {
+			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'right' );
+		});
+
+		it('should return 4 cells', function () {
+			expect( this.cells.length ).to.equal( 4 );
+		});
+
+		it('should not contain the fromCell', function () {
+			expect( this.cells.indexOf( this.fromCell ) ).to.equal( -1 );
+		});
+	});
+
+
+	describe("#_getAllCellsInDirection(,'up')", function () {
+		before( function() {
+			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'up' );
+		});
+
+		it('should return 5 cells', function () {
+			expect( this.cells.length ).to.equal( 5 );
+		});
+
+		it('should not contain the fromCell', function () {
+			expect( this.cells.indexOf( this.fromCell ) ).to.equal( -1 );
+		});
+		it('should end in the top left', function () {
+			expect( this.cells[4].hasClass('test-top-left') ).to.equal( true );
+		});
+	});
+
+
+	
 
 });
