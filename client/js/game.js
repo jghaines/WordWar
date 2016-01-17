@@ -31,9 +31,7 @@ function GameController(remote) {
 
 		//this.populateLetters();
 
-		this._boardModel.loadBoard(boardUrl, (function() { 
-			this._boardLoaded();
-		}).bind(this));
+		this._boardModel.loadBoard(	boardUrl );
 	}
 
 	this.newTurn = function( turnInfo ) {
@@ -107,6 +105,12 @@ function GameController(remote) {
 		this.log.info( this.constructor.name + '.playWord(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
+/*
+		var wordPlacedCells = this._boardModel.getWordCandidateCells();
+		if ( ! this._boardController.validPlacement() ) {
+
+		}
+*/
 		if ( ! this.validWordPlaced (wordPlaced) ) {
 			this._boardView.flash('flash-error');
 			return;
@@ -166,6 +170,10 @@ function GameController(remote) {
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
 	this._buttonsView = new ButtonsView();
+
+	this._boardModel.onBoardLoaded( (function() { 
+		this._boardLoaded();
+	}).bind(this));
 
 	this._stateContext.onNewGame( (function(msg) { 
 		this.newGame(msg);

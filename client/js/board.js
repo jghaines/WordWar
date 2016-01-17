@@ -5,17 +5,21 @@ function BoardModel() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
-	this.loadBoard = function(url, callback) {
-		this._boardView.loadBoard(url, callback);
-		this._boardView._table
+	this.loadBoard = function(url) {
+		this.log.info( this.constructor.name + '.loadBoard('+url+', callback)');
+
+		var that = this;
+		this._table.load( url, '', ( function() { // fire callbacks once load is complete
+			this._boardLoadedCallbacks.fire();
+		}).bind( this ));
 	}
 
  	this.getHeight = function() {
- 		return this._boardView._table.find('tr').length;
+ 		return this._table.find('tr').length;
  	}
 
  	this.getWidth = function() {
- 		return this._boardView._table.find('tr:eq(0) td').length;
+ 		return this._table.find('tr:eq(0) td').length;
  	}
 
 	this.getCellCoordinates = function( cell ) {
@@ -27,7 +31,7 @@ function BoardModel() {
 			 coords.col < 0 || coords.col >= this.getWidth() ) {
 			return null;
 		}
-		return $( this._boardView._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )[0] );
+		return $( this._table.find( 'tr:eq(' + coords.row + ') td:eq(' + coords.col + ')' )[0] );
 	}
 
 	// get 1x1 range of given cell
@@ -107,14 +111,14 @@ function BoardModel() {
  	}
 
 	this.getPlayerCell = function(who) {
-		return this._boardView._table.find('td.player-' + who);
+		return this._table.find('td.player-' + who);
 	}
 
 	this.setPlayerCell = function(who, coordinates) {
 		this.log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
 		var cssClass = 'player-' + who;
-		this._boardView._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
-		this._boardView._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
+		this._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
+		this._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
 	}
 
 	this.isCellPlaceable = function(cell) {
@@ -127,6 +131,12 @@ function BoardModel() {
 		this._placedDirection = cell.attr('ww:direction');
 	}
 
+	this.setUnplaceableAll = function() {
+		this._table.find('td.placeable').each( function() {
+			$(this).removeClass('placeable');
+		});
+	}
+
 	this.unplaceAll = function() {
 		this.getPlacedCells().each( function() {
 			$(this).removeClass('placed');
@@ -136,7 +146,7 @@ function BoardModel() {
 
 	// list of cells that are placed
 	this.getPlacedCells = function() {
-		return this._boardView._table.find('td.placed');
+		return this._table.find('td.placed');
 	}
 
 	this.getPlacedWord = function() {
@@ -196,20 +206,34 @@ function BoardModel() {
 
 		for( var row = range.min.row; row <= range.max.row ; ++row ) {
 			for( var col = range.min.col; col <= range.max.col ; ++col ) {
-				this._boardView._table.find('tr:eq(' + row + ') td:eq(' + col + ')').addClass('played-' + who);
+				this._table.find('tr:eq(' + row + ') td:eq(' + col + ')').addClass('played-' + who);
 			}			
 		}
 	}
 
+	// register callback
+	this.onBoardLoaded = function( callback ) {
+		this._boardLoadedCallbacks.add( callback );
+	}
+
+	this._table = $( 'table.gameboard' );
 	this._boardView = null;
 	this._placedDirection = 'any';
+
+	this._boardLoadedCallbacks = $.Callbacks();
+
 }
 
 function BoardView(boardModel) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
-	this.fillSpecials = function(cells) {
+	/* called when board is loaded */
+	this._boardLoaded = function() {
+		this._fillSpecials(/*all*/);
+	}
+
+	this._fillSpecials = function(cells) {
 		this.log.info('BoardView.fillSpecials(.)');
 		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all gameboard cells
 
@@ -223,16 +247,6 @@ function BoardView(boardModel) {
 			} else if ( $(this).attr('ww_value') ) {
 				$(this).text( $(this).attr('ww_value') );
 			}
-		});
-	}
-
-	this.loadBoard = function(url, callback) {
-		this.log.info('BoardView.loadBoard('+url+')');
-
-		var that = this;
-		this._table.load( url, '', function() { // callback - after the board is loaded
-			that.fillSpecials();
-			callback();
 		});
 	}
 
@@ -268,13 +282,15 @@ function BoardView(boardModel) {
 
 	// constructor code
 	this._boardModel = boardModel;
-	this._boardModel._boardView = this;
+	this._boardModel.onBoardLoaded( (function() {
+		this._boardLoaded()
+	}).bind( this ));
 
-	this._table = $('table.gameboard');
-	this._status = $('.status');
+	this._table = $( 'table.gameboard' );
+	this._status = $( '.status' );
 	this._wordLists = {
-		'local': 	$('div.playedwords.local ul'),
-		'remote': 	$('div.playedwords.remote ul'),
+		'local': 	$( 'div.playedwords.local ul' ),
+		'remote': 	$( 'div.playedwords.remote ul' ),
 	};
 }
 
@@ -285,7 +301,7 @@ function BoardController(boardModel, boardView) {
 
 	this.unhighlightPlaceablePositions = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
-		this._boardView._table.find('td').removeClass( 'placeable' );
+		this._boardModel.setUnplaceableAll();
 	}
 
 	this._highlightNextPlaceable = function(fromCell, direction) {
@@ -322,7 +338,7 @@ function BoardController(boardModel, boardView) {
 
 	this.highlightPlaceablePositions = function() {
 		this.log.info("BoardController.highlightPlaceablePositions()");
-		var placedCells =  this._boardView._table.find('td.placed');
+		var placedCells =  this._boardModel.getPlacedCells();
 		var playerCell =  this._boardModel.getPlayerCell('local');
 
 		this.unhighlightPlaceablePositions();
