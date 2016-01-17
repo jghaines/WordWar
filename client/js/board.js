@@ -27,6 +27,10 @@ function BoardModel() {
 	}
 
 	this.getCellAtCoordinates = function( coords ) {
+		if ( ! coords.hasOwnProperty('row') || ! coords.hasOwnProperty( 'col' ) ) {
+			throw new Error( this.constructor.name + '.getCellAtCoordinates() - expected coords object' );
+		}
+
 		if ( coords.row < 0 || coords.row >= this.getHeight() ||
 			 coords.col < 0 || coords.col >= this.getWidth() ) {
 			return null;
