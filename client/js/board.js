@@ -3,7 +3,7 @@
 
 function BoardModel() {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
 	this.loadBoard = function(url) {
 		this.log.info( this.constructor.name + '.loadBoard('+url+', callback)');
@@ -48,6 +48,9 @@ function BoardModel() {
 	}
 
 	this.getNextCellInDirection = function( startCell, direction ) {
+		this.log.info( this.constructor.name + '.getNextCellInDirection(..)' );
+		this.log.debug( this.constructor.name + '.getNextCellInDirection(startCell, direction=' + direction + ')' );
+
 		var coords = this.getCellCoordinates( startCell );
 		switch(direction) {
 			case 'left':
@@ -69,6 +72,9 @@ function BoardModel() {
 	}
 
 	this._getAllCellsInDirection = function( startCell, direction ) {
+		this.log.info( this.constructor.name + '._getAllCellsInDirection(..)' );
+		this.log.debug( this.constructor.name + '._getAllCellsInDirection(startCell, direction=' + direction + ')' );
+
 		if ( 'any' === direction ) {
 			return [];
 		}
@@ -83,8 +89,12 @@ function BoardModel() {
 	}
 
 	this._getWordCandidateCellsInDirection = function( startCell, direction ) {
+		this.log.info( this.constructor.name + '._getWordCandidateCellsInDirection(..)' );
+		this.log.debug( this.constructor.name + '._getWordCandidateCellsInDirection(startCell, direction=' + direction + ')' );
+
 		var cells = this._getAllCellsInDirection( startCell, direction );
 		var lastPlacedIndex = cells.lastIndexWhere( function() { return $(this).hasClass( 'placed' ) } );
+		this.log.debug( '  ' + this.constructor.name + '._getWordCandidateCellsInDirection() - cells.length (all)=' + cells.length + ', lastPlacedIndex=' + lastPlacedIndex );
 
 		if ( lastPlacedIndex < 0 ) {
 			return [];
@@ -95,10 +105,23 @@ function BoardModel() {
 		if ( trailingBlankIndex >= 0 ) {
 			cells.splice( trailingBlankIndex );
 		}
-		return cells;
+		this.log.debug( '  ' + this.constructor.name + '._getWordCandidateCellsInDirection() - cells.length (spliced)=' + cells.length + ', trailingBlankIndex=' + trailingBlankIndex );
+
+		switch (direction) {
+			case 'left': // fallthrough
+			case 'up':
+				return cells.reverse();
+			case 'right': // fallthrough
+			case 'down':
+				return cells;
+			default:
+				throw new Error( this.constructor.name + '._getWordCandidateCellsInDirection() - invalid direction: ' + direction );
+		}
 	}
 
 	this.getWordCandidateCells = function() {
+		this.log.info( this.constructor.name + '.getWordCandidateCells()' );
+
 		return this._getWordCandidateCellsInDirection( this.getPlayerCell( 'local' ), this.getPlacedDirection() );
 	}
 
