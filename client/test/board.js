@@ -370,5 +370,44 @@ describe('BoardModel wordcandidate - up', function() {
 			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
 		});
 	});
+});
 
+describe('BoardModel wordcandidate - left', function() {
+	beforeEach(	function() {
+		this._boardModel = new BoardModel();
+		this._boardModel._placedDirection = 'left';
+		this.testTables = {
+			trailingStatic: $( `
+				<table><tbody> <tr><td class='static'>Z</td> <td /> <td class='placed'>A</td> <td class='static'>P</td> <td class='player-local'></td></tr> </tbody></table>
+				`),
+		};
+	});
+
+	describe('#getPlacedWord()', function () {
+
+		it('should ignore trailing static cells', function () {
+			this._boardModel._table = this.testTables['trailingStatic'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+		});
+	});
+});
+
+describe('BoardModel wordcandidate - down', function() {
+	beforeEach(	function() {
+		this._boardModel = new BoardModel();
+		this._boardModel._placedDirection = 'down';
+		this.testTables = {
+			trailingStatic: $( `
+				<table><tbody> <tr><td class='player-local'></td></tr> <tr><td class='static'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td /></tr> <tr><td class='static'>Z</td></tr> </tbody></table>
+				`),
+		};
+	});
+
+	describe('#getPlacedWord()', function () {
+
+		it('should ignore trailing static cells', function () {
+			this._boardModel._table = this.testTables['trailingStatic'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+		});
+	});
 });

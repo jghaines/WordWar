@@ -3,7 +3,7 @@
 
 function BoardModel() {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.loadBoard = function(url) {
 		this.log.info( this.constructor.name + '.loadBoard('+url+', callback)');
