@@ -65,6 +65,17 @@ describe('BoardModel', function() {
 		});
 	});
 
+	describe("#_getAllCellsInDirection(,'left')", function () {
+		before( function() {
+			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'left' );
+		});
+
+		it('should return no cells', function () {
+			expect( this.cells.length ).to.equal( 0 );
+		});
+	});
+
 	describe("#_getAllCellsInDirection(,'right')", function () {
 		before( function() {
 			this.fromCell  = this._boardModel.getPlayerCell('local');
@@ -79,7 +90,6 @@ describe('BoardModel', function() {
 			expect( this.cells.indexOf( this.fromCell ) ).to.equal( -1 );
 		});
 	});
-
 
 	describe("#_getAllCellsInDirection(,'up')", function () {
 		before( function() {
@@ -98,8 +108,73 @@ describe('BoardModel', function() {
 			expect( this.cells[4].hasClass('test-top-left') ).to.equal( true );
 		});
 	});
+});
 
 
-	
+describe.only('BoardModel wordcandidate', function() {
+	beforeEach(	function() {
+		this._boardModel = new BoardModel();
+		this.testTables = {
+			noWord: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td></td><td></td><td></td><td></td> </tr> </tbody></table>
+				`),
+			onePlaced: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><td></td><td></td><td></td> </tr> </tbody></table>
+				`),
+			twoPlaced: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
+				`),
+			oneStaticOnePlaced: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='static'>A</td><<td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
+				`),
+			onePlacedOneStatic: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td></td> </tr> </tbody></table>
+				`),
+		};
+	});
+
+	describe('#_getWordCandidateCellsInDirection()', function () {
+		it('should return no cells if nothing is placed', function () {
+			this._boardModel._table = this.testTables['noWord'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 0 );
+		});
+
+		it('should return first cell for a one placed letter', function () {
+			this._boardModel._table = this.testTables['onePlaced'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 1 );
+			expect( cells[0].text() ).to.equal( 'A' );
+		});
+
+		it('should return first two cells for two placed letter', function () {
+			this._boardModel._table = this.testTables['twoPlaced'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 2 );
+			expect( cells[0].text() ).to.equal( 'A' );
+			expect( cells[1].text() ).to.equal( 'P' );
+		});
+
+		it('should return first two cells for a one static, one placed word', function () {
+			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 2 );
+			expect( cells[0].text() ).to.equal( 'A' );
+			expect( cells[1].text() ).to.equal( 'P' );
+		});
+
+		it('should return first two cells for a one placed, one static word', function () {
+			this._boardModel._table = this.testTables['onePlacedOneStatic'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 2 );
+			expect( cells[0].text() ).to.equal( 'A' );
+			expect( cells[1].text() ).to.equal( 'P' );
+		});
+	});
 
 });

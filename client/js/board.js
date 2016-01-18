@@ -93,7 +93,7 @@ function BoardModel() {
 		// anything after and including the first blank (i.e. non-static) cell after the lastPlaced cell, isn't candidate
 		var trailingBlankIndex =  cells.firstIndexWhere( function() { return ! $(this).hasClass( 'static' ) }, lastPlacedIndex + 1 );
 		if ( trailingBlankIndex >= 0 ) {
-			cells.splice( trailingBlankIndex + 1 );
+			cells.splice( trailingBlankIndex );
 		}
 		return cells;
 	}
