@@ -114,6 +114,7 @@ describe('BoardModel', function() {
 describe.only('BoardModel wordcandidate', function() {
 	beforeEach(	function() {
 		this._boardModel = new BoardModel();
+		this._boardModel._placedDirection = 'right';
 		this.testTables = {
 			noWord: $( `
 				<table><tbody> <tr> <td class='player-local'></td><td></td><td></td><td></td><td></td> </tr> </tbody></table>
@@ -129,6 +130,12 @@ describe.only('BoardModel wordcandidate', function() {
 				`),
 			onePlacedOneStatic: $( `
 				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td></td> </tr> </tbody></table>
+				`),
+			trailingStatic: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td class='static'>Z</td> </tr> </tbody></table>
+				`),
+			fullRow: $( `
+				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td class='static'>P</td><td class='static'>L</td> </tr> </tbody></table>
 				`),
 		};
 	});
@@ -167,6 +174,17 @@ describe.only('BoardModel wordcandidate', function() {
 			expect( cells[1].text() ).to.equal( 'P' );
 		});
 
+		it('should return all letters on a full row', function () {
+			this._boardModel._table = this.testTables['fullRow'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 4 );
+			expect( cells[0].text() ).to.equal( 'A' );
+			expect( cells[1].text() ).to.equal( 'P' );
+			expect( cells[2].text() ).to.equal( 'P' );
+			expect( cells[3].text() ).to.equal( 'L' );
+		});
+
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
 			var fromCell  = this._boardModel.getPlayerCell('local');
@@ -174,6 +192,52 @@ describe.only('BoardModel wordcandidate', function() {
 			expect( cells.length ).to.equal( 2 );
 			expect( cells[0].text() ).to.equal( 'A' );
 			expect( cells[1].text() ).to.equal( 'P' );
+		});
+
+		it('should ignore trailing static cells', function () {
+			this._boardModel._table = this.testTables['trailingStatic'];
+			var fromCell  = this._boardModel.getPlayerCell('local');
+			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
+			expect( cells.length ).to.equal( 2 );
+			expect( cells[0].text() ).to.equal( 'A' );
+			expect( cells[1].text() ).to.equal( 'P' );
+		});
+	});
+
+	describe('#getPlacedWord()', function () {
+		it('should return an empty string nothing is placed', function () {
+			this._boardModel._table = this.testTables['noWord'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( '' );
+		});
+
+		it('should return first cell for a one placed letter', function () {
+			this._boardModel._table = this.testTables['onePlaced'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'A' );
+		});
+
+		it('should return first two cells for two placed letter', function () {
+			this._boardModel._table = this.testTables['twoPlaced'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+		});
+
+		it('should return first two cells for a one static, one placed word', function () {
+			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+		});
+
+		it('should return all letters on a full row', function () {
+			this._boardModel._table = this.testTables['fullRow'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'APPL' );
+		});
+
+		it('should return first two cells for a one placed, one static word', function () {
+			this._boardModel._table = this.testTables['onePlacedOneStatic'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+		});
+
+		it('should ignore trailing static cells', function () {
+			this._boardModel._table = this.testTables['trailingStatic'];
+			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
 		});
 	});
 

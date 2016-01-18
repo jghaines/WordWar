@@ -154,7 +154,7 @@ function BoardModel() {
 	}
 
 	this.getPlacedWord = function() {
-		return 	$.map( this.getPlacedCells(), function( val, i ) {
+		return 	$.map( this.getWordCandidateCells(), function( val, i ) {
 		  return $(val).text();
 		}).join('');
 
