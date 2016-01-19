@@ -14,10 +14,6 @@ function GameController(remote) {
 		this._boardView.click( (function(cell) {
 			this.selectCellToPlace(cell);
 		}).bind(this) );
-
-		this._buttonsView.clickPlay( (function() {
-			this.playWord();
-		}).bind(this) );
 	}
 
 	this.newGame = function(gameInfo) {
@@ -105,12 +101,27 @@ function GameController(remote) {
 		this.log.info( this.constructor.name + '.playWord(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
-/*
-		var wordPlacedCells = this._boardModel.getWordCandidateCells();
-		if ( ! this._boardController.validPlacement() ) {
-
+		if ( ! this.validWordPlaced (wordPlaced) ) {
+			this._boardView.flash('flash-error');
+			return;
 		}
-*/
+
+ 		this._buttonsView.enablePlayButton(false);
+
+		var myPlay = new Play(
+			this._boardModel.getPlacedWord(),
+			this._boardModel.getPlacedScore(),
+			this._boardModel.getPlacedRange(),
+			this._boardModel.getCellCoordinates( this._boardModel.getEndOfWordCell() )
+		);
+
+		this._stateContext.localMove( myPlay );
+ 	}
+
+	this.resetWord = function() {
+		this.log.info( this.constructor.name + '.playWord(.)');
+		var wordPlaced = this._boardModel.getPlacedWord();
+
 		if ( ! this.validWordPlaced (wordPlaced) ) {
 			this._boardView.flash('flash-error');
 			return;
@@ -189,6 +200,14 @@ function GameController(remote) {
 
 	this._stateContext.onStatusUpdate( (function(statusMessage) {
 		this.statusUpdate(statusMessage);
+	}).bind(this) );
+
+	this._buttonsView.onPlayClicked( (function() {
+		this.playWord();
+	}).bind(this) );
+
+	this._buttonsView.onResetClicked( (function() {
+		this.resetWord();
 	}).bind(this) );
 
 }
