@@ -83,13 +83,15 @@ function GameController(remote) {
 		}
 
 		// valid placement
-		this._boardModel.placeLetter(cell,this._lettersModel.getSelectedLetter());
-		this._lettersModel.setPlaced(this._lettersModel.getSelectedIndex(), true);
+		this._boardModel.placeLetter( cell, this._lettersModel.getSelectedLetter() );
+		this._lettersModel.setPlaced( this._lettersModel.getSelectedIndex(), true );
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
 		this._lettersView.updatePlaced();
 		this._boardController.unhighlightPlaceablePositions();
-		this._buttonsView.enablePlayButton(true);
+		this._buttonsView.enableMoveButton( true );
+		this._buttonsView.enableAttackButton( true );
+		this._buttonsView.enableResetButton( true );
 	}
 
 	// Whether the given word is valid
@@ -97,8 +99,8 @@ function GameController(remote) {
 		return ( sowpods.binaryIndexOf( word ) >= 0 );
 	}
 
-	this.playWord = function() {
-		this.log.info( this.constructor.name + '.playWord(.)');
+	this.playMove = function() {
+		this.log.info( this.constructor.name + '.playMove(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
@@ -106,7 +108,9 @@ function GameController(remote) {
 			return;
 		}
 
- 		this._buttonsView.enablePlayButton(false);
+ 		this._buttonsView.enableMoveButton( false );
+ 		this._buttonsView.enableAttackButton( false );
+		this._buttonsView.enableResetButton( false );
 
 		var myPlay = new Play(
 			this._boardModel.getPlacedWord(),
@@ -131,15 +135,17 @@ function GameController(remote) {
 
  		// show the local player updates
  		this.executePlay( 'local',  this._stateContext.getLocalPlay() );
+		this._boardModel.unplaceAll();
 
  		// map the remote play coordinates
 		var remotePlay = this._stateContext.getRemotePlay();
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange   = this._boardModel.rotateRange( remotePlay.playRange );
- 		// show the remote player updates
-		this.executePlay( 'remote', remotePlay );
-
-		this._boardModel.unplaceAll();
+ 		// show the remote player updates after a pause
+		setTimeout( (function() { 
+			this.executePlay( 'remote', remotePlay );
+		}).bind( this ), 700 )
+		
 	}
 
 
@@ -188,8 +194,12 @@ function GameController(remote) {
 		this.statusUpdate(statusMessage);
 	}).bind(this) );
 
-	this._buttonsView.onPlayClicked( (function() {
-		this.playWord();
+	this._buttonsView.onMoveClicked( (function() {
+		this.playMove();
+	}).bind(this) );
+
+	this._buttonsView.onAttackClicked( (function() {
+		this.playAttack();
 	}).bind(this) );
 
 	this._buttonsView.onResetClicked( (function() {
