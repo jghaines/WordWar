@@ -1,11 +1,6 @@
-div.playedwords.local {
-	border-color: magenta;
+table.gameboard {
+	table-layout: fixed; /* Dear CSS, Please don't try clever resizing */	
 }
-
-div.playedwords.remote {
-	border-color: black;
-}
-
 
 table.gameboard td {
 	text-align:	center;	 

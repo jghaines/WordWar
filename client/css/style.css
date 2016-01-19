@@ -13,17 +13,23 @@ body {
 	border-style: solid;
 }
 
+.playedwords.local {
+	border-color: magenta;
+}
+
+.playedwords.remote {
+	border-color: black;
+}
+
 .playedwords ul {
     list-style-type: none;
     padding:0;
     margin:0;
 }
 
-div.interstitial {
-	max-width: 400px;
-}
 
-span.buttons {
+
+.buttons {
 	float: right;
 }
 
@@ -34,6 +40,10 @@ button {
 	border-radius: 4px;
 
 	font-size: 	20px;
+}
+
+button#attack {
+	background-color: red;
 }
 
 button#move {

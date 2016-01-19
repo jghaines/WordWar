@@ -29,40 +29,45 @@
 	</head>
 
 	<body>
-		<div class="top">
-			<table><tr>
-			<td rowspan='2'>
-				<table class="gameboard">
-					<!-- Gamboard will be populated by script -->
-				</table>
-			</td>
-			<td>
-				<div class="playedwords remote">
-					<ul />
-				</div>
-			</td>
-			</tr><tr><td>
-				<div class="playedwords local">
-					<ul />
-				</div>
-			</td></tr></table>
-		</div>
+		<table><!-- ugh table layout :-( -->
+			<tr>
+				<td colspan='2' rowspan='2'>
+					<table class="gameboard">
+						<!-- Gamboard will be populated by script -->
+					</table>
+				</td>
+				<td>
+					<div class="playedwords remote">
+						<ul />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div class="playedwords local">
+						<ul />
+					</div>
+				</td>
+			</tr>
 
-		<div class="interstitial">
-			<span class="status"></span>
+			<tr>
+				<td>
+					<div class="status"></div>
+					<table class="letters">
+						<tbody>
+							<!-- Letters will be populated by script -->
+						</tbody>
+					</table>
+				</td>
+				<td colspan='2'>
+					<span class="buttons">
+						<button type="button" id="attack">Attack (x2)</button>
+						<button type="button" id="move">Move</button>
+						<button type="button" id="reset">Reset</button>
+					</span>
+				</td>
+			</tr>
 
-			<span class="buttons">
-				<button type="button" id="reset">Reset</button>
-			</span>
-			<span class="buttons">
-				<button type="button" id="move">Move</button>
-			</span>
-		</div>
-
-		<table class="letters">
-			<tbody>
-				<!-- Letters will be populated by script -->
-			</tbody>
 		</table>
 	</body>
 </html>
