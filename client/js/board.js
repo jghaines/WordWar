@@ -352,8 +352,8 @@ function BoardController(boardModel, boardView) {
 		        	break;
 		        default:
 		        	throw this.constructor.name + '._highlightNextPlaceable() - invalid direction=' + direction;
-				this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop coords=', coords );
 		    }
+			this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop coords=', coords );
 	    	placeableCell = this._boardModel.getCellAtCoordinates( coords );
 		} while ( placeableCell && ( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )));
 
