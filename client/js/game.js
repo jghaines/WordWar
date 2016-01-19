@@ -119,24 +119,10 @@ function GameController(remote) {
  	}
 
 	this.resetWord = function() {
-		this.log.info( this.constructor.name + '.playWord(.)');
-		var wordPlaced = this._boardModel.getPlacedWord();
-
-		if ( ! this.validWordPlaced (wordPlaced) ) {
-			this._boardView.flash('flash-error');
-			return;
-		}
-
- 		this._buttonsView.enablePlayButton(false);
-
-		var myPlay = new Play(
-			this._boardModel.getPlacedWord(),
-			this._boardModel.getPlacedScore(),
-			this._boardModel.getPlacedRange(),
-			this._boardModel.getCellCoordinates( this._boardModel.getEndOfWordCell() )
-		);
-
-		this._stateContext.localMove( myPlay );
+		this.log.info( this.constructor.name + '.resetWord(.)');
+		this._boardModel.unplaceAll();
+		this._lettersModel.unplaceAll();
+		this._lettersView.updatePlaced();
  	}
 
 	// State machine callback - local player and remote compnent have completed move

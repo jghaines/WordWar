@@ -30,6 +30,12 @@ function LettersModel() {
 		this._isPlaced[index] = value;
 	}
 
+	this.unplaceAll = function() {
+		for ( var i = this.getLetterCount() - 1; i >= 0; --i ) {
+			this.setPlaced( i, false );
+		}
+	}
+
 	this.select = function(index) {
 		this.log.info('LettersModel.select('+index+')');
 		this._selectedIndex = index;

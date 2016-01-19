@@ -165,8 +165,9 @@ function BoardModel() {
 	}
 
 	this.unplaceAll = function() {
-		this.getPlacedCells().each( function() {
-			$(this).removeClass('placed');
+		var cells = this.getPlacedCells();
+		cells.each( function() {
+			$(this).removeClass('placed').text('');
 		});
 		this._placedDirection = 'any';
 	}
@@ -396,6 +397,12 @@ function BoardController(boardModel, boardView) {
 			}
 		}
 		return true;
+	}
+
+	this.removePlaced = function() {
+		var cells = this._boardModel.getPlacedCells();
+		this._boardModel.unplaceAll();
+		this._boardView._fillSpecials( cells );
 	}
 
 
