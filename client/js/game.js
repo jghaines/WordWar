@@ -4,19 +4,6 @@ function GameController(remote) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.createBindings = function() {
-		// TODO: refactor to remove this - instead use Proxy pattern jQuery Callbacks in _letters and _board View
-		this.log.info( this.constructor.name + '.createBindings()');
-
-		this._lettersView.onClick( (function(index, letter) {
-			this.selectLetterToPlace(index, letter);
-		}).bind(this) );
-
-		this._boardView.click( (function(cell) {
-			this.placeLetterOnBoard(cell);
-		}).bind(this) );
-	}
-
 	this.newGame = function(gameInfo) {
 		this.log.info( this.constructor.name + '.newGame(.)' );
 		this.log.debug( this.constructor.name, '.newGame( gameInfo=', gameInfo, ')' );
@@ -48,14 +35,6 @@ function GameController(remote) {
 		this._buttonsView.enableMoveButton(   false );
 		this._buttonsView.enableAttackButton( false );
 		this._buttonsView.enableResetButton(  false );
-	}
-
-	this._boardLoaded = function() {
-		this.log.info( this.constructor.name + '._boardLoaded()' );
-		this.createBindings();
-
-		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
-		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
@@ -249,9 +228,13 @@ function GameController(remote) {
 	this._buttonsView.enableResetButton(  false );
 
 	// bind all the things
-	this._boardModel.onBoardLoaded( (function() { 
-		this._boardLoaded();
-	}).bind(this));
+	this._lettersView.onClick( (function(index, letter) {
+		this.selectLetterToPlace(index, letter);
+	}).bind(this) );
+
+	this._boardView.onClick( (function(cell) {
+		this.placeLetterOnBoard(cell);
+	}).bind(this) );
 
 	this._stateContext.onNewGame( (function(msg) { 
 		this.newGame(msg);

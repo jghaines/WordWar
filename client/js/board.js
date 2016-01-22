@@ -273,6 +273,11 @@ function BoardView( boardModel ) {
 	/* called when board is loaded */
 	this._boardLoaded = function() {
 		this._fillSpecials(/*all*/);
+		var that = this;
+		this._table.find( 'td' ).click( function() {
+			that._click( $(this) );
+		} );
+
 	}
 
 	this._fillSpecials = function( cells ) {
@@ -290,13 +295,6 @@ function BoardView( boardModel ) {
 				$(this).text( $(this).attr('ww_value') );
 			}
 		});
-	}
-
-	this.click = function( callback ) {
-		this.log.info('BoardView.click(. )');
-		this._table.find( 'td' ).click( function() {
-			callback( $(this) );
-		} );
 	}
 
 	this.setStatus = function( statusMessage ) {
@@ -321,6 +319,17 @@ function BoardView( boardModel ) {
 		flash( cell, 'flash-attack' );
 	}
 
+	this.onClick = function( callback ) {
+		this.log.info( this.constructor.name + '.onClick(.)' );
+		this._clickCallbacks.add( callback );
+	}
+
+	// when a letter is clicked, trigger the callbacks
+	this._click = function( cell ) {
+ 		this._clickCallbacks.fire( cell );
+	}
+
+
 	this._bindDragDrop = function() {
 		$_table.find('td' ).droppable( {
 			drop: function( event, ui ) {
@@ -333,22 +342,33 @@ function BoardView( boardModel ) {
 
 	// constructor code
 	this._boardModel = boardModel;
-	this._boardModel.onBoardLoaded(( function() {
-		this._boardLoaded()
-	}).bind( this ));
 
-	this._table = $( 'table.gameboard' );
+	this._table  = $( 'table.gameboard' );
 	this._status = $( '.status' );
 	this._wordLists = {
 		'local': 	$( 'div.playedwords.local  ul' ),
 		'remote': 	$( 'div.playedwords.remote ul' ),
 	};
+
+	this._clickCallbacks = $.Callbacks();
+
+	this._boardModel.onBoardLoaded(( function() {
+		this._boardLoaded()
+	}).bind( this ));
+
 }
 
 
 function BoardController(boardModel, boardView) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
+
+	this._boardLoaded = function() {
+		this.log.info( this.constructor.name + '._boardLoaded()' );
+
+		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
+		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
+	}
 
 	this.unhighlightPlaceablePositions = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
@@ -431,4 +451,8 @@ function BoardController(boardModel, boardView) {
 
 	this._boardModel = boardModel;
 	this._boardView = boardView;
+
+	this._boardModel.onBoardLoaded(( function() { 
+		this._boardLoaded();
+	}).bind( this ));
 }
