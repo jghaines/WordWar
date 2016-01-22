@@ -132,6 +132,4 @@ function LettersView(lettersModel) {
 	this._lettersModel = lettersModel;
 	this._lettersTable = $('table.letters');
 	this._clickCallbacks = $.Callbacks();
-
-
 }
