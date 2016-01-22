@@ -1,6 +1,6 @@
 function ButtonsView() {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.enableMoveButton = function(isEnabled) {
 		this.log.info( this.constructor.name + '.enablemoveButton(' + isEnabled + ')' );
@@ -50,13 +50,13 @@ function ButtonsView() {
 	}
 
 
-	this._moveButton   = $("button#move");
-	this._attackButton = $("button#attack");
-	this._resetButton  = $("button#reset");
+	this._moveButton   = $( 'button#move'   );
+	this._attackButton = $( 'button#attack' );
+	this._resetButton  = $( 'button#reset'  );
 
-	this._onMoveClickedCallbacks  = $.Callbacks();
-	this._onAttackClickedCallbacks  = $.Callbacks();
-	this._onResetClickedCallbacks = $.Callbacks();
+	this._onMoveClickedCallbacks   = $.Callbacks();
+	this._onAttackClickedCallbacks = $.Callbacks();
+	this._onResetClickedCallbacks  = $.Callbacks();
 
 	// register private callbacks
 	this._moveButton.click( ( function(){

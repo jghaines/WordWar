@@ -224,7 +224,7 @@ function BoardModel() {
 		return this._placedDirection;
 	}
 
-	// TODO: (Game)Contorller logic
+	// TODO: Move to (Game)Contorller logic
 	this.getPlacedScore = function() {
 		var score = 0;
 		var wordBonus = 1;

@@ -2,7 +2,7 @@
 
 function StateContext(remote) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	// new game - callback from Remote proxy
 	this.newGame = function(gameInfo) {
@@ -30,7 +30,7 @@ function StateContext(remote) {
 	}
 
  	// remote move - callback from remote proxy
- 	this.remoteMove = function(msg) {
+ 	this.remoteMove = function( msg ) {
  		this.log.info(this.constructor.name + '.remoteMove(.)');
  		this.log.debug(this.constructor.name + '.remoteMove(', msg, ')');
 
@@ -114,7 +114,7 @@ function StateContext(remote) {
 
 function StateWaitForGameStart( context ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.context = context;
 
@@ -142,7 +142,7 @@ function StateWaitForGameStart( context ) {
 
 function StateWaitForMove( context ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.context = context;
 
@@ -165,7 +165,7 @@ function StateWaitForMove( context ) {
 
 function StateWaitForRemote( context ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.context = context;
 
@@ -189,7 +189,7 @@ function StateWaitForRemote( context ) {
 
 function StateWaitForLocal( context ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.context = context;
 
