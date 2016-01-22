@@ -31,6 +31,7 @@ function GameController(remote) {
 		this._lettersView.updateLetters();
 		this._lettersView.updatePlaced();
 		this._lettersView.updateSelection();
+		this._lettersView.setEnabled( true );
 
 		this._buttonsView.enableMoveButton(   false );
 		this._buttonsView.enableAttackButton( false );
@@ -97,6 +98,7 @@ function GameController(remote) {
  		this._buttonsView.enableMoveButton(   false );
  		this._buttonsView.enableAttackButton( false );
 		this._buttonsView.enableResetButton(  false );
+		this._lettersView.setEnabled( false );
 
 		var myPlay = new Play(
 			moveType,
@@ -217,6 +219,7 @@ function GameController(remote) {
 
 	this._lettersModel = new LettersModel();
 	this._lettersView = new LettersView(this._lettersModel );
+	this._lettersView.setEnabled( true );
 
 	this._boardModel = new BoardModel();
 	this._boardView = new BoardView(this._boardModel);
@@ -226,7 +229,7 @@ function GameController(remote) {
 	this._buttonsView.enableMoveButton(   false );
 	this._buttonsView.enableAttackButton( false );
 	this._buttonsView.enableResetButton(  false );
-
+	
 	// bind all the things
 	this._lettersView.onClick( (function(index, letter) {
 		this.selectLetterToPlace(index, letter);

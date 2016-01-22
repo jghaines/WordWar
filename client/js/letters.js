@@ -67,6 +67,10 @@ function LettersView(lettersModel) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
+	this.setEnabled = function( isEnabled ) {
+		this._isEnabled = isEnabled;
+	}
+
 	this.updateLetters = function() {
 		this.log.info('LettersView.updateLetters()');
 
@@ -111,7 +115,9 @@ function LettersView(lettersModel) {
 
 	// when a letter is clicked, trigger the callbacks
 	this._click = function( index, letter ) {
- 		this._clickCallbacks.fire( index, letter );
+		if ( this._isEnabled ) {
+ 			this._clickCallbacks.fire( index, letter );
+ 		}
 	}
 
 	// register click callback handler
@@ -131,5 +137,6 @@ function LettersView(lettersModel) {
 	// constructor code
 	this._lettersModel = lettersModel;
 	this._lettersTable = $('table.letters');
+	this._isEnabled = true;
 	this._clickCallbacks = $.Callbacks();
 }
