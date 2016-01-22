@@ -7,9 +7,15 @@ var
     UUID       = require('node-uuid'),
     letterbag  = require('./wordyLetters.js');
 
-
 gameServer.log = require('loglevel');
 gameServer.log.setLevel('INFO');
+
+gameServer.defaultBoard = '1.html';
+if( process.argv.length > 2 ) {
+	gameServer.defaultBoard = process.argv[2];
+	gameServer.log.info('Default board:', gameServer.defaultBoard);
+}
+
 
 gameServer.findGame = function(player) {
 	this.log.debug(' gameServer.findGame() - games.length', this.games.length );
@@ -44,7 +50,7 @@ gameServer.createGame = function(player) {
 	    players: 		[ player ],
 	    turn: 			0,
 	    playsThisTurn: 	0,
-	    board: 			'./boards/1.html',
+	    board: 			'./boards/' + gameServer.defaultBoard,
 		letterCount: 	10
 	};
 
