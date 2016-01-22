@@ -1,19 +1,24 @@
 .flash-selection {
-    animation-name: flash-selection-animation;
-    animation-duration: 0.8s;
-}
-
-@keyframes flash-selection-animation {  
-    from { background: yellow; }
-    to   { background: default; }
+	animation-name: flash-yellow-animation-animation;
+	animation-duration: 0.8s;
 }
 
 .flash-error {
-    animation-name: flash-error-animation;
-    animation-duration: 0.3s;
+	animation-name: flash-red-animation;
+	animation-duration: 0.3s;
 }
 
-@keyframes flash-error-animation {  
-    from { background: red; }
-    to   { background: default; }
+.flash-attack {
+	animation-name: flash-red-animation;
+	animation-duration: 1.2s;
+}
+
+@keyframes flash-yellow-animation {  
+	from { background: yellow; }
+	to   { background: default; }
+}
+
+@keyframes flash-red-animation {  
+	from { background: red; }
+	to   { background: default; }
 }

@@ -105,9 +105,9 @@ function GameController(remote) {
 		return ( sowpods.binaryIndexOf( word ) >= 0 );
 	}
 
-	/* user has clicked Play */ 
-	this.playMove = function() {
-		this.log.info( this.constructor.name + '.playMove(.)');
+	/* user has clicked Move or Attack */ 
+	this.playWord = function( moveType ) {
+		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
 		var wordPlaced = this._boardModel.getPlacedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
@@ -120,8 +120,9 @@ function GameController(remote) {
 		this._buttonsView.enableResetButton(  false );
 
 		var myPlay = new Play(
+			moveType,
 			this._boardModel.getPlacedWord(),
-			this._boardModel.getPlacedScore(),
+			this._boardModel.getPlacedScore(), //
 			this._boardModel.getPlacedRange(),
 			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() )
 		);
@@ -144,27 +145,83 @@ function GameController(remote) {
  	this.moveComplete = function() {
 		this.log.info( this.constructor.name + '.moveComplete()' );
 
- 		// show the local player updates
- 		this.executePlay( 'local',  this._stateContext.getLocalPlay() );
 		this._boardModel.unplaceAll();
 
- 		// map the remote play coordinates
+		var localPlay  = this._stateContext.getLocalPlay();
 		var remotePlay = this._stateContext.getRemotePlay();
+ 		// map the remote play coordinates
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange   = this._boardModel.rotateRange( remotePlay.playRange );
- 		// show the remote player updates after a pause
-		setTimeout( (function() { 
-			this.executePlay( 'remote', remotePlay );
-		}).bind( this ), 700 )
-		
+
+ 		this.calculateScore( localPlay, remotePlay );
+		this.addPlayedItem( 'local',  localPlay );
+		this.addPlayedItem( 'remote', remotePlay );
+
+ 		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+	 		// show the local player updates
+	 		this.executeMove( 'local',  localPlay );
+			this.executeMove( 'remote', remotePlay );
+ 		} else if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+	 		// show the local player updates
+	 		this.executeAttack( 'local',  localPlay );
+			localPlayedItem  = 'Attack: ' + localPlay.word  + ' (' + localPlay.wordValue  + ')'; 
+			remotePlayedItem = 'Played: ' + remotePlay.word + ' (' + remotePlay.wordValue + ')'; 
+			setTimeout( (function() { 
+				this.executePlay( 'remote', remotePlay );
+			}).bind( this ), 700 );
+
+ 		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
+	 		// show the local player updates
+	 		this.executeAttack( 'remote',  remotePlay );
+			setTimeout( (function() { 
+				this.executePlay( 'local', localPlay );
+			}).bind( this ), 700 );
+
+ 		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
+	 		// show the local player updates
+	 		this.executeAttack( 'remote',  remotePlay );
+			this.executeAttack( 'local',   localPlay );
+ 		}
 	}
 
+ 	this.calculateScore = function( playA, playB ) {
+ 		if ( 'move' == playA.moveType && 'move' == playB.moveType ) {
+ 			playA.score = playA.wordValue;
+ 			playB.score = playB.wordValue;
+ 		} else if ( 'attack' == playA.moveType && 'move' == playB.moveType ) {
+ 			playA.score = 0;
+ 			playB.score = -1 * playA.wordValue * this._ATTACK_MULTIPLIER;
+ 		} else if ( 'move' == playA.moveType && 'attack' == playB.moveType ) {
+ 			playA.score = -1 * playB.wordValue * this._ATTACK_MULTIPLIER;
+ 			playB.score = 0;
+ 		} else if ( 'attack' == playA.moveType && 'attack' == playB.moveType ) {
+ 			var highestScore = Math.max( playA.wordValue, playB.wordValue );
+ 			playA.score = playA.wordValue - highestScore;
+ 			playB.score = playB.wordValue - highestScore;
+ 		}
+ 	}
 
-	this.executePlay = function(who, play) {
-		this.log.info( this.constructor.name + '.executePlay(who=' + who + ', play=.)');
-		this._boardModel.setPlayerCell(who, play.newPosition);
-		this._boardModel.addPlayedRange(who, play.playRange);
-		this._boardView.addPlayedWord(who, play.word + ' (' + play.score + ')' );
+	this.executeMove = function( who, play ) {
+		this.log.info( this.constructor.name + '.executeMove(who=' + who + ', play=.)' );
+		this._boardModel.setPlayerCell( who, play.newPosition );
+		this._boardModel.addPlayedRange( who, play.playRange );
+	}
+
+	this.executeAttack = function( who, play ) {
+		this.log.info( this.constructor.name + '.executeAttack(who=' + who + ', play=.)' );
+		this.executeMove( who, play );
+		this._boardView.flashAttackOnPlayer( 'local' == who ? 'remote' : 'local' );
+	}
+
+	this.addPlayedItem = function( who, play ) {
+		this._boardView.addPlayedItem( who,
+			play.moveType.toTitleCase() + ': ' + play.word +
+			'(' + play.wordValue + ') ' +
+			( play.score > 0 ? '+' : '' ) +
+			play.score,
+			play.moveType
+		);
+
 	}
 
 	// State machine callback
@@ -174,6 +231,7 @@ function GameController(remote) {
 
 	// constructor code
 	this._ATTACK_RANGE = 2.0; // how far we can attack
+	this._ATTACK_MULTIPLIER = 2; // attacks are double damange
 
 	this._remote = remote;
 	this._stateContext = new StateContext( this._remote );
@@ -212,11 +270,11 @@ function GameController(remote) {
 	}).bind(this) );
 
 	this._buttonsView.onMoveClicked( (function() {
-		this.playMove();
+		this.playWord('move');
 	}).bind(this) );
 
 	this._buttonsView.onAttackClicked( (function() {
-		this.playAttack();
+		this.playWord('attack');
 	}).bind(this) );
 
 	this._buttonsView.onResetClicked( (function() {

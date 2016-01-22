@@ -248,7 +248,7 @@ function BoardModel() {
 
 		for( var row = range.min.row; row <= range.max.row ; ++row ) {
 			for( var col = range.min.col; col <= range.max.col ; ++col ) {
-				this._table.find('tr:eq(' + row + ') td:eq(' + col + ')').addClass('played-' + who);
+				this._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' ).addClass( 'played-' + who );
 			}			
 		}
 	}
@@ -266,7 +266,7 @@ function BoardModel() {
 
 }
 
-function BoardView(boardModel) {
+function BoardView( boardModel ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
@@ -275,7 +275,7 @@ function BoardView(boardModel) {
 		this._fillSpecials(/*all*/);
 	}
 
-	this._fillSpecials = function(cells) {
+	this._fillSpecials = function( cells ) {
 		this.log.info('BoardView.fillSpecials(.)');
 		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all gameboard cells
 
@@ -284,7 +284,7 @@ function BoardView(boardModel) {
 				$(this).html(
 					'x' + $(this).attr( 'ww_value' ) + '<br />' +
 					 ( $(this).hasClass( 'letter' ) ? "<span class='bonusType'>letter</span>": '' ) +
-					 ( $(this).hasClass( 'word' ) ? "<span class='bonusType'>word</span>": '' )
+					 ( $(this).hasClass( 'word'   ) ? "<span class='bonusType'>word</span>": '' )
 					);
 			} else if ( $(this).attr('ww_value') ) {
 				$(this).text( $(this).attr('ww_value') );
@@ -292,24 +292,33 @@ function BoardView(boardModel) {
 		});
 	}
 
-	this.click = function(callback) {
+	this.click = function( callback ) {
 		this.log.info('BoardView.click(. )');
-		this._table.find('td').click( function() {
-			callback($(this));
+		this._table.find( 'td' ).click( function() {
+			callback( $(this) );
 		} );
 	}
 
-	this.setStatus = function ( statusMessage ) {
+	this.setStatus = function( statusMessage ) {
 		this._status.text( statusMessage );
 	}
 
-	this.addPlayedWord = function ( who, wordText ) {
-		this._wordLists[who].append( $('<li/>').text(wordText) );
+	this.addPlayedItem = function ( who, text, styleClass ) {
+		var element = $('<li/>').text( text );
+		if ( typeof styleClass !== 'undefined' ) {
+			element.addClass( 'move-' + styleClass );
+		}
+		this._wordLists[who].append( element );
 	}
 
 
-	this.flash = function(flash_class) {
-		flash(this._table, flash_class);
+	this.flash = function( flash_class ) {
+		flash( this._table, flash_class );
+	}
+
+	this.flashAttackOnPlayer = function( who ) {
+		var cell = this._boardModel.getPlayerCell( who );
+		flash( cell, 'flash-attack' );
 	}
 
 	this._bindDragDrop = function() {
@@ -324,14 +333,14 @@ function BoardView(boardModel) {
 
 	// constructor code
 	this._boardModel = boardModel;
-	this._boardModel.onBoardLoaded( (function() {
+	this._boardModel.onBoardLoaded(( function() {
 		this._boardLoaded()
 	}).bind( this ));
 
 	this._table = $( 'table.gameboard' );
 	this._status = $( '.status' );
 	this._wordLists = {
-		'local': 	$( 'div.playedwords.local ul' ),
+		'local': 	$( 'div.playedwords.local  ul' ),
 		'remote': 	$( 'div.playedwords.remote ul' ),
 	};
 }
