@@ -149,8 +149,6 @@ function GameController(remote) {
  		} else if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ) {
 	 		// show the local player updates
 	 		this.executeAttack( 'local',  localPlay );
-			localPlayedItem  = 'Attack: ' + localPlay.word  + ' (' + localPlay.wordValue  + ')'; 
-			remotePlayedItem = 'Played: ' + remotePlay.word + ' (' + remotePlay.wordValue + ')'; 
 			setTimeout( (function() { 
 				this.executePlay( 'remote', remotePlay );
 			}).bind( this ), 700 );
