@@ -49,11 +49,11 @@ describe('BoardModel', function() {
 		});
 	});
 
-	describe('#getCellCoordinates()', function () {
+	describe('#getCoordinatesForCell()', function () {
 		it('should give correct coords', function () {
 			var cell = this._boardModel.getCellAtCoordinates( { row: 2, col: 2 } );
-			expect( this._boardModel.getCellCoordinates( cell ).row ).to.equal( 2 );
-			expect( this._boardModel.getCellCoordinates( cell ).col ).to.equal( 2 );
+			expect( this._boardModel.getCoordinatesForCell( cell ).row ).to.equal( 2 );
+			expect( this._boardModel.getCoordinatesForCell( cell ).col ).to.equal( 2 );
 		});
 	});
 
@@ -108,12 +108,29 @@ describe('BoardModel', function() {
 			expect( this.cells[4].hasClass('test-top-left') ).to.equal( true );
 		});
 	});
+
+	describe("#getCellDistance()", function () {
+		it('return the exact distance from the player to the corner', function () {
+			this.cellA = this._boardModel.getPlayerCell('local');
+			this.cellB = $( 'td.test-bottom-right', this._boardModel._table );
+			expect( this._boardModel.getCellDistance( this.cellA, this.cellB )).to.equal( 4 );
+		});
+		it('return the approximate distance from the player to the middle', function () {
+			this.cellA = this._boardModel.getPlayerCell('local');
+			this.cellB = $( 'td.test-middle', this._boardModel._table );
+			// TODO round to ~2 decimal places - expect 3.605551275463989
+			expect( Math.trunc( this._boardModel.getCellDistance( this.cellA, this.cellB ))).to.equal( 3 );
+		});
+	});
 });
 
 
 describe('BoardModel wordcandidate - right', function() {
 	beforeEach(	function() {
 		this._boardModel = new BoardModel();
+		this._boardView = new BoardView(this._boardModel);
+		this._boardController = new BoardController(this._boardModel, this._boardView);
+
 		this._boardModel._placedDirection = 'right';
 		this.testTables = {
 			noWord: $( `

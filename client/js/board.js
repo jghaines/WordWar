@@ -22,7 +22,7 @@ function BoardModel() {
  		return this._table.find('tr:eq(0) td').length;
  	}
 
-	this.getCellCoordinates = function( cell ) {
+	this.getCoordinatesForCell = function( cell ) {
 		return { row: cell.parent().index(), col: cell.index() };
 	}
 
@@ -40,18 +40,29 @@ function BoardModel() {
 
 	// get 1x1 range of given cell
 	this.getCellRange = function( cell ) {
-		var coords = this.getCellCoordinates( cell );
+		var coords = this.getCoordinatesForCell( cell );
 		return {
 			min: { row: coords.row, col: coords.col },
 			max: { row: coords.row, col: coords.col }
 		};
 	}
 
+	// return the distance between cellA and cellB
+	this.getCellDistance = function( cellA, cellB ) {
+		this.log.info( this.constructor.name + '.getCellDistance(..)' );
+		var coordsA = this.getCoordinatesForCell( cellA );
+		var coordsB = this.getCoordinatesForCell( cellB );
+		this.log.debug( '  ', this.constructor.name, '.getCellDistance(..) coordsA =', coordsA, 'coordsB=', coordsB );
+		return	Math.sqrt(
+					Math.pow( coordsA.row - coordsB.row, 2 ) + 
+					Math.pow( coordsA.col - coordsB.col, 2 ) );
+	}
+
 	this.getNextCellInDirection = function( startCell, direction ) {
 		this.log.info( this.constructor.name + '.getNextCellInDirection(..)' );
 		this.log.debug( this.constructor.name + '.getNextCellInDirection(startCell, direction=' + direction + ')' );
 
-		var coords = this.getCellCoordinates( startCell );
+		var coords = this.getCoordinatesForCell( startCell );
 		switch(direction) {
 			case 'left':
 				coords.col--;
@@ -88,6 +99,7 @@ function BoardModel() {
 		return cells;
 	}
 
+	// TODO: this sholud be Controller logic
 	this._getWordCandidateCellsInDirection = function( startCell, direction ) {
 		this.log.info( this.constructor.name + '._getWordCandidateCellsInDirection(..)' );
 		this.log.debug( this.constructor.name + '._getWordCandidateCellsInDirection(startCell, direction=' + direction + ')' );
@@ -119,6 +131,7 @@ function BoardModel() {
 		}
 	}
 
+	// TODO: this sholud be Controller logic
 	this.getWordCandidateCells = function() {
 		this.log.info( this.constructor.name + '.getWordCandidateCells()' );
 
@@ -186,8 +199,8 @@ function BoardModel() {
 
 	this.getPlacedRange = function() {
 		var placedCells = this.getPlacedCells();
-		var minCoordinates = this.getCellCoordinates( placedCells.first() );
-		var maxCoordinates = this.getCellCoordinates( placedCells.last() );
+		var minCoordinates = this.getCoordinatesForCell( placedCells.first() );
+		var maxCoordinates = this.getCoordinatesForCell( placedCells.last() );
 
 		return {
 			min: { row: minCoordinates.row, col: minCoordinates.col },
@@ -211,6 +224,7 @@ function BoardModel() {
 		return this._placedDirection;
 	}
 
+	// TODO: (Game)Contorller logic
 	this.getPlacedScore = function() {
 		var score = 0;
 		var wordBonus = 1;
@@ -325,7 +339,7 @@ function BoardView(boardModel) {
 
 function BoardController(boardModel, boardView) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	this.unhighlightPlaceablePositions = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
@@ -334,7 +348,7 @@ function BoardController(boardModel, boardView) {
 
 	this._highlightNextPlaceable = function(fromCell, direction) {
 		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction + ')');
-		var coords = this._boardModel.getCellCoordinates( fromCell );
+		var coords = this._boardModel.getCoordinatesForCell( fromCell );
 
 		var placeableCell;
 		do {
@@ -391,7 +405,7 @@ function BoardController(boardModel, boardView) {
 			return false;
 		}
 
-		for ( var i = cells.length - 1; i >=0 ; --i ) {
+		for ( var i = cells.length - 1; i >= 0 ; --i ) {
 			if ( '' == cells[i].text() ) { // blank cell
 				return false;
 			}

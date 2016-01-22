@@ -5,6 +5,7 @@ function GameController(remote) {
 	this.log.setLevel( log.levels.DEBUG );
 
 	this.createBindings = function() {
+		// TODO: refactor to remove this - instead use Proxy pattern jQuery Callbacks in _letters and _board View
 		this.log.info( this.constructor.name + '.createBindings()');
 
 		this._lettersView.onClick( (function(index, letter) {
@@ -12,7 +13,7 @@ function GameController(remote) {
 		}).bind(this) );
 
 		this._boardView.click( (function(cell) {
-			this.selectCellToPlace(cell);
+			this.placeLetterOnBoard(cell);
 		}).bind(this) );
 	}
 
@@ -44,6 +45,9 @@ function GameController(remote) {
 		this._lettersView.updatePlaced();
 		this._lettersView.updateSelection();
 
+		this._buttonsView.enableMoveButton(   false );
+		this._buttonsView.enableAttackButton( false );
+		this._buttonsView.enableResetButton(  false );
 	}
 
 	this._boardLoaded = function() {
@@ -68,8 +72,8 @@ function GameController(remote) {
 		this._boardController.highlightPlaceablePositions();
 	}
 
-	this.selectCellToPlace = function(cell) {
-		this.log.info( this.constructor.name + '.selectCellToPlace(.)');
+	this.placeLetterOnBoard = function( cell ) {
+		this.log.info( this.constructor.name + '.placeLetterOnBoard(.)');
 
 		if ( this._lettersModel.getSelectedIndex() == null ) { // no letter selected
 			// nudge the user
@@ -77,7 +81,7 @@ function GameController(remote) {
 			return;
 		}
 
-		if ( ! this._boardModel.isCellPlaceable(cell) ) { // invalid placement
+		if ( ! this._boardModel.isCellPlaceable( cell )) { // invalid placement
 			this._boardView.flash('flash-error');
 			return;
 		}
@@ -89,9 +93,11 @@ function GameController(remote) {
 		this._lettersView.updateSelection();
 		this._lettersView.updatePlaced();
 		this._boardController.unhighlightPlaceablePositions();
-		this._buttonsView.enableMoveButton( true );
-		this._buttonsView.enableAttackButton( true );
+		this._buttonsView.enableMoveButton(  true );
 		this._buttonsView.enableResetButton( true );
+
+		var isInAttackRange = ( this._boardModel.getCellDistance( cell, this._boardModel.getPlayerCell( 'remote' )) <= this._ATTACK_RANGE );
+		this._buttonsView.enableAttackButton( isInAttackRange );
 	}
 
 	// Whether the given word is valid
@@ -99,6 +105,7 @@ function GameController(remote) {
 		return ( sowpods.binaryIndexOf( word ) >= 0 );
 	}
 
+	/* user has clicked Play */ 
 	this.playMove = function() {
 		this.log.info( this.constructor.name + '.playMove(.)');
 		var wordPlaced = this._boardModel.getPlacedWord();
@@ -108,15 +115,15 @@ function GameController(remote) {
 			return;
 		}
 
- 		this._buttonsView.enableMoveButton( false );
+ 		this._buttonsView.enableMoveButton(   false );
  		this._buttonsView.enableAttackButton( false );
-		this._buttonsView.enableResetButton( false );
+		this._buttonsView.enableResetButton(  false );
 
 		var myPlay = new Play(
 			this._boardModel.getPlacedWord(),
 			this._boardModel.getPlacedScore(),
 			this._boardModel.getPlacedRange(),
-			this._boardModel.getCellCoordinates( this._boardModel.getEndOfWordCell() )
+			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() )
 		);
 
 		this._stateContext.localMove( myPlay );
@@ -127,6 +134,10 @@ function GameController(remote) {
 		this._boardModel.unplaceAll();
 		this._lettersModel.unplaceAll();
 		this._lettersView.updatePlaced();
+
+		this._buttonsView.enableMoveButton(   false );
+		this._buttonsView.enableAttackButton( false );
+		this._buttonsView.enableResetButton(  false );
  	}
 
 	// State machine callback - local player and remote compnent have completed move
@@ -162,6 +173,8 @@ function GameController(remote) {
 	}
 
 	// constructor code
+	this._ATTACK_RANGE = 2.0; // how far we can attack
+
 	this._remote = remote;
 	this._stateContext = new StateContext( this._remote );
 
@@ -173,7 +186,11 @@ function GameController(remote) {
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
 	this._buttonsView = new ButtonsView();
+	this._buttonsView.enableMoveButton(   false );
+	this._buttonsView.enableAttackButton( false );
+	this._buttonsView.enableResetButton(  false );
 
+	// bind all the things
 	this._boardModel.onBoardLoaded( (function() { 
 		this._boardLoaded();
 	}).bind(this));
