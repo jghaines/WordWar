@@ -48,14 +48,15 @@ table.gameboard td.wildcard {
 	color: white;
 }
 
-table.gameboard td.played-local {
-	background: magenta	!important;
-	color: 		magenta !important;
-}
-
+/* order is extra !important - later rules override earlier ones */
 table.gameboard td.played-remote {
 	background: black !important;
 	color: 		black !important;
+}
+
+table.gameboard td.played-local {
+	background: magenta	!important;
+	color: 		magenta !important;
 }
 
 table.gameboard td.static {
@@ -76,11 +77,12 @@ table.gameboard td.placeable {
 
 
 /* Avatars */
+table.gameboard td.player-remote {
+	content:url( '../images/Bowie.png' );
+}
+
 table.gameboard td.player-local {
 	content:url( '../images/MadWizard.png' );
 }
 
-table.gameboard td.player-remote {
-	content:url( '../images/Bowie.png' );
-}
 
