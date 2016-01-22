@@ -51,6 +51,16 @@ Array.prototype.lastIndexWhere  = lastIndexWhere;
 Array.prototype.firstIndexWhere = firstIndexWhere;
 
 
+// http://stackoverflow.com/questions/4878756/javascript-how-to-capitalize-first-letter-of-each-word-like-a-2-word-city
+function toTitleCase() {
+    return this.replace( /\w\S*/g, function( txt ) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+}
+
+String.prototype.toTitleCase = toTitleCase;
+
+
 function flash(element, flash_class) {
 	$(element).addClass(flash_class);
     setTimeout(function() {

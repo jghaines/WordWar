@@ -43,3 +43,18 @@ describe('Array', function() {
 		});
 	});
 });
+
+
+describe('String', function() {
+	describe('#toTitleCase()', function () {
+		it('should work on lowercase words', function () {
+			expect( 'lowercase'.toTitleCase() ).to.equal( 'Lowercase' );
+		});
+		it('should work on UPPERCASE words', function () {
+			expect( 'UPPERCASE'.toTitleCase() ).to.equal( 'Uppercase' );
+		});
+		it('should work on mIXedCasE words', function () {
+			expect( 'mIXedCasE'.toTitleCase() ).to.equal( 'Mixedcase' );
+		});
+	});
+});
