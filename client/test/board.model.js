@@ -1,4 +1,5 @@
 var expect = chai.expect;
+var assert = chai.assert;
 
 describe('BoardModel', function() {
 	beforeEach(	function() {
@@ -118,8 +119,7 @@ describe('BoardModel', function() {
 		it('return the approximate distance from the player to the middle', function () {
 			this.cellA = this._boardModel.getPlayerCell('local');
 			this.cellB = $( 'td.test-middle', this._boardModel._table );
-			// TODO round to ~2 decimal places - expect 3.605551275463989
-			expect( Math.trunc( this._boardModel.getCellDistance( this.cellA, this.cellB ))).to.equal( 3 );
+			assert.closeTo( this._boardModel.getCellDistance( this.cellA, this.cellB ), 3.6, 0.1 );
 		});
 	});
 });
