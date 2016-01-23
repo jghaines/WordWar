@@ -15,7 +15,8 @@ table.gameboard td {
 
 table.gameboard td.bonus,
 table.gameboard td.wildcard,
-table.gameboard td.static {
+table.gameboard td.static,
+table.gameboard td.bonus {
 	border-width: 1px;
 	border-style: solid;
 }
@@ -59,7 +60,8 @@ table.gameboard td.played-local {
 	color: 		magenta !important;
 }
 
-table.gameboard td.static {
+table.gameboard td.static,
+table.gameboard td.block {
 	background: black !important;
 	border-color: black;
 	color: white !important;
