@@ -8,6 +8,25 @@ body {
 	background: #EEEEEE;
 }
 
+.score {
+	text-align:	center;	 
+	font-size: 24px;
+	font-weight: bold;
+}
+
+.score.local {
+	color:	magenta;
+}
+
+.score.remote {
+	color:	black;
+}
+
+.score.lost {
+	color:		black;
+	background: red;
+}
+
 .playedwords {
 	border: 4px;
 	border-style: solid;

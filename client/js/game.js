@@ -13,7 +13,8 @@ function GameController(remote) {
 		this._lettersModel.setLetterCount( gameInfo.letterCount );
 		this._lettersView.updateLetters();
 
-		//this.populateLetters();
+		this._scoreModel.setScore( 'local',  gameInfo.startScore );
+		this._scoreModel.setScore( 'remote', gameInfo.startScore );
 
 		this._boardModel.loadBoard(	boardUrl );
 	}
@@ -225,6 +226,8 @@ function GameController(remote) {
 	this._boardModel = new BoardModel();
 	this._boardView = new BoardView(this._boardModel);
 	this._boardController = new BoardController( this._boardModel, this._boardView );
+
+	this._scoreModel = new ScoreModel();
 
 	this._buttonsView = new ButtonsView();
 	this._buttonsView.enableMoveButton(   false );

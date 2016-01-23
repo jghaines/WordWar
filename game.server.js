@@ -48,6 +48,7 @@ gameServer.createGame = function(player) {
 	var newGame = {
 	    id : 			UUID(),
 	    players: 		[ player ],
+	    startScore: 	50,
 	    turn: 			0,
 	    playsThisTurn: 	0,
 	    board: 			'./boards/' + gameServer.defaultBoard,
@@ -65,7 +66,7 @@ gameServer.startGame = function(game) {
 	this.log.info('G', game.id, 'started' );
 
 	for ( var i = 0; i < game.players.length; ++i ) {
-		game.players[i].emit( 'new game', JSON.stringify( game, ['board', 'letterCount'] ));
+		game.players[i].emit( 'new game', JSON.stringify( game, ['board', 'letterCount', 'startScore'] ));
 	}
 
 	this.nextTurn(game);
