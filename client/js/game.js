@@ -150,14 +150,14 @@ function GameController(remote) {
 	 		// show the local player updates
 	 		this.executeAttack( 'local',  localPlay );
 			setTimeout( (function() { 
-				this.executePlay( 'remote', remotePlay );
+				this.executeMove( 'remote', remotePlay );
 			}).bind( this ), 700 );
 
  		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
 	 		// show the local player updates
 	 		this.executeAttack( 'remote',  remotePlay );
 			setTimeout( (function() { 
-				this.executePlay( 'local', localPlay );
+				this.executeMove( 'local', localPlay );
 			}).bind( this ), 700 );
 
  		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
