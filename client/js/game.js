@@ -113,8 +113,7 @@ function GameController(remote) {
 
 	this.resetWord = function() {
 		this.log.info( this.constructor.name + '.resetWord(.)');
-		this._boardModel.unplaceAll();
-		this._boardController.unhighlightPlaceablePositions();
+		this._boardController.resetWord();
 
 		this._lettersModel.unplaceAll();
 		this._lettersModel.unselect();
