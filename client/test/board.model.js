@@ -221,40 +221,40 @@ describe('BoardModel wordcandidate - right', function() {
 		});
 	});
 
-	describe('#getPlacedWord()', function () {
+	describe('#getPlayedWord()', function () {
 		it('should return an empty string nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( '' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( '' );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'A' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'A' );
 		});
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'APPL' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'APPL' );
 		});
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 	});
 });
@@ -351,40 +351,40 @@ describe('BoardModel wordcandidate - up', function() {
 		});
 	});
 
-	describe('#getPlacedWord()', function () {
+	describe('#getPlayedWord()', function () {
 		it('should return an empty string nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( '' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( '' );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'A' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'A' );
 		});
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'APE' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'APE' );
 		});
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 	});
 });
@@ -400,11 +400,11 @@ describe('BoardModel wordcandidate - left', function() {
 		};
 	});
 
-	describe('#getPlacedWord()', function () {
+	describe('#getPlayedWord()', function () {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 	});
 });
@@ -420,11 +420,11 @@ describe('BoardModel wordcandidate - down', function() {
 		};
 	});
 
-	describe('#getPlacedWord()', function () {
+	describe('#getPlayedWord()', function () {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlacedWord() ).to.equal( 'AP' );
+			expect( this._boardModel.getPlayedWord() ).to.equal( 'AP' );
 		});
 	});
 });

@@ -122,10 +122,10 @@ function BoardModel() {
 		switch (direction) {
 			case 'left': // fallthrough
 			case 'up':
-				return cells.reverse();
+				return $( cells.reverse() );
 			case 'right': // fallthrough
 			case 'down':
-				return cells;
+				return $( cells );
 			default:
 				throw new Error( this.constructor.name + '._getWordCandidateCellsInDirection() - invalid direction: ' + direction );
 		}
@@ -190,7 +190,7 @@ function BoardModel() {
 		return this._table.find('td.placed');
 	}
 
-	this.getPlacedWord = function() {
+	this.getPlayedWord = function() {
 		return 	$.map( this.getWordCandidateCells(), function( val, i ) {
 		  return $(val).text();
 		}).join('');
@@ -224,25 +224,6 @@ function BoardModel() {
 		return this._placedDirection;
 	}
 
-	// TODO: Move to (Game)Contorller logic
-	this.getPlacedScore = function() {
-		var score = 0;
-		var wordBonus = 1;
-		this.getPlacedCells().each( function() {
-			var letterBonus = 1;
-			var letterScore = scoreForLetter( $( this ).text() );
-			if ( $(this).hasClass('bonus') ) {
-				if ( $(this).hasClass('letter') ) {
-					letterBonus *= $(this).attr('ww_value');
-				} else if ( $(this).hasClass('word') ) {
-					wordBonus *= $(this).attr('ww_value');
-				} 
-			}
-			score += letterBonus * letterScore;
-		} );
-		return wordBonus * score;
-	}
-
 	this.addPlayedRange = function(who, range) {
 		this.log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
 
@@ -268,7 +249,7 @@ function BoardModel() {
 
 function BoardView( boardModel ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
 	/* called when board is loaded */
 	this._boardLoaded = function() {
@@ -281,8 +262,9 @@ function BoardView( boardModel ) {
 	}
 
 	this._fillSpecials = function( cells ) {
-		this.log.info('BoardView.fillSpecials(.)');
+		this.log.info( this.constructor.name + '.fillSpecials(.)' );
 		cells = ( typeof cells !== 'undefined' ? cells : this._table.find( 'td' ) ); // default to all gameboard cells
+		this.log.debug( '  ', this.constructor.name,'.fillSpecials(.) - cells.length=', cells.length );
 
 		cells.each( function() {
 			if ( $(this).hasClass( 'bonus' ) ) {
@@ -442,13 +424,33 @@ function BoardController(boardModel, boardView) {
 		return true;
 	}
 
-	this.removePlaced = function() {
+	this.resetWord = function() {
 		var cells = this._boardModel.getPlacedCells();
 		this._boardModel.unplaceAll();
 		this._boardView._fillSpecials( cells );
+		this.unhighlightPlaceablePositions();
+	}
+
+	this.getPlayedScore = function() {
+		var score = 0;
+		var wordBonus = 1;
+		this._boardModel.getWordCandidateCells().each( function() {
+			var letterBonus = 1;
+			var letterScore = scoreForLetter( $( this ).text() );
+			if ( $(this).hasClass('bonus') ) {
+				if ( $(this).hasClass('letter') ) {
+					letterBonus *= $(this).attr('ww_value');
+				} else if ( $(this).hasClass('word') ) {
+					wordBonus *= $(this).attr('ww_value');
+				} 
+			}
+			score += letterBonus * letterScore;
+		} );
+		return wordBonus * score;
 	}
 
 
+	// constructor code
 	this._boardModel = boardModel;
 	this._boardView = boardView;
 

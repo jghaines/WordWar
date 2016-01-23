@@ -88,7 +88,7 @@ function GameController(remote) {
 	/* user has clicked Move or Attack */ 
 	this.playWord = function( moveType ) {
 		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
-		var wordPlaced = this._boardModel.getPlacedWord();
+		var wordPlaced = this._boardModel.getPlayedWord();
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
 			this._boardView.flash('flash-error');
@@ -102,8 +102,8 @@ function GameController(remote) {
 
 		var myPlay = new Play(
 			moveType,
-			this._boardModel.getPlacedWord(),
-			this._boardModel.getPlacedScore(), //
+			this._boardModel.getPlayedWord(),
+			this._boardController.getPlayedScore(), //
 			this._boardModel.getPlacedRange(),
 			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() )
 		);
