@@ -365,7 +365,7 @@ function BoardController(boardModel, boardView) {
 		this._boardModel.setUnplaceableAll();
 	}
 
-	this._highlightNextPlaceable = function(fromCell, direction) {
+	this._highlightNextPlaceable = function( fromCell, direction ) {
 		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction + ')');
 		var coords = this._boardModel.getCoordinatesForCell( fromCell );
 
@@ -387,11 +387,14 @@ function BoardController(boardModel, boardView) {
 		        default:
 		        	throw this.constructor.name + '._highlightNextPlaceable() - invalid direction=' + direction;
 		    }
-			this.log.debug( this.constructor.name, '._highlightNextPlaceable()loop coords=', coords );
+			this.log.debug( this.constructor.name, '._highlightNextPlaceable() loop coords=', coords );
 	    	placeableCell = this._boardModel.getCellAtCoordinates( coords );
-		} while ( placeableCell && ( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )));
+		} while ( placeableCell && // stop when no more cells
+				! placeableCell.hasClass( 'block' ) && // stop at a block
+				( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )) // iterate over placed and static
+				);
 
-		if ( placeableCell ) {
+		if ( placeableCell && ! placeableCell.hasClass( 'block' )) {
 			placeableCell.addClass( 'placeable' );
 			placeableCell.attr( 'ww:direction', direction );
 		}
@@ -412,7 +415,7 @@ function BoardController(boardModel, boardView) {
 			this._highlightNextPlaceable(playerCell, 'left');
 			this._highlightNextPlaceable(playerCell, 'right');
 		} else {
-			var direction = $(placedCells).first().attr('ww:direction');
+			var direction = this._boardModel.getPlacedDirection();
 			this._highlightNextPlaceable(playerCell, direction);
 		}
 	}

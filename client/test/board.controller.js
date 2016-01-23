@@ -14,8 +14,56 @@ describe('BoardController', function() {
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td class='player-local'></td><td></td><td></td><td></td><td class='test-bottom-right'></td> </tr>
 </tbody></table>
-`)
+`),			
+			'firstLetter': $( `
+<table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='player-local'></td><td class='placed'>A</td><td></td><td></td><td class='test-bottom-right'></td> </tr>
+</tbody></table>
+`),
+			'skipStatic': $( `
+<table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='player-local'></td><td class='placed'>A</td><td class='static'>P</td><td></td><td class='test-bottom-right'></td> </tr>
+</tbody></table>
+`),
+			'fullRow': $( `
+<table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='player-local'></td><td class='placed'>A</td><td class='static'>P</td><td class='placed'>P</td><td class='placed'>L</td> </tr>
+</tbody></table>
+`),
+			'block': $( `
+<table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='player-local'></td><td class='placed'>A</td><td class='block'></td><td></td><td class='test-bottom-right'></td> </tr>
+</tbody></table>
+`),
 		};
+
+		this.testDirection = {
+			'startPosition' : 'any',
+			'firstLetter' 	: 'right',
+			'skipStatic' 	: 'right',
+			'fullRow'	 	: 'right',
+			'block'	 		: 'right',
+		}
 
 		this._boardModel = new BoardModel();
 		this._boardView = new BoardView( this._boardModel );
@@ -24,8 +72,10 @@ describe('BoardController', function() {
 	});
 
 	describe( '#highlightPlaceablePositions()', function () {
-		it( 'from the start position, it should highlight two cells', function() {
-			this._boardModel._table = this.testTables['startPosition'];
+		it( 'from the start position, it should highlight two adjacent cells', function() {
+			this._boardModel._table 			= this.testTables['startPosition'];
+			this._boardModel._placedDirection 	= this.testDirection['startPosition'];
+
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
 			expect( cells.length ).to.equal( 2 );
@@ -34,9 +84,45 @@ describe('BoardController', function() {
 			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).row ).to.equal( 5 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).col ).to.equal( 1 );
 		});
+
+		it( 'should highlight only the next cell, when a single letter is placed', function() {
+			this._boardModel._table 			= this.testTables['firstLetter'];
+			this._boardModel._placedDirection 	= this.testDirection['firstLetter'];
+
+			this._boardController.highlightPlaceablePositions();
+			var cells = this._boardModel._table.find( 'td.placeable' );
+			expect( cells.length ).to.equal( 1 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).to.equal( 5 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).to.equal( 2 );
+		});
+
+		it( 'should skip over static letters', function() {
+			this._boardModel._table 			= this.testTables['skipStatic'];
+			this._boardModel._placedDirection 	= this.testDirection['skipStatic'];
+
+			this._boardController.highlightPlaceablePositions();
+			var cells = this._boardModel._table.find( 'td.placeable' );
+			expect( cells.length ).to.equal( 1 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).to.equal( 5 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).to.equal( 3 );
+		});
+
+		it( 'should highlight nothing on a full row', function() {
+			this._boardModel._table 			= this.testTables['fullRow'];
+			this._boardModel._placedDirection 	= this.testDirection['fullRow'];
+
+			this._boardController.highlightPlaceablePositions();
+			var cells = this._boardModel._table.find( 'td.placeable' );
+			expect( cells.length ).to.equal( 0 );
+		});
+
+		it( 'should stop when there is a block', function() {
+			this._boardModel._table 			= this.testTables['block'];
+			this._boardModel._placedDirection 	= this.testDirection['block'];
+
+			this._boardController.highlightPlaceablePositions();
+			var cells = this._boardModel._table.find( 'td.placeable' );
+			expect( cells.length ).to.equal( 0 );
+		});
 	});
-
 });
-
-
-
