@@ -356,7 +356,9 @@ function BoardController(boardModel, boardView) {
 	this.addPlayedRange = function( who, range ) {
 		this._boardModel.foreachRange( range, function( cell ) {
 			cell.addClass( 'played-' + who );
-			cell.attr( 'ww_value', 1 ); // reset bonuses
+			if ( cell.hasClass('bonus') ) {
+				cell.attr( 'ww_value', 1 ); // bonus will only work on first play
+			}
 		} );
 	}
 
