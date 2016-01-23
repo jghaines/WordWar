@@ -250,7 +250,7 @@ function BoardModel() {
 
 function BoardView( boardModel ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 	/* called when board is loaded */
 	this._boardLoaded = function() {
