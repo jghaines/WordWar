@@ -186,7 +186,7 @@ function GameController(remote) {
 	this.executeMove = function( who, play ) {
 		this.log.info( this.constructor.name + '.executeMove(who=' + who + ', play=.)' );
 		this._boardModel.setPlayerCell( who, play.newPosition );
-		this._boardModel.addPlayedRange( who, play.playRange );
+		this._boardController.addPlayedRange( who, play.playRange );
 	}
 
 	this.executeAttack = function( who, play ) {

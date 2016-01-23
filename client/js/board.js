@@ -224,12 +224,13 @@ function BoardModel() {
 		return this._placedDirection;
 	}
 
-	this.addPlayedRange = function(who, range) {
-		this.log.info('BoardModel.addPlayedRange(who=' + who + ', range=', range, ')');
+	this.foreachRange = function( range, callback ) {
+		this.log.info( this.constructor.name + '.addPlayedRange(..)');
 
 		for( var row = range.min.row; row <= range.max.row ; ++row ) {
 			for( var col = range.min.col; col <= range.max.col ; ++col ) {
-				this._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' ).addClass( 'played-' + who );
+				var cell = this._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' );
+				callback( cell );
 			}			
 		}
 	}
@@ -348,8 +349,15 @@ function BoardController(boardModel, boardView) {
 	this._boardLoaded = function() {
 		this.log.info( this.constructor.name + '._boardLoaded()' );
 
-		this._boardModel.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
-		this._boardModel.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
+		this.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
+		this.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
+	}
+
+	this.addPlayedRange = function( who, range ) {
+		this._boardModel.foreachRange( range, function( cell ) {
+			cell.addClass( 'played-' + who );
+			cell.attr( 'ww_value', 1 ); // reset bonuses
+		} );
 	}
 
 	this.unhighlightPlaceablePositions = function() {
