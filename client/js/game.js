@@ -127,8 +127,8 @@ function GameController(remote) {
  	}
 
 	// State machine callback - local player and remote compnent have completed move
- 	this.moveComplete = function() {
-		this.log.info( this.constructor.name + '.moveComplete()' );
+ 	this.endTurn = function() {
+		this.log.info( this.constructor.name + '.endTurn()' );
 
 		this._boardModel.unplaceAll();
 
@@ -251,8 +251,8 @@ function GameController(remote) {
 		this.newTurn(msg);
 	}).bind(this));
 
-	this._stateContext.onMoveComplete( (function() {
-		this.moveComplete();
+	this._stateContext.onendTurn( (function() {
+		this.endTurn();
 	}).bind(this) );
 
 	this._stateContext.onStatusUpdate( (function(statusMessage) {

@@ -41,9 +41,9 @@ function StateContext(remote) {
  	}
 
  	// local & remove moves complete - callback from States
- 	this.moveComplete = function(args) {
- 		this.log.info( this.constructor.name + '.moveComplete(.)'); 		
- 		this._moveCompleteCallbacks.fire(args);
+ 	this.endTurn = function(args) {
+ 		this.log.info( this.constructor.name + '.endTurn(.)'); 		
+ 		this._endTurnCallbacks.fire(args);
  	}
 
 
@@ -77,8 +77,8 @@ function StateContext(remote) {
 		this._newTurnCallbacks.add(callback);
 	}
 
-	this.onMoveComplete = function(callback) {
-		this._moveCompleteCallbacks.add(callback);
+	this.onendTurn = function(callback) {
+		this._endTurnCallbacks.add(callback);
 	}
 
 	this.onStatusUpdate = function(callback) {
@@ -92,7 +92,7 @@ function StateContext(remote) {
 
 	this._newGameCallbacks = $.Callbacks();
 	this._newTurnCallbacks = $.Callbacks();
-	this._moveCompleteCallbacks = $.Callbacks();
+	this._endTurnCallbacks = $.Callbacks();
 	this._statusUpdateCallbacks = $.Callbacks();
 
 	this._state = new StateWaitForGameStart( this );
@@ -134,8 +134,8 @@ function StateWaitForGameStart( context ) {
 		throw this.constructor.name + '.remoteMove' + ' invalid state transition';
 	}
 
-	this.moveComplete = function() {
-		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
+	this.endTurn = function() {
+		throw this.constructor.name + '.endTurn' + ' invalid state transition';
 	}
 }
 
@@ -158,8 +158,8 @@ function StateWaitForMove( context ) {
 		context.setState( new StateWaitForLocal( this.context ));	
 	}
 
-	this.moveComplete = function() {
-		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
+	this.endTurn = function() {
+		throw this.constructor.name + '.endTurn' + ' invalid state transition';
 	}
 }
 
@@ -177,12 +177,12 @@ function StateWaitForRemote( context ) {
 
 	this.remoteMove = function() {
 		this.log.info(this.constructor.name, ' -(remoteMove)-> StateWaitForMove')
-		context.moveComplete();
+		context.endTurn();
 		context.setState( new StateWaitForMove( this.context ));	
 	}
 
-	this.moveComplete = function() {
-		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
+	this.endTurn = function() {
+		throw this.constructor.name + '.endTurn' + ' invalid state transition';
 	}
 }
 
@@ -197,7 +197,7 @@ function StateWaitForLocal( context ) {
 
 	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForMove')
-		context.moveComplete();
+		context.endTurn();
 		context.setState( new StateWaitForMove( this.context ));	
 	}
 
@@ -205,7 +205,7 @@ function StateWaitForLocal( context ) {
 		throw this.constructor.name + '.remoteMove' + ' invalid state transition';
 	}
 
-	this.moveComplete = function() {
-		throw this.constructor.name + '.moveComplete' + ' invalid state transition';
+	this.endTurn = function() {
+		throw this.constructor.name + '.endTurn' + ' invalid state transition';
 	}
 }
