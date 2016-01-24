@@ -15,6 +15,8 @@ function GameController(remote) {
 
 		this._scoreModel.setScore( 'local',  gameInfo.startScore );
 		this._scoreModel.setScore( 'remote', gameInfo.startScore );
+		this._scoreModel.setLost( 'local', false );
+		this._scoreModel.setLost( 'local', false );
 
 		this._boardModel.loadBoard(	boardUrl );
 	}
@@ -161,30 +163,56 @@ function GameController(remote) {
 	 		this.executeAttack( 'remote',  remotePlay );
 			this.executeAttack( 'local',   localPlay );
  		}
- 		this.calculateScore( localPlay, remotePlay );
+ 		var gameEnded = this.updateScore( localPlay, remotePlay );
 		this.addPlayedItem( 'local',  localPlay );
 		this.addPlayedItem( 'remote', remotePlay );
+
+		if ( gameEnded ) {
+ 			this.endGame();
+ 		}
+	}
+
+	// update score, return true if game has ended
+ 	this.updateScore = function( localPlay, remotePlay ) {
+
+ 		if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ||
+ 			 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue > remotePlay.wordValue ) {
+ 			// local win
+ 			localPlay.score = 0;
+ 			remotePlay.score = -1 * this._ATTACK_MULTIPLIER * localPlay.wordValue;
+
+ 		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ||
+ 					'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue < remotePlay.wordValue ) {
+ 			// remote win
+ 			localPlay.score = -1 * this._ATTACK_MULTIPLIER * remotePlay.wordValue;
+ 			remotePlay.score = 0;
+
+ 		} else if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+ 			localPlay.score = localPlay.wordValue;
+ 			remotePlay.score = remotePlay.wordValue;
+
+ 		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue == remotePlay.wordValue ) {
+ 			// attack with draw
+ 			localPlay.score = 0;
+ 			remotePlay.score = 0;
+
+ 		} else { // draw: either move-move or equal score attacks
+ 			throw new Error( this.constructor.name + '.updateScore() - unhandled case' )	;
+ 		}
 
 		this._scoreModel.incrementScore( 'local',  localPlay.score );
 		this._scoreModel.incrementScore( 'remote', remotePlay.score );
 
-	}
+		if ( this._scoreModel.getScore( 'local' ) < 0 ) {
+			this._scoreModel.setLost( 'local', true );
+			return true;
+		}
 
- 	this.calculateScore = function( playA, playB ) {
- 		if ( 'move' == playA.moveType && 'move' == playB.moveType ) {
- 			playA.score = playA.wordValue;
- 			playB.score = playB.wordValue;
- 		} else if ( 'attack' == playA.moveType && 'move' == playB.moveType ) {
- 			playA.score = 0;
- 			playB.score = -1 * playA.wordValue * this._ATTACK_MULTIPLIER;
- 		} else if ( 'move' == playA.moveType && 'attack' == playB.moveType ) {
- 			playA.score = -1 * playB.wordValue * this._ATTACK_MULTIPLIER;
- 			playB.score = 0;
- 		} else if ( 'attack' == playA.moveType && 'attack' == playB.moveType ) {
- 			var highestScore = Math.max( playA.wordValue, playB.wordValue );
- 			playA.score = playA.wordValue - highestScore;
- 			playB.score = playB.wordValue - highestScore;
- 		}
+		if ( this._scoreModel.getScore( 'remote' ) < 0 ) {
+			this._scoreModel.setLost( 'remote', true );
+			return true;
+		}
+		return false;
  	}
 
 	this.executeMove = function( who, play ) {
@@ -200,6 +228,7 @@ function GameController(remote) {
 	}
 
 	this.addPlayedItem = function( who, play ) {
+		this.log.info( this.constructor.name + '.addPlayedItem(who=' + who + ', play=.)' );
 		this._boardView.addPlayedItem( who,
 			play.moveType.toTitleCase() + ': ' + play.word +
 			'(' + play.wordValue + ') ' +
@@ -209,6 +238,17 @@ function GameController(remote) {
 		);
 
 	}
+
+	this.endGame = function() {
+		this.log.info( this.constructor.name + '.endGame())' );
+		this.setStatus( 'End of Game' );
+		this._lettersView.setEnabled( false );
+
+		this._buttonsView.enableMoveButton(   false );
+		this._buttonsView.enableAttackButton( false );
+		this._buttonsView.enableResetButton(  false );		
+	 }
+
 
 	// State machine callback
 	this.statusUpdate = function ( statusMessage ) {

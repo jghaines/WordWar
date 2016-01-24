@@ -13,6 +13,10 @@ function ScoreModel() {
 		this.setScore( who, this.getScore( who ) + value );
 	}
 
+	this.setLost = function( who, hasLost ) {
+		this._score[who].toggleClass( 'lost', hasLost );
+	}
+
 	// constructor
 	this._score = {
 		'local': 	$( 'span.score.local' ),

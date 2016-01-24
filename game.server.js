@@ -48,7 +48,7 @@ gameServer.createGame = function(player) {
 	var newGame = {
 	    id : 			UUID(),
 	    players: 		[ player ],
-	    startScore: 	50,
+	    startScore: 	0,
 	    turn: 			0,
 	    playsThisTurn: 	0,
 	    board: 			'./boards/' + gameServer.defaultBoard,
