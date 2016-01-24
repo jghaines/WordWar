@@ -6,14 +6,18 @@ function ScoreModel() {
 	}
 
 	this.getScore = function( who ) {
-		this._score[who].text();
+		return parseInt( this._score[who].text() );
 	}
 
+	this.incrementScore = function( who, value ) {
+		this.setScore( who, this.getScore( who ) + value );
+	}
+
+	// constructor
 	this._score = {
 		'local': 	$( 'span.score.local' ),
 		'remote': 	$( 'span.score.remote' ),
 	};
-
 	this.setScore( 'local', 0 );
 	this.setScore( 'remote', 0 );
 }

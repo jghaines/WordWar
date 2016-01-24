@@ -138,10 +138,6 @@ function GameController(remote) {
  		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
  		remotePlay.playRange   = this._boardModel.rotateRange( remotePlay.playRange );
 
- 		this.calculateScore( localPlay, remotePlay );
-		this.addPlayedItem( 'local',  localPlay );
-		this.addPlayedItem( 'remote', remotePlay );
-
  		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
 	 		// show the local player updates
 	 		this.executeMove( 'local',  localPlay );
@@ -165,6 +161,13 @@ function GameController(remote) {
 	 		this.executeAttack( 'remote',  remotePlay );
 			this.executeAttack( 'local',   localPlay );
  		}
+ 		this.calculateScore( localPlay, remotePlay );
+		this.addPlayedItem( 'local',  localPlay );
+		this.addPlayedItem( 'remote', remotePlay );
+
+		this._scoreModel.incrementScore( 'local',  localPlay.score );
+		this._scoreModel.incrementScore( 'remote', remotePlay.score );
+
 	}
 
  	this.calculateScore = function( playA, playB ) {
