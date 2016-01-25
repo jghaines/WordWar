@@ -51,7 +51,7 @@ describe('AttackBeatsMove', function() {
 	});
 });
 
-describe.only('AttackPenalisesMove', function() {
+describe('AttackPenalisesMove', function() {
 	beforeEach(	function() {
 		this.scoreStrategy = new AttackPenalisesMove();
 	});
@@ -89,14 +89,14 @@ describe.only('AttackPenalisesMove', function() {
 			var playA = { moveType : 'attack', wordValue : 12 };
 			var playB = { moveType : 'attack', wordValue : 15 };
 			this.scoreStrategy.calculateScore( playA, playB );
-			expect( playA.score ).to.equal( -30 );
+			expect( playA.score ).to.equal( -2 * playB.wordValue );
 			expect( playB.score ).to.equal( 0 );
 		});
 		it('should penalise the lower-scored player in an attack - when players are swapped', function () {
 			var playA = { moveType : 'attack', wordValue : 12 };
 			var playB = { moveType : 'attack', wordValue : 15 };
 			this.scoreStrategy.calculateScore( playB, playA ); // note order
-			expect( playA.score ).to.equal( -30 );
+			expect( playA.score ).to.equal( -2 * playB.wordValue );
 			expect( playB.score ).to.equal( 0 );
 		});
 	});
