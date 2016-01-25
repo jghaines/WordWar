@@ -55,6 +55,16 @@ describe('BoardController', function() {
 	<tr> <td class='player-local'></td><td class='placed'>A</td><td class='block'></td><td></td><td class='test-bottom-right'></td> </tr>
 </tbody></table>
 `),
+			'overlappingPlayers': $( `
+<table><tbody>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td class="player-local player-remote"></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td></td><td class='placed'>A</td><td class='block'></td><td></td><td class='test-bottom-right'></td> </tr>
+</tbody></table>
+`),
 		};
 
 		this.testDirection = {
@@ -123,6 +133,17 @@ describe('BoardController', function() {
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
 			expect( cells.length ).to.equal( 0 );
+		});
+	});
+
+	describe( '#arePlayersOnSameCell()', function () {
+		it( 'should return false from the start position', function() {
+			this._boardModel._table = this.testTables['startPosition'];
+			expect( this._boardController.arePlayersOnSameCell() ).to.equal( false );
+		});
+		it( 'should return true when they share a position', function() {
+			this._boardModel._table = this.testTables['overlappingPlayers'];
+			expect( this._boardController.arePlayersOnSameCell() ).to.equal( true );
 		});
 	});
 });

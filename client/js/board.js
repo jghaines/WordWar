@@ -352,6 +352,14 @@ function BoardController(boardModel, boardView) {
 		this.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
 	}
 
+	this.arePlayersOnSameCell = function() {
+ 		var localCoords  = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' ));
+ 		var remoteCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' ));
+
+ 		return ( localCoords.equals( remoteCoords ));
+	}
+
+
 	this.addPlayedRange = function( who, range ) {
 		this._boardModel.foreachRange( range, function( cell ) {
 			cell.addClass( 'played-' + who );

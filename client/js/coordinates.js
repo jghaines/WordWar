@@ -1,7 +1,7 @@
 function Coordinates( _row, _col ) {
 
 
-	function equals( other ) {
+	this.equals = function( other ) {
 		return ( this.row == other.row && this.col == other.col );
 	}
 
