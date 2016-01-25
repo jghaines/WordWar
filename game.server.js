@@ -10,11 +10,16 @@ var
 gameServer.log = require('loglevel');
 gameServer.log.setLevel('INFO');
 
-gameServer.defaultBoard = '1.html';
-if( process.argv.length > 2 ) {
-	gameServer.defaultBoard = process.argv[2];
-	gameServer.log.info('Default board:', gameServer.defaultBoard);
+gameServer.defaultBoard = '1.html'; // default
+
+if (  undefined !== process.env.BOARD_NAME ) { // override from (heroku) ENVironment variable
+	gameServer.defaultBoard = process.env.BOARD_NAME;
 }
+
+if ( process.argv.length > 2 ) { // override from command line
+	gameServer.defaultBoard = process.argv[2];
+}
+gameServer.log.info('Default board:', gameServer.defaultBoard);
 
 
 gameServer.findGame = function(player) {
