@@ -7,7 +7,7 @@ describe('BoardController', function() {
 		this.testTables = {
 			'startPosition': $( `
 <table><tbody>
-	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td class='player-remote'></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
@@ -17,7 +17,7 @@ describe('BoardController', function() {
 `),			
 			'firstLetter': $( `
 <table><tbody>
-	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td class='player-remote'></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
@@ -27,7 +27,7 @@ describe('BoardController', function() {
 `),
 			'skipStatic': $( `
 <table><tbody>
-	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td class='player-remote'></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
@@ -37,7 +37,7 @@ describe('BoardController', function() {
 `),
 			'fullRow': $( `
 <table><tbody>
-	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td class='player-remote'></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
@@ -47,7 +47,7 @@ describe('BoardController', function() {
 `),
 			'block': $( `
 <table><tbody>
-	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td></td> </tr>
+	<tr> <td class='test-top-left'></td><td></td><td></td><td></td><td class='player-remote'></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>

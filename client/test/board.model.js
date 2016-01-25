@@ -36,23 +36,23 @@ describe('BoardModel', function() {
 
 	describe('#getCellAtCoordinates()', function () {
 		it('should return null for out of range', function () {
-			expect( this._boardModel.getCellAtCoordinates( { row: -1, col:  0 } ) ).to.equal( null );
-			expect( this._boardModel.getCellAtCoordinates( { row:  0, col: -1 } ) ).to.equal( null );
-			expect( this._boardModel.getCellAtCoordinates( { row:  6, col:  0 } ) ).to.equal( null );
-			expect( this._boardModel.getCellAtCoordinates( { row:  0, col:  5 } ) ).to.equal( null );
+			expect( this._boardModel.getCellAtCoordinates( new Coordinates( -1,  0 ))).to.equal( null );
+			expect( this._boardModel.getCellAtCoordinates( new Coordinates(  0, -1 ))).to.equal( null );
+			expect( this._boardModel.getCellAtCoordinates( new Coordinates(  6,  0 ))).to.equal( null );
+			expect( this._boardModel.getCellAtCoordinates( new Coordinates(  0,  5 ))).to.equal( null );
 		});
 	});
 
 	describe('#getCellAtCoordinates()', function () {
 		it('should return correct cell', function () {
-			var cell = this._boardModel.getCellAtCoordinates( { row: 2, col: 2 } );
+			var cell = this._boardModel.getCellAtCoordinates( new Coordinates( 2, 2 ));
 			expect( cell.hasClass('test-middle') ).to.equal( true );
 		});
 	});
 
 	describe('#getCoordinatesForCell()', function () {
 		it('should give correct coords', function () {
-			var cell = this._boardModel.getCellAtCoordinates( { row: 2, col: 2 } );
+			var cell = this._boardModel.getCellAtCoordinates( new Coordinates( 2, 2 ));
 			expect( this._boardModel.getCoordinatesForCell( cell ).row ).to.equal( 2 );
 			expect( this._boardModel.getCoordinatesForCell( cell ).col ).to.equal( 2 );
 		});

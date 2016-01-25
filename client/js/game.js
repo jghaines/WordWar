@@ -163,6 +163,11 @@ function GameController( remoteProxy, scoreStrategy ) {
 	 		this.executeAttack( 'remote',  remotePlay );
 			this.executeAttack( 'local',   localPlay );
  		}
+
+ 		// if players have landed on same cell
+ 		if ( this._boardController.arePlayersOnSameCell() ) {
+ 		}
+
  		var gameEnded = this.updateScore( localPlay, remotePlay );
 		this.addPlayedItem( 'local',  localPlay );
 		this.addPlayedItem( 'remote', remotePlay );

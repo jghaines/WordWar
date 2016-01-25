@@ -23,12 +23,12 @@ function BoardModel() {
  	}
 
 	this.getCoordinatesForCell = function( cell ) {
-		return { row: cell.parent().index(), col: cell.index() };
+		return new Coordinates( cell.parent().index(), cell.index() );
 	}
 
 	this.getCellAtCoordinates = function( coords ) {
-		if ( ! coords.hasOwnProperty('row') || ! coords.hasOwnProperty( 'col' ) ) {
-			throw new Error( this.constructor.name + '.getCellAtCoordinates() - expected coords object' );
+		if ( coords.constructor.name != 'Coordinates') {
+			throw new Error( this.constructor.name + '.getCellAtCoordinates() - expected coordinates object' );
 		}
 
 		if ( coords.row < 0 || coords.row >= this.getHeight() ||
@@ -42,8 +42,8 @@ function BoardModel() {
 	this.getCellRange = function( cell ) {
 		var coords = this.getCoordinatesForCell( cell );
 		return {
-			min: { row: coords.row, col: coords.col },
-			max: { row: coords.row, col: coords.col }
+			min: new Coordinates( coords.row, coords.col ),
+			max: new Coordinates( coords.row, coords.col )
 		};
 	}
 
@@ -140,10 +140,9 @@ function BoardModel() {
 
 
  	this.rotatePosition = function( position ) {
- 		return {
- 			row: ( this.getHeight() - position.row - 1 ),
- 			col: ( this.getWidth()  - position.col - 1 )
- 		};
+ 		return new Coordinates (
+ 			( this.getHeight() - position.row - 1 ),
+ 			( this.getWidth()  - position.col - 1 ) );
  	}
 
  	this.rotateRange = function( range ) {
@@ -203,8 +202,8 @@ function BoardModel() {
 		var maxCoordinates = this.getCoordinatesForCell( placedCells.last() );
 
 		return {
-			min: { row: minCoordinates.row, col: minCoordinates.col },
-			max: { row: maxCoordinates.row, col: maxCoordinates.col }
+			min: new Coordinates( minCoordinates.row, minCoordinates.col ),
+			max: new Coordinates( maxCoordinates.row, maxCoordinates.col )
 		};
 	}
 
