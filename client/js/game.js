@@ -1,6 +1,6 @@
 "use strict";
 
-function GameController(remote) {
+function GameController( remoteProxy, scoreStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
@@ -174,31 +174,7 @@ function GameController(remote) {
 
 	// update score, return true if game has ended
  	this.updateScore = function( localPlay, remotePlay ) {
-
- 		if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ||
- 			 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue > remotePlay.wordValue ) {
- 			// local win
- 			localPlay.score = 0;
- 			remotePlay.score = -1 * this._ATTACK_MULTIPLIER * localPlay.wordValue;
-
- 		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ||
- 					'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue < remotePlay.wordValue ) {
- 			// remote win
- 			localPlay.score = -1 * this._ATTACK_MULTIPLIER * remotePlay.wordValue;
- 			remotePlay.score = 0;
-
- 		} else if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
- 			localPlay.score = localPlay.wordValue;
- 			remotePlay.score = remotePlay.wordValue;
-
- 		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType && localPlay.wordValue == remotePlay.wordValue ) {
- 			// attack with draw
- 			localPlay.score = 0;
- 			remotePlay.score = 0;
-
- 		} else { // draw: either move-move or equal score attacks
- 			throw new Error( this.constructor.name + '.updateScore() - unhandled case' )	;
- 		}
+		this._scoreStrategy.calculateScore( localPlay, remotePlay );
 
 		this._scoreModel.incrementScore( 'local',  localPlay.score );
 		this._scoreModel.incrementScore( 'remote', remotePlay.score );
@@ -212,8 +188,7 @@ function GameController(remote) {
 			this._scoreModel.setLost( 'remote', true );
 			return true;
 		}
-		return false;
- 	}
+	}
 
 	this.executeMove = function( who, play ) {
 		this.log.info( this.constructor.name + '.executeMove(who=' + who + ', play=.)' );
@@ -249,7 +224,6 @@ function GameController(remote) {
 		this._buttonsView.enableResetButton(  false );		
 	 }
 
-
 	// State machine callback
 	this.statusUpdate = function ( statusMessage ) {
 		this._boardView.setStatus( statusMessage );
@@ -259,7 +233,8 @@ function GameController(remote) {
 	this._ATTACK_RANGE = 2.0; // how far we can attack
 	this._ATTACK_MULTIPLIER = 2; // attacks are double damange
 
-	this._remote = remote;
+	this._remote = remoteProxy;
+	this._scoreStrategy = scoreStrategy;
 	this._stateContext = new StateContext( this._remote );
 
 	this._lettersModel = new LettersModel();

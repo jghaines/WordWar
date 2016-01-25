@@ -1,10 +1,11 @@
 'use strict';
 
 var gc = {};
-var remote = {};
 
 window.onload = function(){
 	var socket = io();
-	remote = new RemoteController(socket);
-	gc = new GameController(remote);
+	var remote = new RemoteController(socket);
+	var scoreStrategy = new AttackBeatsMove();
+
+	gc = new GameController(remote, scoreStrategy);
 }
