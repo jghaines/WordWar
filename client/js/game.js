@@ -241,7 +241,7 @@ function GameController(remote) {
 
 	this.endGame = function() {
 		this.log.info( this.constructor.name + '.endGame())' );
-		this.setStatus( 'End of Game' );
+		this.statusUpdate( 'End of Game' );
 		this._lettersView.setEnabled( false );
 
 		this._buttonsView.enableMoveButton(   false );
