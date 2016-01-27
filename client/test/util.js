@@ -47,6 +47,12 @@ describe('Array', function() {
 
 describe('String', function() {
 	describe('#toTitleCase()', function () {
+		it('should work on empty string', function () {
+			expect( ''.toTitleCase() ).to.equal( '' );
+		});
+		it('should work on single letter', function () {
+			expect( 'a'.toTitleCase() ).to.equal( 'A' );
+		});
 		it('should work on lowercase words', function () {
 			expect( 'lowercase'.toTitleCase() ).to.equal( 'Lowercase' );
 		});

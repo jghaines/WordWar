@@ -16,7 +16,7 @@ function GameController( remoteProxy, scoreStrategy ) {
 		this._scoreModel.setScore( 'local',  gameInfo.startScore );
 		this._scoreModel.setScore( 'remote', gameInfo.startScore );
 		this._scoreModel.setLost( 'local', false );
-		this._scoreModel.setLost( 'local', false );
+		this._scoreModel.setLost( 'remote', false );
 
 		this._boardModel.loadBoard(	boardUrl );
 	}
@@ -25,7 +25,7 @@ function GameController( remoteProxy, scoreStrategy ) {
 		this.log.info( this.constructor.name + '.newTurn(.)' );
 		this.log.debug( this.constructor.name, '.newTurn( turnInfo=', turnInfo, ')' );
 
-		for (var i = turnInfo.letters.length - 1; i >= 0; i--) {
+		for ( var i = turnInfo.letters.length - 1; i >= 0; i-- ) {
 			this._lettersModel.setLetter(i, turnInfo.letters[i] );
 			this._lettersModel.setPlaced(i, false);
 		};
@@ -164,8 +164,12 @@ function GameController( remoteProxy, scoreStrategy ) {
 			this.executeAttack( 'local',   localPlay );
  		}
 
- 		// if players have landed on same cell
+ 		// if players have landed on same cell, retreat both players
  		if ( this._boardController.arePlayersOnSameCell() ) {
+ 			this.retreatPlayer( 'local', localPlay );
+ 			this.retreatPlayer( 'remote', remotePlay );
+			this._boardModel.setPlayerCell( 'local', localPlay.newPosition );
+			this._boardModel.setPlayerCell( 'remote', remotePlay.newPosition );
  		}
 
  		var gameEnded = this.updateScore( localPlay, remotePlay );
@@ -193,6 +197,7 @@ function GameController( remoteProxy, scoreStrategy ) {
 			this._scoreModel.setLost( 'remote', true );
 			return true;
 		}
+		return false;
 	}
 
 	this.executeMove = function( who, play ) {
@@ -216,7 +221,30 @@ function GameController( remoteProxy, scoreStrategy ) {
 			play.score,
 			play.moveType
 		);
+	}
 
+	this.knockBackPlayer = function( play ) {
+		if ( play.playRange.min.row == play.playRange.max.row ) { // vertical
+			if ( play.playRange.min.col < play.newPosition.col ) {
+				play.newPosition.col--;
+			} else if ( play.playRange.min.col > play.newPosition.col ) {
+				play.newPosition.col++;
+			} else {
+				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
+			}
+
+		} else if ( play.playRange.min.col == play.playRange.max.col ) { // horizontal
+			if ( play.playRange.min.row < play.newPosition.row ) {
+				play.newPosition.row--;
+			} else if ( play.playRange.min.row > play.newPosition.row ) {
+				play.newPosition.row++
+			} else {
+				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled horizontal retreat');
+			}
+
+		} else {
+			throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled directional retreat');			
+		}
 	}
 
 	this.endGame = function() {
