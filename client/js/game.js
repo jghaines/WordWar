@@ -137,9 +137,9 @@ function GameController( remoteProxy, scoreStrategy ) {
 		var localPlay  = this._stateContext.getLocalPlay();
 		var remotePlay = this._stateContext.getRemotePlay();
  		// map the remote play coordinates
- 		remotePlay.newPosition = this._boardModel.rotatePosition( remotePlay.newPosition );
- 		remotePlay.playRange   = this._boardModel.rotateRange( remotePlay.playRange );
-
+ 		remotePlay.newPosition = remotePlay.newPosition.getRotated( this._boardModel.getBoardRange() );
+ 		remotePlay.playRange   = remotePlay.playRange.getRotated( this._boardModel.getBoardRange() );
+ 		
  		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
 	 		// show the local player updates
 	 		this.executeMove( 'local',  localPlay );

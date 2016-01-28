@@ -1,0 +1,52 @@
+'use strict';
+
+function CoordRange( _min, _max ) {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
+	this.loadFromJson = function( json ) {
+		this.min = new Coordinates();
+		this.max = new Coordinates();
+
+		this.min.loadFromJson( json.min );
+		this.max.loadFromJson( json.max );
+	}
+
+	this.toJSON = function() {
+		return {
+			min: this.min,
+			max: this.max
+		};
+	}
+
+	this.equals = function( other ) {
+		return ( this.min.equals( other.min ) && this.max.equals( other.max ) );
+	}
+
+	this.getRotated = function( outerRange ) {
+		return new CoordRange( this.max.getRotated( outerRange ), this.min.getRotated( outerRange ) );
+	}
+
+	this.foreach = function( callback ) {
+		this.log.info( this.constructor.name + '.foreach(.)');
+
+		for ( var row = this.min.row; row <= this.max.row ; ++row ) {
+			for ( var col = this.min.col; col <= this.max.col ; ++col ) {
+				callback( new Coordinates( row, col ));
+			}			
+		}
+	}
+
+	if ( _min !== undefined ) {
+		if ( _min.constructor.name != 'Coordinates' ) {
+			throw new Error( this.constructor.name + '() expected Coordinates min parameter' );
+		}
+		this.min = _min;
+	}
+	if ( _max !== undefined ) {
+		if ( _max.constructor.name != 'Coordinates' ) {
+			throw new Error( this.constructor.name + '() expected Coordinates max parameter' );
+		}
+		this.max = _max;
+	}
+}

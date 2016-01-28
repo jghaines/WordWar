@@ -109,19 +109,6 @@ describe('BoardModel', function() {
 			expect( this.cells[4].hasClass('test-top-left') ).to.equal( true );
 		});
 	});
-
-	describe("#getCellDistance()", function () {
-		it('return the exact distance from the player to the corner', function () {
-			this.cellA = this._boardModel.getPlayerCell('local');
-			this.cellB = $( 'td.test-bottom-right', this._boardModel._table );
-			expect( this._boardModel.getCellDistance( this.cellA, this.cellB )).to.equal( 4 );
-		});
-		it('return the approximate distance from the player to the middle', function () {
-			this.cellA = this._boardModel.getPlayerCell('local');
-			this.cellB = $( 'td.test-middle', this._boardModel._table );
-			assert.closeTo( this._boardModel.getCellDistance( this.cellA, this.cellB ), 3.6, 0.1 );
-		});
-	});
 });
 
 

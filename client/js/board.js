@@ -22,6 +22,13 @@ function BoardModel() {
  		return this._table.find('tr:eq(0) td').length;
  	}
 
+ 	this.getBoardRange = function() {
+ 		return new CoordRange(
+ 			new Coordinates( 0, 0 ),
+ 			new Coordinates( this.getHeight() - 1, this.getWidth() - 1 )
+ 			);
+ 	}
+
 	this.getCoordinatesForCell = function( cell ) {
 		return new Coordinates( cell.parent().index(), cell.index() );
 	}
@@ -41,21 +48,8 @@ function BoardModel() {
 	// get 1x1 range of given cell
 	this.getCellRange = function( cell ) {
 		var coords = this.getCoordinatesForCell( cell );
-		return {
-			min: new Coordinates( coords.row, coords.col ),
-			max: new Coordinates( coords.row, coords.col )
-		};
-	}
-
-	// return the distance between cellA and cellB
-	this.getCellDistance = function( cellA, cellB ) {
-		this.log.info( this.constructor.name + '.getCellDistance(..)' );
-		var coordsA = this.getCoordinatesForCell( cellA );
-		var coordsB = this.getCoordinatesForCell( cellB );
-		this.log.debug( '  ', this.constructor.name, '.getCellDistance(..) coordsA =', coordsA, 'coordsB=', coordsB );
-		return	Math.sqrt(
-					Math.pow( coordsA.row - coordsB.row, 2 ) + 
-					Math.pow( coordsA.col - coordsB.col, 2 ) );
+		return new CoordRange(	new Coordinates( coords.row, coords.col ),
+							new Coordinates( coords.row, coords.col ) );
 	}
 
 	this.getNextCellInDirection = function( startCell, direction ) {
@@ -138,17 +132,6 @@ function BoardModel() {
 		return this._getWordCandidateCellsInDirection( this.getPlayerCell( 'local' ), this.getPlacedDirection() );
 	}
 
-
- 	this.rotatePosition = function( position ) {
- 		return new Coordinates (
- 			( this.getHeight() - position.row - 1 ),
- 			( this.getWidth()  - position.col - 1 ) );
- 	}
-
- 	this.rotateRange = function( range ) {
- 		return { min: this.rotatePosition( range.max ), max: this.rotatePosition( range.min )  };
- 	}
-
 	this.getPlayerCell = function(who) {
 		return this._table.find('td.player-' + who);
 	}
@@ -201,10 +184,8 @@ function BoardModel() {
 		var minCoordinates = this.getCoordinatesForCell( placedCells.first() );
 		var maxCoordinates = this.getCoordinatesForCell( placedCells.last() );
 
-		return {
-			min: new Coordinates( minCoordinates.row, minCoordinates.col ),
-			max: new Coordinates( maxCoordinates.row, maxCoordinates.col )
-		};
+		return new CoordRange(	new Coordinates( minCoordinates.row, minCoordinates.col ),
+							new Coordinates( maxCoordinates.row, maxCoordinates.col ));
 	}
 
 	this.getEndOfWordCell = function() {
@@ -221,17 +202,6 @@ function BoardModel() {
 
 	this.getPlacedDirection = function() {
 		return this._placedDirection;
-	}
-
-	this.foreachRange = function( range, callback ) {
-		this.log.info( this.constructor.name + '.addPlayedRange(..)');
-
-		for( var row = range.min.row; row <= range.max.row ; ++row ) {
-			for( var col = range.min.col; col <= range.max.col ; ++col ) {
-				var cell = this._table.find( 'tr:eq(' + row + ') td:eq(' + col + ')' );
-				callback( cell );
-			}			
-		}
 	}
 
 	// register callback
@@ -361,12 +331,13 @@ function BoardController(boardModel, boardView) {
 
 
 	this.addPlayedRange = function( who, range ) {
-		this._boardModel.foreachRange( range, function( cell ) {
+		range.foreach( ( function( coords ) {
+			var cell = this._boardModel.getCellAtCoordinates( coords );
 			cell.addClass( 'played-' + who );
 			if ( cell.hasClass('bonus') ) {
 				cell.attr( 'ww_value', 1 ); // bonus will only work on first play
 			}
-		} );
+		}).bind( this ));
 	}
 
 	this.unhighlightPlaceablePositions = function() {
