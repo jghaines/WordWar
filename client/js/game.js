@@ -1,6 +1,6 @@
 "use strict";
 
-function GameController( remoteProxy, scoreStrategy ) {
+function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
@@ -79,7 +79,11 @@ function GameController( remoteProxy, scoreStrategy ) {
 		this._buttonsView.enableMoveButton(  true );
 		this._buttonsView.enableResetButton( true );
 
-		var isInAttackRange = ( this._boardModel.getCellDistance( cell, this._boardModel.getPlayerCell( 'remote' )) <= this._ATTACK_RANGE );
+		var isInAttackRange = this._attackRangeStrategy.isAttackInRange(
+			this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' )),
+			this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' )),
+			this._boardModel.getPlacedRange()
+			);
 		this._buttonsView.enableAttackButton( isInAttackRange );
 	}
 
@@ -139,7 +143,7 @@ function GameController( remoteProxy, scoreStrategy ) {
  		// map the remote play coordinates
  		remotePlay.newPosition = remotePlay.newPosition.getRotated( this._boardModel.getBoardRange() );
  		remotePlay.playRange   = remotePlay.playRange.getRotated( this._boardModel.getBoardRange() );
- 		
+
  		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
 	 		// show the local player updates
 	 		this.executeMove( 'local',  localPlay );
@@ -264,11 +268,11 @@ function GameController( remoteProxy, scoreStrategy ) {
 	}
 
 	// constructor code
-	this._ATTACK_RANGE = 2.0; // how far we can attack
 	this._ATTACK_MULTIPLIER = 2; // attacks are double damange
 
 	this._remote = remoteProxy;
 	this._scoreStrategy = scoreStrategy;
+	this._attackRangeStrategy = attackRangeStrategy;
 	this._stateContext = new StateContext( this._remote );
 
 	this._lettersModel = new LettersModel();
