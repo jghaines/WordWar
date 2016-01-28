@@ -19,6 +19,10 @@ function CoordRange( _min, _max ) {
 		};
 	}
 
+	this.count = function() {
+		return ( this.max.row - this.min.row + 1 ) * ( this.max.col - this.min.col + 1 );
+	}
+
 	this.equals = function( other ) {
 		return ( this.min.equals( other.min ) && this.max.equals( other.max ) );
 	}
