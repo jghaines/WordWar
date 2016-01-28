@@ -166,8 +166,8 @@ function GameController( remoteProxy, scoreStrategy ) {
 
  		// if players have landed on same cell, retreat both players
  		if ( this._boardController.arePlayersOnSameCell() ) {
- 			this.retreatPlayer( 'local', localPlay );
- 			this.retreatPlayer( 'remote', remotePlay );
+ 			this.knockBackPlayer( localPlay );
+ 			this.knockBackPlayer( remotePlay );
 			this._boardModel.setPlayerCell( 'local', localPlay.newPosition );
 			this._boardModel.setPlayerCell( 'remote', remotePlay.newPosition );
  		}
@@ -224,22 +224,23 @@ function GameController( remoteProxy, scoreStrategy ) {
 	}
 
 	this.knockBackPlayer = function( play ) {
-		if ( play.playRange.min.row == play.playRange.max.row ) { // vertical
-			if ( play.playRange.min.col < play.newPosition.col ) {
-				play.newPosition.col--;
-			} else if ( play.playRange.min.col > play.newPosition.col ) {
+		this.log.info( this.constructor.name + '.knockBackPlayer(.)' );
+		if ( play.playRange.min.row == play.playRange.max.row ) { // horizontal move
+			if ( play.newPosition.col < play.playRange.max.col ) {
 				play.newPosition.col++;
-			} else {
-				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
-			}
-
-		} else if ( play.playRange.min.col == play.playRange.max.col ) { // horizontal
-			if ( play.playRange.min.row < play.newPosition.row ) {
-				play.newPosition.row--;
-			} else if ( play.playRange.min.row > play.newPosition.row ) {
-				play.newPosition.row++
+			} else if ( play.playRange.min.col < play.newPosition.col ) {
+				play.newPosition.col--;
 			} else {
 				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled horizontal retreat');
+			}
+
+		} else if ( play.playRange.min.col == play.playRange.max.col ) { // vertical move
+			if ( play.newPosition.row < play.playRange.max.row ) {
+				play.newPosition.row++;
+			} else if ( play.playRange.min.row < play.newPosition.row ) {
+				play.newPosition.row--;
+			} else {
+				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
 			}
 
 		} else {
