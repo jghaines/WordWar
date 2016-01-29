@@ -1,3 +1,18 @@
+
+// test the given strategy exhaustively over the board
+function checkBoard( strategy, fromCoordinates, board, range ) {
+	for ( var row = 0; row < board.length; ++row ) {
+		var line = board[row];
+		for ( var col = 0; col < line.length; ++col ) {
+			var cell = line[col];
+			var toCoordinates = new Coordinates( row, col );
+			var expectedResult = ( cell == 'X' );
+			expect( strategy.isAttackInRange( fromCoordinates, toCoordinates, range ) ).toBe( expectedResult,
+				'row: ' + row + ' col: ' + col + ' should be ' + ( expectedResult ? 'in-' : 'out-of-' ) + 'range'  );
+		}
+	}
+}
+
 describe('AttackRangeStrategy classes', function() {
 	beforeAll( function() {
 		this.coordsNW = new Coordinates( 0, 0 );
@@ -11,14 +26,14 @@ describe('AttackRangeStrategy classes', function() {
 		this.rangeBottom = new CoordRange( this.coordsSW, this.coordsSE );
 	});
 
-	describe('StaticDistanceAttackRangeStrategy', function() {
+	describe('RadiusAttackRangeStrategy', function() {
 		beforeEach( function() {
-			this.attackRange = new StaticDistanceAttackRangeStrategy(2);
+			this.attackRange = new RadiusAttackRangeStrategy(2);
 		});
 
 		describe("#isAttackInRange() - left to right", function () {
 			it("should throw an exception if not constructed with an integer", function() {
-				expect( function() { new StaticDistanceAttackRangeStrategy() } ).throw;
+				expect( function() { new RadiusAttackRangeStrategy() } ).toThrowError( /expected/ );
 			});
 
 			it("should be in range for a NW to NE word", function() {
@@ -116,39 +131,189 @@ describe('AttackRangeStrategy classes', function() {
 
 	describe('CompositeAttackRangeStrategy', function() {
 		beforeEach( function() {
-			this.attackRange = new CompositeAttackRangeStrategy(
-				[
-					{
-						fromLength: 10,
-						strategy: 	new StaticDistanceAttackRangeStrategy(3)
-					},
-					{
-						fromLength: 8,
-						strategy: 	new StaticDistanceAttackRangeStrategy(2)
-					},
-					{
-						fromLength: 6,
-						strategy: 	new StaticDistanceAttackRangeStrategy(1)
-					},
-					{
-						fromLength: 1,
-						strategy: 	new OverlappingAttackRangeStrategy()
-					},
-				] );
+			this.fromCoordinates = new Coordinates( 3, 0 );
+			this.boards = { // for checkBoard function '_'=player, 'X'=in-range
+				'blank': [
+					'....................',
+					'....................',
+					'....................',
+					'_...................',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line1': [
+					'....................',
+					'....................',
+					'....................',
+					'_X..................',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line2': [
+					'....................',
+					'....................',
+					'....................',
+					'_XX.................',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line3': [
+					'....................',
+					'....................',
+					'....................',
+					'_XXX................',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line4': [
+					'....................',
+					'....................',
+					'....................',
+					'_XXXX...............',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line5': [
+					'....................',
+					'....................',
+					'....................',
+					'_XXXXX..............',
+					'....................',
+					'....................',
+					'....................',
+				],
+				'line6+1' : [
+					'....................',
+					'....................',
+					'......X.............',
+					'_XXXXXXX............',
+					'......X.............',
+					'....................',
+					'....................',
+				],
+				'line8+2' : [
+					'....................',
+					'........X...........',
+					'.......XXX..........',
+					'_XXXXXXXXXX.........',
+					'.......XXX..........',
+					'........X...........',
+					'....................',
+				],
+				'line10+3' : [
+					'..........X.........',
+					'.........XXX........',
+					'........XXXXX.......',
+					'_XXXXXXXXXXXXX......',
+					'........XXXXX.......',
+					'.........XXX........',
+					'..........X.........',
+				]
+			};
+		});
+
+		describe('basic composite', function() {
+			beforeEach( function() {
+				this.attackRange = new CompositeAttackRangeStrategy(
+					[
+						{
+							from: 		3,
+							to: 		99,
+							strategy: 	new OverlappingAttackRangeStrategy()
+						},
+					] );
+			});
+
+			it('should return no hits for short lengths', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 1 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['blank'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 2 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['blank'], range );
+			});
+
+			it('should return overlapping cells for lengths >= 3', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 3 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line3'], range );
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 4 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line4'], range );
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 5 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line5'], range );
+			});
 		});
 
 
-		describe("#isAttackInRange()", function () {
-			it("should be in range for a NW to NE word", function() {
-				var fromCoordinates = this.coordsNW;
-				var toCoordinates = this.coordsNE;
-				var range = new CoordRange( new Coordinates( 0, 1 ), this.coordsNE );
-				expect( this.attackRange.isAttackInRange( fromCoordinates, toCoordinates, range )).toBe( true );
+		describe('complex composite', function() {
+			beforeEach( function() {
+				this.attackRange = new CompositeAttackRangeStrategy( [
+					{
+						from: 		1,
+						to: 		99,
+						strategy: 	new OverlappingAttackRangeStrategy()
+					},
+					{
+						from: 		6,
+						to: 		7,
+						strategy: 	new RadiusAttackRangeStrategy(1)
+					},
+					{
+						from: 		8,
+						to: 		9,
+						strategy: 	new RadiusAttackRangeStrategy(2)
+					},
+					{
+						from: 		10,
+						to: 		99,
+						strategy: 	new RadiusAttackRangeStrategy(3)
+					},
+				]);
 			});
 
+			it('should overlapping hits for short lengths', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 1 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line1'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 2 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line2'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 3 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line3'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 4 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line4'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 4 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line4'], range );
+
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 5 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line5'], range );
+			});
+
+			it('should return overlapping cells and 1-radius cells for length 6', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 6 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line6+1'], range );
+			});
+
+			it('should return overlapping cells and 2-radius cells for length 8', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 8 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line8+2'], range );
+			});
+
+			it('should return overlapping cells and 3-radius cells for length 10', function() {
+				var range;
+				range = new CoordRange( new Coordinates( 3, 1 ), new Coordinates( 3, 10 ) );
+				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line10+3'], range );
+			});
 		});
 	});
 });
-
-
-
