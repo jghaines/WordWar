@@ -1,6 +1,3 @@
-var expect = chai.expect;
-var assert = chai.assert;
-
 describe('CoordRange', function() {
 	beforeEach( function() {
 		this.coordsNW = new Coordinates( 0, 0 );
@@ -17,38 +14,38 @@ describe('CoordRange', function() {
 
 	describe("#count()", function () {
 		it('should return 5 for the top', function () {
-			expect( this.rangeTop.count() ).to.equal( 5 );
+			expect( this.rangeTop.count() ).toEqual( 5 );
 		});
 		it('should return 5 for the left', function () {
-			expect( this.rangeLeft.count() ).to.equal( 5 );
+			expect( this.rangeLeft.count() ).toEqual( 5 );
 		});
 		it('should return 5 for the right', function () {
-			expect( this.rangeRight.count() ).to.equal( 5 );
+			expect( this.rangeRight.count() ).toEqual( 5 );
 		});
 		it('should return 5 for the bottom', function () {
-			expect( this.rangeBottom.count() ).to.equal( 5 );
+			expect( this.rangeBottom.count() ).toEqual( 5 );
 		});
 		it('should return 25 for the outerRange', function () {
-			expect( this.outerRange.count() ).to.equal( 25 );
+			expect( this.outerRange.count() ).toEqual( 25 );
 		});
 	});
 
 	describe("#getRotated()", function () {
 		it('should rotate from left to right', function () {
 			this.rotated = this.rangeLeft.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeRight ) ).to.equal( true );
+			expect( this.rotated.equals( this.rangeRight ) ).toEqual( true );
 		});
 		it('should rotate from right to left ', function () {
 			this.rotated = this.rangeRight.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeLeft ) ).to.equal( true );
+			expect( this.rotated.equals( this.rangeLeft ) ).toEqual( true );
 		});
 		it('should rotate from top to bottom', function () {
 			this.rotated = this.rangeTop.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeBottom ) ).to.equal( true );
+			expect( this.rotated.equals( this.rangeBottom ) ).toEqual( true );
 		});
 		it('should rotate from bottom to top', function () {
 			this.rotated = this.rangeBottom.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeTop ) ).to.equal( true );
+			expect( this.rotated.equals( this.rangeTop ) ).toEqual( true );
 		});
 	});
 });

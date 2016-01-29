@@ -1,8 +1,6 @@
-var expect = chai.expect;
-
-describe.skip('GameController', function() {
+describe('GameController', function() {
 	beforeEach(	function() {
-		var remoteProxy = sinon.spy(); // this is broken	
+		var remoteProxy = jasmine.createSpyObj( 'RemoteProxy', ['onStartGame', 'onStartTurn','onPlayReceived'] );
 		var scoreStrategy = {};
 		this.gameController = new GameController( remoteProxy, scoreStrategy );
 
@@ -19,8 +17,8 @@ describe.skip('GameController', function() {
 			this.play.newPosition = new Coordinates( 0, 3 );
 
 			this.gameController.knockBackPlayer( this.play );
-			expect( this.play.newPosition.row ).to.equal( 0 );
-			expect( this.play.newPosition.col ).to.equal( 2 );
+			expect( this.play.newPosition.row ).toEqual( 0 );
+			expect( this.play.newPosition.col ).toEqual( 2 );
 
 		});
 	});

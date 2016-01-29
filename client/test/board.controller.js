@@ -1,7 +1,3 @@
-
-
-var expect = chai.expect;
-
 describe('BoardController', function() {
 	beforeEach(	function() {
 		this.testTables = {
@@ -88,11 +84,11 @@ describe('BoardController', function() {
 
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
-			expect( cells.length ).to.equal( 2 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).to.equal( 4 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).to.equal( 0 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).row ).to.equal( 5 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).col ).to.equal( 1 );
+			expect( cells.length ).toEqual( 2 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 4 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 0 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).row ).toEqual( 5 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).col ).toEqual( 1 );
 		});
 
 		it( 'should highlight only the next cell, when a single letter is placed', function() {
@@ -101,9 +97,9 @@ describe('BoardController', function() {
 
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
-			expect( cells.length ).to.equal( 1 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).to.equal( 5 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).to.equal( 2 );
+			expect( cells.length ).toEqual( 1 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 5 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 2 );
 		});
 
 		it( 'should skip over static letters', function() {
@@ -112,9 +108,9 @@ describe('BoardController', function() {
 
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
-			expect( cells.length ).to.equal( 1 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).to.equal( 5 );
-			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).to.equal( 3 );
+			expect( cells.length ).toEqual( 1 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 5 );
+			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 3 );
 		});
 
 		it( 'should highlight nothing on a full row', function() {
@@ -123,7 +119,7 @@ describe('BoardController', function() {
 
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
-			expect( cells.length ).to.equal( 0 );
+			expect( cells.length ).toEqual( 0 );
 		});
 
 		it( 'should stop when there is a block', function() {
@@ -132,18 +128,18 @@ describe('BoardController', function() {
 
 			this._boardController.highlightPlaceablePositions();
 			var cells = this._boardModel._table.find( 'td.placeable' );
-			expect( cells.length ).to.equal( 0 );
+			expect( cells.length ).toEqual( 0 );
 		});
 	});
 
 	describe( '#arePlayersOnSameCell()', function () {
 		it( 'should return false from the start position', function() {
 			this._boardModel._table = this.testTables['startPosition'];
-			expect( this._boardController.arePlayersOnSameCell() ).to.equal( false );
+			expect( this._boardController.arePlayersOnSameCell() ).toEqual( false );
 		});
 		it( 'should return true when they share a position', function() {
 			this._boardModel._table = this.testTables['overlappingPlayers'];
-			expect( this._boardController.arePlayersOnSameCell() ).to.equal( true );
+			expect( this._boardController.arePlayersOnSameCell() ).toEqual( true );
 		});
 	});
 });
