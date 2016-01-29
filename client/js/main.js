@@ -4,7 +4,7 @@ var gc = {};
 
 window.onload = function(){
 	var socket = io();
-	var remote = new RemoteController(socket);
+	var remote = new RemoteProxy( socket );
 	//var scoreStrategy = new AttackBeatsMove();
 	var scoreStrategy = new AttackPenalisesMove();
 	var attackRangeStrategy = new StaticDistanceAttackRangeStrategy(2);

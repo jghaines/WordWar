@@ -1,7 +1,7 @@
 'use strict';
 
 
-function RemoteController(socket) {
+function RemoteProxy(socket) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
