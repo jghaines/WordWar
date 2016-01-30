@@ -147,6 +147,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
  	this.endTurn = function() {
 		this.log.info( this.constructor.name + '.endTurn()' );
 
+		this._audio.endTurn();
+
 		this._boardModel.unplaceAll();
 		this._boardController.unhighlightAttackable();
 
@@ -280,6 +282,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	// constructor code
 	this._ATTACK_MULTIPLIER = 2; // attacks are double damange
+
+	this._audio = new AudioProxy();
 
 	this._remote = remoteProxy;
 	this._scoreStrategy = scoreStrategy;
