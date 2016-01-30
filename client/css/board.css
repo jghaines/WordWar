@@ -10,16 +10,11 @@ table.gameboard td {
 	height: 25px;
 	width: 25px;
 
-	background: grey;
-}
-
-table.gameboard td.bonus,
-table.gameboard td.wildcard,
-table.gameboard td.static,
-table.gameboard td.bonus,
-table.gameboard td.attackable {
 	border-width: 1px;
 	border-style: solid;
+	border-color: grey;
+
+	background: grey;
 }
 
 table.gameboard td.bonus {
@@ -57,20 +52,22 @@ table.gameboard td.attackable {
 
 /* order is extra !important - later rules override earlier ones */
 table.gameboard td.played-remote {
-	background: black !important;
-	color: 		black !important;
+	background: 	black !important;
+	border-color: 	black;
+	color: 			black !important;
 }
 
 table.gameboard td.played-local {
-	background: magenta	!important;
-	color: 		magenta !important;
+	background: 	magenta	!important;
+	border-color: 	magenta;
+	color: 			magenta !important;
 }
 
 table.gameboard td.static,
 table.gameboard td.block {
-	background: black !important;
-	border-color: black;
-	color: white !important;
+	background: 	black !important;
+	border-color: 	black;
+	color: 			white !important;
 }
 
 table.gameboard td.placed {
