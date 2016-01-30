@@ -2,7 +2,12 @@
 
 // attack is in-range if it overlaps the opponent cell
 function OverlappingAttackRangeStrategy() {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
 	this.isAttackInRange = function( fromCoordinates, toCoordinates, range ) {
+		this.log.info( this.constructor.name + '.isAttackInRange(..)');
+
 		var inRange = false;
 		range.foreach( function( coord ) {
 			if ( coord.equals( toCoordinates )) {
@@ -16,7 +21,12 @@ function OverlappingAttackRangeStrategy() {
 
 // attack is in-range if the last letter is within 'attackRange' cells of the opponent
 function RadiusAttackRangeStrategy( attackRange ) {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
 	this.isAttackInRange = function( fromCoordinates, toCoordinates, range ) {
+		this.log.info( this.constructor.name + '.isAttackInRange(..)');
+
 		var attackCoord = {};
 		if ( fromCoordinates.distanceTo( range.min ) < 1.5 ) { // range.max is at the end of the range
 			attackCoord = range.max;
@@ -25,6 +35,7 @@ function RadiusAttackRangeStrategy( attackRange ) {
 		} else {
 			throw new Error( this.constructor.name + '.isAttackInRange() could not find end of range' );
 		}
+		this.log.debug( this.constructor.name + '.isAttackInRange() - toCoordinates=', toCoordinates, 'attackCoord=', attackCoord );
 
 		return ( toCoordinates.distanceTo( attackCoord ) <= this._attackRange );
  	}

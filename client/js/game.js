@@ -281,8 +281,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	}
 
 	// constructor code
-	this._ATTACK_MULTIPLIER = 2; // attacks are double damange
-
 	this._audio = new AudioProxy();
 
 	this._remote = remoteProxy;
