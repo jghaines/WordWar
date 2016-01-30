@@ -148,6 +148,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.info( this.constructor.name + '.endTurn()' );
 
 		this._boardModel.unplaceAll();
+		this._boardController.unhighlightAttackable();
 
 		var localPlay  = this._stateContext.getLocalPlay();
 		var remotePlay = this._stateContext.getRemotePlay();
