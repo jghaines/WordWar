@@ -79,12 +79,23 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableMoveButton(  true );
 		this._buttonsView.enableResetButton( true );
 
-		var isInAttackRange = this._attackRangeStrategy.isAttackInRange(
-			this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' )),
-			this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' )),
-			this._boardModel.getPlacedRange()
-			);
-		this._buttonsView.enableAttackButton( isInAttackRange );
+		if ( this._attackRangeStrategy.isAttackInRange(
+				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' )),
+				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' )),
+				this._boardModel.getPlacedRange() )) { // if attack is in range
+
+			this._buttonsView.enableAttackButton( true );
+
+			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' ))
+			var placedRange = this._boardModel.getPlacedRange();
+			var strategy = this._attackRangeStrategy;
+			this._boardController.highlightAttackableWhere( function( _ignore_cell, coords ) {
+				return ( strategy.isAttackInRange( localPlayerCoords, coords, placedRange ));
+			});
+
+		} else {
+			this._buttonsView.enableAttackButton( false );			
+		}
 	}
 
 	// Whether the given word is valid
@@ -121,6 +132,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.resetWord = function() {
 		this.log.info( this.constructor.name + '.resetWord(.)');
 		this._boardController.resetWord();
+		this._boardController.unhighlightAttackable();
 
 		this._lettersModel.unplaceAll();
 		this._lettersModel.unselect();

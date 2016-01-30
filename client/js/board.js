@@ -22,12 +22,22 @@ function BoardModel() {
  		return this._table.find('tr:eq(0) td').length;
  	}
 
- 	this.getBoardRange = function() {
- 		return new CoordRange(
- 			new Coordinates( 0, 0 ),
- 			new Coordinates( this.getHeight() - 1, this.getWidth() - 1 )
- 			);
- 	}
+	this.getBoardRange = function() {
+		return new CoordRange(
+			new Coordinates( 0, 0 ),
+			new Coordinates( this.getHeight() - 1, this.getWidth() - 1 )
+			);
+	}
+
+	// invoke callback( cell, coordinates ) - for every cell on the board
+	this.foreach = function( callback ) {
+		for (var row = this.getHeight() - 1; row >= 0; row--) {
+			for (var col = this.getWidth() - 1; col >= 0; col--) {
+				var coords = new Coordinates( row, col );
+				callback( this.getCellAtCoordinates( coords ), coords );			
+			};
+		};
+	}
 
 	this.getCoordinatesForCell = function( cell ) {
 		return new Coordinates( cell.parent().index(), cell.index() );
@@ -184,8 +194,13 @@ function BoardModel() {
 		var minCoordinates = this.getCoordinatesForCell( placedCells.first() );
 		var maxCoordinates = this.getCoordinatesForCell( placedCells.last() );
 
-		return new CoordRange(	new Coordinates( minCoordinates.row, minCoordinates.col ),
-							new Coordinates( maxCoordinates.row, maxCoordinates.col ));
+		return new CoordRange(
+			new Coordinates( minCoordinates.row, minCoordinates.col ),
+			new Coordinates( maxCoordinates.row, maxCoordinates.col ));
+	}
+
+	this.setAttackable = function( cell, isAttackable ) {
+		$(cell).toggleClass( 'attackable', isAttackable );
 	}
 
 	this.getEndOfWordCell = function() {
@@ -400,6 +415,21 @@ function BoardController(boardModel, boardView) {
 		}
 	}
 
+	// invoke callback( cell, coords ) for each cells, set Attackable where it returns true
+	this.highlightAttackableWhere = function( callback ) {
+		var board = this._boardModel;
+		this._boardModel.foreach( function( cell, coords ) {
+			var isAttackable = callback( cell, coords );
+			board.setAttackable( cell, isAttackable );
+		});
+	}
+
+	this.unhighlightAttackable = function() {
+		this.highlightAttackableWhere( function( _ignore_cell, _ignore_coords ) {
+			return ( false );			
+		});
+	}
+
 	this.validPlacement = function() { 
 		var cells = this._boardModel.getWordCandidateCells();
 
@@ -420,6 +450,7 @@ function BoardController(boardModel, boardView) {
 		this._boardModel.unplaceAll();
 		this._boardView._fillSpecials( cells );
 		this.unhighlightPlaceablePositions();
+		this.unhighlightAttackable();
 	}
 
 	this.getPlayedScore = function() {

@@ -16,7 +16,8 @@ table.gameboard td {
 table.gameboard td.bonus,
 table.gameboard td.wildcard,
 table.gameboard td.static,
-table.gameboard td.bonus {
+table.gameboard td.bonus,
+table.gameboard td.attackable {
 	border-width: 1px;
 	border-style: solid;
 }
@@ -48,6 +49,11 @@ table.gameboard td.wildcard {
 	background: purple;
 	color: white;
 }
+
+table.gameboard td.attackable {
+	border-color: red;
+}
+
 
 /* order is extra !important - later rules override earlier ones */
 table.gameboard td.played-remote {
