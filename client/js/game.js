@@ -132,7 +132,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.resetWord = function() {
 		this.log.info( this.constructor.name + '.resetWord(.)');
 		this._boardController.resetWord();
-		this._boardController.unhighlightAttackable();
 
 		this._lettersModel.unplaceAll();
 		this._lettersModel.unselect();
