@@ -276,26 +276,10 @@ describe('AttackRangeStrategy classes', function() {
 		describe('complex composite', function() {
 			beforeEach( function() {
 				this.attackRange = new CompositeAttackRangeStrategy( [
-					{
-						from: 		1,
-						to: 		99,
-						strategy: 	new OverlappingAttackRangeStrategy()
-					},
-					{
-						from: 		6,
-						to: 		7,
-						strategy: 	new RadiusAttackRangeStrategy(1)
-					},
-					{
-						from: 		8,
-						to: 		9,
-						strategy: 	new RadiusAttackRangeStrategy(2)
-					},
-					{
-						from: 		10,
-						to: 		99,
-						strategy: 	new RadiusAttackRangeStrategy(3)
-					},
+					{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
+					{ from:  6, to:  7, strategy: new RadiusAttackRangeStrategy(1) },
+					{ from:  8, to:  9, strategy: new RadiusAttackRangeStrategy(2) },
+					{ from: 10, to: 99, strategy: new RadiusAttackRangeStrategy(3) },
 				]);
 			});
 

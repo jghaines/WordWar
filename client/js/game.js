@@ -201,7 +201,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	// update score, return true if game has ended
  	this.updateScore = function( localPlay, remotePlay ) {
-		this._scoreStrategy.calculateScore( localPlay, remotePlay );
+		this._scoreStrategy.calculateScore([ localPlay, remotePlay ]);
 
 		this._scoreModel.incrementScore( 'local',  localPlay.score );
 		this._scoreModel.incrementScore( 'remote', remotePlay.score );
