@@ -217,6 +217,30 @@ describe('AttackRangeStrategy classes', function() {
 			};
 		});
 
+		describe('multiple composite', function() {
+			it('should invoke the component strategies in range exactly once', function () {
+				var attackRangeStrategySpyA = jasmine.createSpyObj( 'attackRangeStrategyA', [ 'isAttackInRange' ]);
+				var attackRangeStrategySpyB = jasmine.createSpyObj( 'attackRangeStrategyB', [ 'isAttackInRange' ]);
+
+				this.attackRangeStrategy = new CompositeAttackRangeStrategy( [
+					{
+						from: 		1,
+						to: 		99,
+						strategy: 	attackRangeStrategySpyA
+					},
+					{
+						from: 		6,
+						to: 		7,
+						strategy: 	attackRangeStrategySpyB
+					},
+				] );
+				this.attackRangeStrategy.isAttackInRange( this.coordsNW, this.coordsNE, this.rangeTop );
+				expect( attackRangeStrategySpyA.isAttackInRange.calls.count() ).toEqual( 1 );
+				expect( attackRangeStrategySpyB.isAttackInRange.calls.count() ).toEqual( 0 );
+			});
+		});
+
+
 		describe('basic composite', function() {
 			beforeEach( function() {
 				this.attackRange = new CompositeAttackRangeStrategy(
@@ -248,7 +272,6 @@ describe('AttackRangeStrategy classes', function() {
 				checkBoard( this.attackRange, this.fromCoordinates, this.boards['line5'], range );
 			});
 		});
-
 
 		describe('complex composite', function() {
 			beforeEach( function() {
