@@ -19,6 +19,19 @@ function ButtonsView() {
 		this._resetButton.prop('disabled', ! isEnabled );
 	}
 
+	this.setPlayerModel = function( playerModel ) {
+		this._playerModel = playerModel;
+		this._playerModel.onUpdate( (function() {
+			this._updateData();
+		}).bind( this ));
+		this._updateData(); // get initial data
+	}
+
+	// called-back when player model is updated
+	this._updateData = function() {
+		this._attackButton.text( 'Attack (x' + this._playerModel.getAttackMultiplier() + ')' );
+	}
+
 	// register callbacks
 	this.onMoveClicked = function( callback ) {
 		this.log.info( this.constructor.name + '.onmoveClicked(callback)' );

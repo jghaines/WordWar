@@ -79,7 +79,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableMoveButton(  true );
 		this._buttonsView.enableResetButton( true );
 
-		if ( this._attackRangeStrategy.isAttackInRange(
+		if ( this._scoreModel.getAttackMultiplier() > 0 &&
+			this._attackRangeStrategy.isAttackInRange(
 				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' )),
 				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' )),
 				this._boardModel.getPlacedRange() )) { // if attack is in range
@@ -123,7 +124,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this._boardModel.getPlayedWord(),
 			this._boardController.getPlayedScore(), //
 			this._boardModel.getPlacedRange(),
-			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() )
+			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() ),
+			this._scoreModel.getAttackMultiplier()
 		);
 
 		this._stateContext.localMove( myPlay );
@@ -201,10 +203,13 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	// update score, return true if game has ended
  	this.updateScore = function( localPlay, remotePlay ) {
+		this.log.info( this.constructor.name + '.updateScore(.)');
 		this._scoreStrategy.calculateScore([ localPlay, remotePlay ]);
 
 		this._scoreModel.incrementScore( 'local',  localPlay.score );
 		this._scoreModel.incrementScore( 'remote', remotePlay.score );
+
+		this._scoreModel.setAttackMultiplier( localPlay.attackMultiplier );
 
 		if ( this._scoreModel.getScore( 'local' ) < 0 ) {
 			this._scoreModel.setLost( 'local', true );
@@ -302,7 +307,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._buttonsView.enableMoveButton(   false );
 	this._buttonsView.enableAttackButton( false );
 	this._buttonsView.enableResetButton(  false );
-	
+	this._buttonsView.setPlayerModel( this._scoreModel );
+
 	// bind all the things
 	this._lettersView.onClick( (function(index, letter) {
 		this.selectLetterToPlace(index, letter);

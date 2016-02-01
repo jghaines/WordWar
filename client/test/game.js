@@ -5,9 +5,10 @@ describe('GameController', function() {
 		this.gameController = new GameController( remoteProxy, scoreStrategy );
 
 		this.play = new Play( 'move', 'word', 10, { 
-			min: new Coordinates( 0, 0 ),
-			max: new Coordinates( 0, 3 ),
-		 }, new Coordinates( 0, 3 ) );
+				min: new Coordinates( 0, 0 ),
+				max: new Coordinates( 0, 3 ),
+			}, 
+			new Coordinates( 0, 3 ), 1 );
 
 	});
 

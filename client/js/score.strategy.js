@@ -96,6 +96,38 @@ function StaticAttackMultiplierScoreStrategy( attackMultiplier ) {
 	this._attackMultiplier = attackMultiplier;
 }
 
+// updates the attackMultiplier based on moveType and increment settings
+function IncrementAttackMultiplierScoreStrategy( incrementAfterMove, incrementAfterAttack ) {
+	this.calculateScore = function( plays ) {
+		plays.forEach( (function( play ) {
+			if ( 'attack' == play.moveType) {
+				play.attackMultiplier += this._incrementAfterAttack;
+			} else if ( 'move' == play.moveType ) {
+				play.attackMultiplier += this._incrementAfterMove;
+			}
+		}).bind( this ));
+	}
+
+	this._incrementAfterMove = incrementAfterMove;
+	this._incrementAfterAttack = incrementAfterAttack;
+}
+
+// enforce given min- and max-Value
+function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
+	this.calculateScore = function( plays ) {
+		plays.forEach( (function( play ) {
+			if ( play.attackMultiplier > this._maxValue ) {
+				play.attackMultiplier = this._maxValue;
+			} else if ( play.attackMultiplier < this._minValue ) {
+				play.attackMultiplier = this._minValue;
+			}
+		}).bind( this ));
+	}
+
+	this._minValue = minValue;
+	this._maxValue = maxValue;
+}
+
 function CompositeScoreStrategy( scoreStrategyList ) {
 	this.calculateScore = function( plays ) {
 		this._scoreStrategyList.forEach( function( scoreStrategy ) {

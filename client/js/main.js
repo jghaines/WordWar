@@ -13,8 +13,9 @@ window.onload = function(){
 					{ from:  8, to:  9, bonus: 20 },
 					{ from: 10, to: 99, bonus: 30 },
 				]),
-				new StaticAttackMultiplierScoreStrategy( 2 ),
 				new AttackPenalisesMoveScoreStrategy( 2 ),
+				new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
+				new MinMaxAttackMultiplierScoreStrategy( 0, 5 ),
 	]);
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },

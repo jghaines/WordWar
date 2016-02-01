@@ -169,6 +169,66 @@ describe('AttackPenalisesMoveScoreStrategy', function() {
 	});
 });
 
+describe('StaticAttackMultiplierScoreStrategy', function() {
+	beforeEach(	function() {
+		this.scoreStrategy = new StaticAttackMultiplierScoreStrategy( 2 );
+		this.playA = { attackMultiplier : 2 };
+		this.playB = { attackMultiplier : 10 };
+		this.scoreStrategy.calculateScore([ this.playA, this.playB ]);
+	});
+
+	describe('#calculateScore()', function () {
+		it('should set attackMultiplier to 2 if it has that value', function () {
+			expect( this.playA.attackMultiplier ).toEqual( 2 );
+		});
+		it('should reset it to 2 otherwise', function () {
+			expect( this.playB.attackMultiplier ).toEqual( 2 );
+		});
+	});
+});
+
+describe('IncrementAttackMultiplierScoreStrategy', function() {
+	beforeEach(	function() {
+		this.scoreStrategy = new IncrementAttackMultiplierScoreStrategy( 1, -2 );
+		this.playA = { moveType : 'move',   attackMultiplier : 2 };
+		this.playB = { moveType : 'attack', attackMultiplier : 10 };
+		this.scoreStrategy.calculateScore([ this.playA, this.playB ]);
+	});
+
+	describe('#calculateScore()', function () {
+		it('should increment my moveIncrement after a move', function () {
+			expect( this.playA.attackMultiplier ).toEqual( 2 + 1 );
+		});
+		it('should increment by attackIncrement after an attack', function () {
+			expect( this.playB.attackMultiplier ).toEqual( 10 - 2 );
+		});
+	});
+});
+
+describe('MinMaxAttackMultiplierScoreStrategy', function() {
+	beforeEach(	function() {
+		this.scoreStrategy = new MinMaxAttackMultiplierScoreStrategy( 0, 5 );
+	});
+
+	describe('#calculateScore()', function () {
+		it('should reset the attackMultiplier if it is below range', function () {
+			var play = { attackMultiplier : -1 };
+			this.scoreStrategy.calculateScore([ play ]);
+			expect( play.attackMultiplier ).toEqual( 0 );
+		});
+		it('should not change the attackMultiplier if it is in range', function () {
+			var play = { attackMultiplier : 2 };
+			this.scoreStrategy.calculateScore([ play ]);
+			expect( play.attackMultiplier ).toEqual( 2 );
+		});
+		it('should reset the attackMultiplier if it is above range', function () {
+			var play = { attackMultiplier : 6 };
+			this.scoreStrategy.calculateScore([ play ]);
+			expect( play.attackMultiplier ).toEqual( 5 );
+		});
+	});
+});
+
 describe('CompositeScoreStrategy', function() {
 	beforeEach(	function() {
 		this.scoreStrategyA = jasmine.createSpy('ScoreStrategyA')
