@@ -13,6 +13,7 @@ window.onload = function(){
 					{ from:  8, to:  9, bonus: 20 },
 					{ from: 10, to: 99, bonus: 30 },
 				]),
+				new StaticAttackMultiplierScoreStrategy( 2 ),
 				new AttackPenalisesMoveScoreStrategy( 2 ),
 	]);
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
