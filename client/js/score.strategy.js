@@ -18,53 +18,41 @@ function WordLengthBonusScoreStrategy( bonuses ) {
 		return 0;
 	}
 
- 	this.calculateScore = function( plays ) {
- 		plays.forEach( (function( play ) {
- 			play.score += this._bonusForWordLength( play.word.length );
- 		}).bind( this ));
- 	}
- 
- 	this._bonuses = bonuses;
- }
-
-// each play will use the same attackMultiplier
-function StaticAttackMultiplierScoreStrategy( attackMultiplier ) {
 	this.calculateScore = function( plays ) {
- 		plays.forEach( (function( play ) {
-			play.attackMultiplier = this._attackMultiplier;
-		}).bind(this) );
+		plays.forEach( (function( play ) {
+			play.score += this._bonusForWordLength( play.word.length );
+		}).bind( this ));
 	}
 
-	this._attackMultiplier = attackMultiplier;
+	this._bonuses = bonuses;
 }
-
 
 function AttackBeatsMoveScoreStrategy(  ) {
 	this.calculateScore = function( plays ) {
 
- 		if ( 'attack' == plays[0].moveType && 'move' == plays[1].moveType ||
- 			 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score > plays[1].score ) {
- 			// player 0 win
- 			plays[1].score = -1 * plays[0].attackMultiplier * plays[0].score;
- 			plays[0].score = 0;
+		if ( 'attack' == plays[0].moveType && 'move' == plays[1].moveType ||
+			 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score > plays[1].score ) {
+			// player 0 win
+			plays[1].score = -1 * plays[0].attackMultiplier * plays[0].score;
+			plays[0].score = 0;
 
- 		} else if ( 'move' == plays[0].moveType && 'attack' == plays[1].moveType ||
- 					'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score < plays[1].score ) {
- 			// player 1 win
- 			plays[0].score = -1 * plays[1].attackMultiplier * plays[1].score;
- 			plays[1].score = 0;
+		} else if ( 'move' == plays[0].moveType && 'attack' == plays[1].moveType ||
+					'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score < plays[1].score ) {
+			// player 1 win
+			plays[0].score = -1 * plays[1].attackMultiplier * plays[1].score;
+			plays[1].score = 0;
 
- 		} else if ( 'move' == plays[0].moveType && 'move' == plays[1].moveType ) {
- 			// scores unchanged
+		} else if ( 'move' == plays[0].moveType && 'move' == plays[1].moveType ) {
+			// scores unchanged
 
- 		} else if ( 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score == plays[1].score ) {
- 			// attack with draw
- 			plays[0].score = 0;
- 			plays[1].score = 0;
+		} else if ( 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score == plays[1].score ) {
+			// attack with draw
+			plays[0].score = 0;
+			plays[1].score = 0;
 
- 		} else { // draw: either move-move or equal score attacks
- 			throw new Error( this.constructor.name + '.calculateScore() - unhandled case' )	;
- 		}
+		} else { // draw: either move-move or equal score attacks
+			throw new Error( this.constructor.name + '.calculateScore() - unhandled case' )	;
+		}
  	}
 }
 
@@ -95,6 +83,17 @@ function AttackPenalisesMoveScoreStrategy() {
  			}
  		}
  	}
+}
+
+// each play will use the same attackMultiplier
+function StaticAttackMultiplierScoreStrategy( attackMultiplier ) {
+	this.calculateScore = function( plays ) {
+ 		plays.forEach( (function( play ) {
+			play.attackMultiplier = this._attackMultiplier;
+		}).bind(this) );
+	}
+
+	this._attackMultiplier = attackMultiplier;
 }
 
 function CompositeScoreStrategy( scoreStrategyList ) {

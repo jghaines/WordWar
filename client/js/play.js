@@ -32,6 +32,9 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 		};
 	}
 
+	this.log.debug( this.constructor.name,'(.. , attackMultiplier=', attackMultiplier, ')' );
+
+
 
 	// constructor code
 	this.player 			= 0;
@@ -40,7 +43,7 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 	this.wordValue			= wordValue;
 	this.playRange			= playRange;
 	this.newPosition 		= newPosition;
-	this.attackMultiplier 	= 1;
+	this.attackMultiplier 	= attackMultiplier;
 
 	this.score			= wordValue;
 }
