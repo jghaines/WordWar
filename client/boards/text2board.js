@@ -18,10 +18,10 @@ rl.on('line', function(line){
 		switch ( true ) {
 			case ( '.' == letter ) : process.stdout.write( "<td/>" ); break; // blank cell
 
-			case ( '<' == letter ) : process.stdout.write( "<td class='player-local'/>" ); break; 
-			case ( '>' == letter ) : process.stdout.write( "<td class='player-remote'/>" ); break; 
+			case ( '<' == letter ) : process.stdout.write( "<td class='player-local'/>" ); break;
+			case ( '>' == letter ) : process.stdout.write( "<td class='player-remote'/>" ); break;
 
-			case ( '_' == letter ) : process.stdout.write( "<td class='block'/>" ); break; 
+			case ( '_' == letter ) : process.stdout.write( "<td class='block'/>" ); break;
 			case ( '?' == letter ) : process.stdout.write( "<td class='wildcard' ww_value='?'/>" ); break;
 			case ( '2' == letter ) : process.stdout.write( "<td class='bonus letter' ww_value='2'/>" ); break;
 			case ( '3' == letter ) : process.stdout.write( "<td class='bonus letter' ww_value='3'/>" ); break;
@@ -30,7 +30,7 @@ rl.on('line', function(line){
 			case ( '#' == letter ) : process.stdout.write( "<td class='bonus word' ww_value='3'/>" ); break;
 			case ( '$' == letter ) : process.stdout.write( "<td class='bonus word' ww_value='4'/>" ); break;
 
-			case ( letter >= 'A' && 
+			case ( letter >= 'A' &&
 				   letter <= 'Z' ) : process.stdout.write( "<td class='static' ww_value='" + letter + "'/>" ); break;
 
 		}
