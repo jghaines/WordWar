@@ -148,6 +148,10 @@ function StateWaitForMove( context ) {
 
 	this.statusMessage = "Place your word";
 
+	this.gameStart = function() {
+		throw this.constructor.name + '.gameStart' + ' invalid state transition';
+	}
+
 	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForRemote')
 		context.setState( new StateWaitForRemote( this.context ));	
@@ -170,6 +174,10 @@ function StateWaitForRemote( context ) {
 	this.context = context;
 
 	this.statusMessage = "Waiting for opponent's move";
+
+	this.gameStart = function() {
+		throw this.constructor.name + '.gameStart' + ' invalid state transition';
+	}
 
 	this.localMove = function() {
 		throw this.constructor.name + '.localMove' + ' invalid state transition';
@@ -194,6 +202,10 @@ function StateWaitForLocal( context ) {
 	this.context = context;
 
 	this.statusMessage = "Place your word";
+
+	this.gameStart = function() {
+		throw this.constructor.name + '.gameStart' + ' invalid state transition';
+	}
 
 	this.localMove = function() {
 		this.log.info(this.constructor.name, '-(localMove)-> StateWaitForMove')
