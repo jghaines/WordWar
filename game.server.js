@@ -8,10 +8,10 @@ var
     letterbag  = require('./wordyLetters.js');
 
 gameServer.log = require("loglevel").getLogger("gameServer.log");
-gameServer.log.setLevel('DEBUG');
+gameServer.log.setLevel('SILENT');
 
-gameServer.logSummary = require("loglevel").getLogger("gameServer.logSummary");;
-gameServer.logSummary.setLevel('SILENT');
+gameServer.logSummary = require("loglevel").getLogger("gameServer.logSummary");
+gameServer.logSummary.setLevel('INFO');
 
 gameServer.defaultBoard = '1.html'; // default
 
@@ -104,7 +104,7 @@ gameServer.startGame = function(game) {
 
 	for ( var i = 0; i < game.players.length; ++i ) {
 		game.players[i].client.game = game;
-		game.players[i].client.emit( 'new game', JSON.stringify( game, ['board', 'letterCount', 'startScore'] ));
+		game.players[i].client.emit( 'new game', JSON.stringify( game, ['board', 'letterCount', 'startScore' ]));
 	}
 
 	this.nextTurn(game);
@@ -115,7 +115,7 @@ gameServer.nextTurn = function(game) {
 
 	var msg = {
 		turnNumber: game.turn,
-		letters: Array.from(Array( game.letterCount )).map( () =>  letterbag.getLetter() )
+		letters: Array.from(Array( game.letterCount )).map( () => letterbag.getLetter() )
 	}
 
 	++game.turn;

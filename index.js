@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var log = require('loglevel');
-log.setLevel('DEBUG');
+log.setLevel('INFO');
 
 var express = require('express');
 var app = express();

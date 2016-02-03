@@ -3,7 +3,7 @@
 
 function RemoteProxy(socket) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.DEBUG );
+	this.log.setLevel( log.levels.SILENT );
 
 
 	//

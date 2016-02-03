@@ -129,10 +129,14 @@ function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
 }
 
 function CompositeScoreStrategy( scoreStrategyList ) {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
 	this.calculateScore = function( plays ) {
-		this._scoreStrategyList.forEach( function( scoreStrategy ) {
+		this._scoreStrategyList.forEach( (function( scoreStrategy ) {
+	 		this.log.debug( this.constructor.name, '.calculateScore (', plays, ') - strategy:', scoreStrategy.constructor.name );
 			scoreStrategy.calculateScore( plays );
-		});
+		}).bind( this ) );
  	}
  
  	this._scoreStrategyList = scoreStrategyList;

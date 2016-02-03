@@ -14,6 +14,7 @@ function ScoreModel() {
 	}
 
 	this.incrementScore = function( who, value ) {
+		this.log.debug( this.constructor.name, '.incrementScore( who=', who, 'value=', value, ')' );
 		this.setScore( who, this.getScore( who ) + value );
 		this._updated();
 	}
@@ -24,7 +25,7 @@ function ScoreModel() {
 	}
 
 	this.setAttackMultiplier = function( attackMultiplier ) {
-		this.log.info( this.constructor.name, '.setAttackMultiplier(', attackMultiplier, ')' );
+		this.log.debug( this.constructor.name, '.setAttackMultiplier(', attackMultiplier, ')' );
 		this._attackMultiplier = attackMultiplier;
 		this._updated();
 	}
