@@ -9,12 +9,11 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 		this.moveType			= json.moveType;
 		this.word				= json.word;
 		this.wordValue			= json.wordValue;
-		this.playRange			= new CoordRange();
-		this.newPosition 		= new Coordinates();
-		this.attackMultiplier 	= attackMultiplier;
-
+		this.attackMultiplier 	= json.attackMultiplier;
 		this.score				= json.score;
 
+		this.playRange			= new CoordRange();
+		this.newPosition 		= new Coordinates();
 		this.playRange.loadFromJson( json.playRange );
 		this.newPosition.loadFromJson( json.newPosition );
 	}
@@ -41,5 +40,5 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 	this.newPosition 		= newPosition;
 	this.attackMultiplier 	= attackMultiplier;
 
-	this.score			= wordValue;
+	this.score				= 0;
 }
