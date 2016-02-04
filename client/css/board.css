@@ -48,9 +48,9 @@ table.gameboard td.wildcard {
 
 /* order is extra !important - later rules override earlier ones */
 table.gameboard td.played-remote {
-	background: 	black !important;
-	border-color: 	black;
-	color: 			black !important;
+	background: 	#00ccff !important;
+	border-color: 	#00ccff;
+	color: 			#00ccff !important;
 }
 
 table.gameboard td.played-local {
