@@ -19,6 +19,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._scoreModel.setLost( 'remote', false );
 
 		this._boardModel.loadBoard(	boardUrl );
+
+		this._audio.newGame();
 	}
 
 	this.newTurn = function( turnInfo ) {

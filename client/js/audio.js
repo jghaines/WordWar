@@ -2,14 +2,18 @@
 
 function AudioProxy() {
 	this.audio = {
-		'endTurn' : new Audio( '/audio/endturn.mp3' ),
+		'wau' : new Audio( '/audio/wau.mp3' ),
 	};
 
 	this._play = function( audioKey ) {
 		this.audio[ audioKey ].play();
 	}
 
+	this.newGame = function() {
+		this.audio['wau'].play();
+	}
+
 	this.endTurn = function() {
-		this.audio['endTurn'].play();
+		this.audio['wau'].play();
 	}
 }
