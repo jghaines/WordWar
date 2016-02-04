@@ -9,8 +9,8 @@
 }
 
 .flash-attack {
-	animation-name: flash-red-animation;
-	animation-duration: 1.2s;
+	animation-name: pulse-red-animation;
+	animation-duration: 0.8s;
 }
 
 @keyframes flash-yellow-animation {  
@@ -21,4 +21,21 @@
 @keyframes flash-red-animation {  
 	from { background: red; }
 	to   { background: default; }
+}
+
+@keyframes pulse-red-animation {
+	0% {
+		transform: scale(1.0);
+		background: #cc0000;
+	}
+	10% {
+		transform: scale(1.5);
+	}
+	90% {
+		transform: scale(1);
+		background: #cc0000;
+	}
+	100% { 
+		background: default;
+	}
 }
