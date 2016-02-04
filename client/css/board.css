@@ -67,7 +67,8 @@ table.gameboard td.block  {
 }
 
 table.gameboard td.static {
-	border-color: 	black;
+	border-color: 	black !important;
+	color: 			black !important;
 }
 
 table.gameboard td.placed {
