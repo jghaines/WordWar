@@ -9,13 +9,16 @@ window.onload = function(){
 	var scoreStrategy  = new CompositeScoreStrategy( [
 				new ScoreEqualsWordValueScoreStrategy(),
 				new WordLengthBonusScoreStrategy( [
-					{ from:  6, to:  7, bonus: 10 },
-					{ from:  8, to:  9, bonus: 20 },
-					{ from: 10, to: 99, bonus: 30 },
+					{ from:  6, to:  6, bonus: 10 },
+					{ from:  7, to:  7, bonus: 20 },
+					{ from:  8, to:  8, bonus: 30 },
+					{ from:  9, to:  9, bonus: 40 },
+					{ from: 10, to: 10, bonus: 50 },
+					{ from: 11, to: 99, bonus: 60 },
 				]),
 				new AttackPenalisesMoveScoreStrategy(),
-				new IncrementAttackMultiplierScoreStrategy( 2, -99 ),
-				new MinMaxAttackMultiplierScoreStrategy( 0, 10 ),
+				new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
+				new MinMaxAttackMultiplierScoreStrategy( 0, 5 ),
 	]);
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
