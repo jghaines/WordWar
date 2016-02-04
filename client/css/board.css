@@ -61,9 +61,7 @@ table.gameboard td.played-local {
 
 table.gameboard td.static,
 table.gameboard td.block {
-	background: 	black !important;
 	border-color: 	black;
-	color: 			white !important;
 }
 
 table.gameboard td.placed {
