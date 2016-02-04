@@ -2,7 +2,7 @@
 
 function StateContext(remote) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.INFO );
 
 	// new game - callback from Remote proxy
 	this.newGame = function(gameInfo) {
@@ -49,7 +49,7 @@ function StateContext(remote) {
 
 	// callback from States
 	this.setState = function(newState) {
- 		this.log.debug(this.constructor.name + '.setState() - state =', newState);
+ 		this.log.info(this.constructor.name + '.setState(' + newState.constructor.name + ')' );
 		this._state = newState;
 
 		this._statusUpdateCallbacks.fire( newState.statusMessage );
