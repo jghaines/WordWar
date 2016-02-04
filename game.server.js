@@ -1,17 +1,20 @@
 'use strict';
 
 
+const LetterGenerator = require('./wordyLetters.js');
 
 var
     gameServer = module.exports = { games : [] },
-    UUID       = require('node-uuid'),
-    letterbag  = require('./wordyLetters.js');
+    UUID       = require('node-uuid');
 
 gameServer.log = require("loglevel").getLogger("gameServer.log");
 gameServer.log.setLevel('SILENT');
 
 gameServer.logSummary = require("loglevel").getLogger("gameServer.logSummary");
 gameServer.logSummary.setLevel('INFO');
+
+
+gameServer._letterGenerator = new LetterGenerator();
 
 gameServer.defaultBoard = '1.html'; // default
 
@@ -23,6 +26,26 @@ if ( process.argv.length > 2 ) { // override if command line given
 	gameServer.defaultBoard = process.argv[2];
 }
 gameServer.log.info('Default board:', gameServer.defaultBoard);
+
+
+gameServer._vowelCount = function( letters ) {
+	var vowels = 'AEIOU';
+	var vowelCount = 0;
+	letters.split('').forEach( function( letter ) {
+		if ( vowels.indexOf( letter ) >= 0 ) {
+			++vowelCount;
+		}
+	});
+
+	return vowelCount;
+}
+
+gameServer._vowelCountChecker = function( letters, minVowels, maxVowels ) {
+	var vowelCount = this._vowelCount( letters );
+	console.log( vowelCount, minVowels, maxVowels );
+	return ( vowelCount >= minVowels && vowelCount <= maxVowels );
+}
+
 
 
 gameServer.findExistingGameForUserId = function( userId, client ) {
@@ -89,7 +112,9 @@ gameServer.createGame = function( userId, client ) {
 	    playsThisTurn: 	0,
 	    finished: 		false, 
 	    board: 			'./boards/' + gameServer.defaultBoard,
-		letterCount: 	10
+		letterCount: 	10,
+		minVowels: 		2,
+		maxVowels: 		8,
 	};
 
 	this.logSummary.info('G', newGame.id, 'P[0]', player.userId, 'created game' );
@@ -115,7 +140,9 @@ gameServer.nextTurn = function(game) {
 
 	var msg = {
 		turnNumber: game.turn,
-		letters: Array.from(Array( game.letterCount )).map( () => letterbag.getLetter() )
+		letters: this._letterGenerator.getLetters( game.letterCount, (function(letters) {
+				return this._vowelCountChecker( letters, game.minVowels, game.maxVowels );
+			}).bind( this ))
 	}
 
 	++game.turn;
