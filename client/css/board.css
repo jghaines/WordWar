@@ -59,8 +59,14 @@ table.gameboard td.played-local {
 	color: 			magenta !important;
 }
 
-table.gameboard td.static,
-table.gameboard td.block {
+
+table.gameboard td.block  {
+	background: 	black !important;
+	border-color: 	black;
+	color: 			white !important;
+}
+
+table.gameboard td.static {
 	border-color: 	black;
 }
 
