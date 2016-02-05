@@ -151,8 +151,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
  	this.endTurn = function() {
 		this.log.info( this.constructor.name + '.endTurn()' );
 
-		this._audio.endTurn();
-
 		this._boardModel.unplaceAll();
 		this._boardController.unhighlightAttackable();
 
@@ -163,10 +161,14 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
  		remotePlay.playRange   = remotePlay.playRange.getRotated( this._boardModel.getBoardRange() );
 
  		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+			this._audio.move();
+
 	 		// show the local player updates
 	 		this.executeMove( 'local',  localPlay );
 			this.executeMove( 'remote', remotePlay );
  		} else if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+			this._audio.attack();
+
 	 		// show the local player updates
 	 		this.executeAttack( 'local',  localPlay );
 			setTimeout( (function() { 
@@ -174,6 +176,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			}).bind( this ), 700 );
 
  		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
+			this._audio.attack();
+
 	 		// show the local player updates
 	 		this.executeAttack( 'remote',  remotePlay );
 			setTimeout( (function() { 
@@ -181,6 +185,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			}).bind( this ), 700 );
 
  		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
+			this._audio.attack();
+
 	 		// show the local player updates
 	 		this.executeAttack( 'remote',  remotePlay );
 			this.executeAttack( 'local',   localPlay );
