@@ -42,7 +42,6 @@ gameServer._vowelCount = function( letters ) {
 
 gameServer._vowelCountChecker = function( letters, minVowels, maxVowels ) {
 	var vowelCount = this._vowelCount( letters );
-	console.log( vowelCount, minVowels, maxVowels );
 	return ( vowelCount >= minVowels && vowelCount <= maxVowels );
 }
 
