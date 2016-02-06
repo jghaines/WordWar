@@ -232,6 +232,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.executeAttack = function( who, play ) {
 		this.log.info( this.constructor.name + '.executeAttack(who=' + who + ', play=.)' );
+		this._boardController.addPlayedRange( who, play.playRange );
 		this._boardView.flashAttackOnPlayer( 'local' == who ? 'remote' : 'local' );
 	}
 
