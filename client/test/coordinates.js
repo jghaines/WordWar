@@ -59,4 +59,35 @@ describe('Coordinates', function() {
 			expect( this.coordsRotated.equals( this.coordsD ) ).toEqual( true );
 		});
 	});
+
+	describe("#getIncrement()", function () {
+		it('should shift up', function () {
+			this.coordsA = new Coordinates( 5, 5 );
+			this.coordsB = new Coordinates( 5, 4 );
+			this.coordsIncr = this.coordsA.getIncrement( 0, -1 );
+
+			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+		});
+		it('should shift down', function () {
+			this.coordsA = new Coordinates( 5, 5 );
+			this.coordsB = new Coordinates( 5, 6 );
+			this.coordsIncr = this.coordsA.getIncrement( 0, 1 );
+
+			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+		});
+		it('should shift left', function () {
+			this.coordsA = new Coordinates( 5, 5 );
+			this.coordsB = new Coordinates( 4, 5 );
+			this.coordsIncr = this.coordsA.getIncrement( -1, 0 );
+
+			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+		});
+		it('should shift right', function () {
+			this.coordsA = new Coordinates( 5, 5 );
+			this.coordsB = new Coordinates( 6, 5 );
+			this.coordsIncr = this.coordsA.getIncrement( 1, 0 );
+
+			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+		});
+	});
 });

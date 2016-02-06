@@ -160,6 +160,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
  		remotePlay.newPosition = remotePlay.newPosition.getRotated( this._boardModel.getBoardRange() );
  		remotePlay.playRange   = remotePlay.playRange.getRotated( this._boardModel.getBoardRange() );
 
+ 		var gameEnded = this.updateScore( localPlay, remotePlay );
+
  		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
 			this._audio.move();
 
@@ -192,15 +194,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this.executeAttack( 'local',   localPlay );
  		}
 
- 		// if players have landed on same cell, retreat both players
- 		if ( this._boardController.arePlayersOnSameCell() ) {
- 			this.knockBackPlayer( localPlay );
- 			this.knockBackPlayer( remotePlay );
-			this._boardModel.setPlayerCell( 'local', localPlay.newPosition );
-			this._boardModel.setPlayerCell( 'remote', remotePlay.newPosition );
- 		}
-
- 		var gameEnded = this.updateScore( localPlay, remotePlay );
 		this.addPlayedItem( 'local',  localPlay );
 		this.addPlayedItem( 'remote', remotePlay );
 
@@ -251,31 +244,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			play.score,
 			play.moveType
 		);
-	}
-
-	this.knockBackPlayer = function( play ) {
-		this.log.info( this.constructor.name + '.knockBackPlayer(.)' );
-		if ( play.playRange.min.row == play.playRange.max.row ) { // horizontal move
-			if ( play.newPosition.col < play.playRange.max.col ) {
-				play.newPosition.col++;
-			} else if ( play.playRange.min.col < play.newPosition.col ) {
-				play.newPosition.col--;
-			} else {
-				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled horizontal retreat');
-			}
-
-		} else if ( play.playRange.min.col == play.playRange.max.col ) { // vertical move
-			if ( play.newPosition.row < play.playRange.max.row ) {
-				play.newPosition.row++;
-			} else if ( play.playRange.min.row < play.newPosition.row ) {
-				play.newPosition.row--;
-			} else {
-				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
-			}
-
-		} else {
-			throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled directional retreat');			
-		}
 	}
 
 	this.endGame = function() {

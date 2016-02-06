@@ -160,6 +160,48 @@ function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
 	this._maxValue = maxValue;
 }
 
+function KnockBackPlayScoreStrategy() {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
+	this._arePlayersOnSameCell = function( plays ) {
+ 		return ( plays[0].newPosition.equals( plays[1].newPosition ));
+	}
+
+	this._knockBackPlayer = function( play ) {
+		this.log.info( this.constructor.name + '.knockBackPlayer(.)' );
+		if ( play.playRange.min.row == play.playRange.max.row ) { // horizontal move
+			if ( play.newPosition.col < play.playRange.max.col ) {
+				play.newPosition = play.newPosition.getIncrement( 0, 1 );
+			} else if ( play.playRange.min.col < play.newPosition.col ) {
+				play.newPosition = play.newPosition.getIncrement( 0, -1 );
+			} else {
+				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled horizontal retreat');
+			}
+
+		} else if ( play.playRange.min.col == play.playRange.max.col ) { // vertical move
+			if ( play.newPosition.row < play.playRange.max.row ) {
+				play.newPosition = play.newPosition.getIncrement( 1, 0 );
+			} else if ( play.playRange.min.row < play.newPosition.row ) {
+				play.newPosition = play.newPosition.getIncrement( -1, 0 );
+			} else {
+				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
+			}
+
+		} else {
+			throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled directional retreat');			
+		}
+	}
+
+	this.calculateScore = function( plays ) {
+		// if players have landed on same cell, retreat both players
+		if ( this._arePlayersOnSameCell( plays ) ) {
+			this._knockBackPlayer( plays[0] );
+			this._knockBackPlayer( plays[1] );
+		}
+	}
+}
+
 function CompositeScoreStrategy( scoreStrategyList ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );

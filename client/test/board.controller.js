@@ -131,15 +131,4 @@ describe('BoardController', function() {
 			expect( cells.length ).toEqual( 0 );
 		});
 	});
-
-	describe( '#arePlayersOnSameCell()', function () {
-		it( 'should return false from the start position', function() {
-			this._boardModel._table = this.testTables['startPosition'];
-			expect( this._boardController.arePlayersOnSameCell() ).toEqual( false );
-		});
-		it( 'should return true when they share a position', function() {
-			this._boardModel._table = this.testTables['overlappingPlayers'];
-			expect( this._boardController.arePlayersOnSameCell() ).toEqual( true );
-		});
-	});
 });

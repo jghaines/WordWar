@@ -280,6 +280,54 @@ describe('MinMaxAttackMultiplierScoreStrategy', function() {
 	});
 });
 
+describe('KnockBackPlayScoreStrategy', function() {
+	beforeEach(	function() {
+		this.scoreStrategy = new KnockBackPlayScoreStrategy();
+		this.plays = [ new Play(), new Play() ];
+		this.coord00 = new Coordinates( 0, 0 );
+		this.coord01 = new Coordinates( 0, 1 );
+		this.coord10 = new Coordinates( 1, 0 );
+		this.coord11 = new Coordinates( 1, 1 );
+		this.coord05 = new Coordinates( 0, 5 );
+		this.coord50 = new Coordinates( 5, 0 );
+		this.range00to05 = new CoordRange( this.coord00, this.coord05 );
+		this.range00to50 = new CoordRange( this.coord00, this.coord50 );
+	});
+
+	describe('#_arePlayersOnSameCell()', function () {
+		it('should return true for same newPosition Coordinates', function () {
+			this.plays[0].newPosition = this.coord00;
+			this.plays[1].newPosition = this.coord00;
+			expect( this.scoreStrategy._arePlayersOnSameCell( this.plays )).toBe( true );
+		});
+		it('should return false for different newPosition Coordinates', function () {
+			this.plays[0].newPosition = this.coord00;
+			this.plays[1].newPosition = this.coord11;
+			expect( this.scoreStrategy._arePlayersOnSameCell( this.plays )).toBe( false );
+		});
+	});
+
+	describe('#calculateScore()', function () {
+		it('should leave the players if they are on different cells', function () {
+			this.plays[0].newPosition = this.coord00;
+			this.plays[1].newPosition = this.coord11;
+			this.scoreStrategy.calculateScore( this.plays );
+			expect( this.plays[0].newPosition.equals( this.coord00 )).toBe( true );
+			expect( this.plays[1].newPosition.equals( this.coord11 )).toBe( true );
+		});
+		it('should knockback both players when they land on the same cell', function () {
+			this.plays[0].newPosition = this.coord00;
+			this.plays[0].playRange   = this.range00to50;
+			this.plays[1].newPosition = this.coord00;
+			this.plays[1].playRange   = this.range00to05;
+			this.scoreStrategy.calculateScore( this.plays );
+			expect( this.plays[0].newPosition.equals( this.coord10 )).toBe( true );
+			expect( this.plays[1].newPosition.equals( this.coord01 )).toBe( true );
+		});
+	});
+});
+
+
 describe('CompositeScoreStrategy', function() {
 	beforeEach(	function() {
 		this.scoreStrategyA = jasmine.createSpy('ScoreStrategyA')
@@ -320,3 +368,4 @@ describe('CompositeScoreStrategy', function() {
 		});
 	});
 });
+
