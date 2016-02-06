@@ -16,6 +16,10 @@ function Coordinates( _row, _col ) {
 		 };
 	}
 
+	this.getIncrement = function( rowIncrement, colIncrement ) {
+		return new Coordinates( this.row + rowIncrement, this.col + colIncrement );
+	}
+
 	this.getRotated = function( outerRange ) {
 		if ( outerRange === undefined ) {
 			throw new Error( this.constructor.name + ".getRotated() Expected outerRange parameter" );

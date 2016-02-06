@@ -143,6 +143,9 @@ function IncrementAttackMultiplierScoreStrategy( incrementAfterMove, incrementAf
 
 // enforce given min- and max-Value
 function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.SILENT );
+
 	this.calculateScore = function( plays ) {
 		plays.forEach( (function( play ) {
 			if ( play.attackMultiplier > this._maxValue ) {
