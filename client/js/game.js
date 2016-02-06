@@ -106,7 +106,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		return ( sowpods.binaryIndexOf( word ) >= 0 );
 	}
 
-	/* user has clicked Move or Attack */ 
+	// user has clicked Move or Attack
 	this.playWord = function( moveType ) {
 		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
 		var wordPlaced = this._boardModel.getPlayedWord();
@@ -115,6 +115,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this._boardView.flash('flash-error');
 			return;
 		}
+
+		this._lettersModel.unselect();
+		this._lettersView.updateSelection();
+
+		this._boardController.unhighlightPlaceablePositions();
 
  		this._buttonsView.enableMoveButton(   false );
  		this._buttonsView.enableAttackButton( false );
