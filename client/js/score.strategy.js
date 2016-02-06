@@ -196,8 +196,15 @@ function KnockBackPlayScoreStrategy() {
 	this.calculateScore = function( plays ) {
 		// if players have landed on same cell, retreat both players
 		if ( this._arePlayersOnSameCell( plays ) ) {
-			this._knockBackPlayer( plays[0] );
-			this._knockBackPlayer( plays[1] );
+			switch ( plays[0].cmp( plays[1] )) {
+				case -1 : 	this._knockBackPlayer( plays[0] );
+							break;
+				case 0 : 	this._knockBackPlayer( plays[0] );
+							this._knockBackPlayer( plays[1] );
+							break;
+				case 1 : 	this._knockBackPlayer( plays[1] );
+							break;
+			}
 		}
 	}
 }
