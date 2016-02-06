@@ -55,4 +55,43 @@ describe('Play', function() {
 			}).bind( this ));
 		});
 	});
+
+	describe("#cmp(.)", function () {
+		it('should let attack beat move', function () {
+			var playA = new Play(); playA.moveType = 'attack';
+			var playB = new Play(); playB.moveType = 'move';
+			expect( playA.cmp( playB )).toEqual( 1 );
+			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
+		});
+		it('should let the longer score win for attack vs attack', function () {
+			var playA = new Play(); playA.moveType = 'attack'; playA.score = 8;
+			var playB = new Play(); playB.moveType = 'attack'; playB.score = 3;
+			expect( playA.cmp( playB )).toEqual( 1 );
+			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
+		});
+		it('should let the longer score win for move vs move', function () {
+			var playA = new Play(); playA.moveType = 'move'; playA.score = 8;
+			var playB = new Play(); playB.moveType = 'move'; playB.score = 3;
+			expect( playA.cmp( playB )).toEqual( 1 );
+			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
+		});
+		it('should let the longer word win for same moveType, score', function () {
+			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'LONGER';
+			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'SHORT';
+			expect( playA.cmp( playB )).toEqual( 1 );
+			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
+		});
+		it('should let the later word win for same moveType, score, wordLength', function () {
+			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'ZZZZ';
+			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'AAAA';
+			expect( playA.cmp( playB )).toEqual( 1 );
+			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
+		});
+		it('should tie for same', function () {
+			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'WORD';
+			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'WORD';
+			expect( playA.cmp( playB )).toEqual( 0 );
+			expect( playB.cmp( playA )).toEqual( 0 ); // reverse order
+		});
+	});
 });

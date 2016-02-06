@@ -31,6 +31,37 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 		};
 	}
 
+	// -1 if this beats other
+	//  0 if this ties with other
+	// +1 if loses to other
+	this.cmp = function( other ) {
+		if ( this.moveType != other.moveType ) { // attack vs move			
+			return ( this.moveType == 'attack' ? 1 : -1 ); // attack beats move
+
+		} else if ( this.score > other.score ) { // higher score wins
+			return 1;
+
+		} else if ( other.score > this.score ) {
+			return -1;
+
+		} else if ( this.word.length > other.word.length ) { // longer word wins
+			return 1;
+
+		} else if ( other.word.length > this.word.length ) {
+			return -1;
+
+		} else if ( this.word > other.word ) { // alphabetical later word wins
+			return 1;
+
+		} else if ( other.word > this.word ) {
+			return -1;
+
+		} else { // tie
+			return 0;
+		}
+
+	}
+
 	// constructor code
 	this.player 			= 0;
 	this.moveType 			= moveType;
