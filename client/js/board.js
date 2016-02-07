@@ -203,18 +203,6 @@ function BoardModel() {
 		$(cell).toggleClass( 'attackable', isAttackable );
 	}
 
-	this.getEndOfWordCell = function() {
-		switch(this._placedDirection) {
-			case 'right': // fall through
-			case 'down':
-	    		return this.getPlacedCells().last();
-			case 'left': // fall through
-			case 'up':
-	    		return this.getPlacedCells().first();
-		}
-		return null;
-	}
-
 	this.getPlacedDirection = function() {
 		return this._placedDirection;
 	}
@@ -443,6 +431,18 @@ function BoardController(boardModel, boardView) {
 		this._boardView._fillSpecials( cells );
 		this.unhighlightPlaceablePositions();
 		this.unhighlightAttackable();
+	}
+
+	this.getEndOfWordCell = function() {
+		switch ( this._boardModel._placedDirection ) {
+			case 'right': // fall through
+			case 'down':
+				return this._boardModel.getWordCandidateCells().last()[0]; // not sure why [0] is required
+			case 'left': // fall through
+			case 'up':
+				return this._boardModel.getWordCandidateCells().first()[0];
+		}
+		return null;
 	}
 
 	this.getPlayedScore = function() {

@@ -88,10 +88,12 @@ table.gameboard td.attackable {
 
 /* Avatars */
 table.gameboard td.player-remote {
+	background: 	#00ccff !important;
 	content:url( '../images/Bowie.png' );
 }
 
 table.gameboard td.player-local {
+	background: 	magenta	!important;
 	content:url( '../images/MadWizard.png' );
 }
 

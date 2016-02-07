@@ -116,6 +116,15 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			return;
 		}
 
+		var myPlay = new Play(
+			moveType,
+			this._boardModel.getPlayedWord(),
+			this._boardController.getPlayedScore(), //
+			this._boardModel.getPlacedRange(),
+			this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell() ),
+			this._scoreModel.getAttackMultiplier()
+		);
+
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
 
@@ -126,16 +135,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableResetButton(  false );
 		this._lettersView.setEnabled( false );
 
-		var myPlay = new Play(
-			moveType,
-			this._boardModel.getPlayedWord(),
-			this._boardController.getPlayedScore(), //
-			this._boardModel.getPlacedRange(),
-			this._boardModel.getCoordinatesForCell( this._boardModel.getEndOfWordCell() ),
-			this._scoreModel.getAttackMultiplier()
-		);
-
 		this._stateContext.localMove( myPlay );
+
  	}
 
 	this.resetWord = function() {
