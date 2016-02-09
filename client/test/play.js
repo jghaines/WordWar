@@ -2,6 +2,7 @@
 describe('Play', function() {
 	beforeEach( function(){
 		this.p = { // parameters
+			playerIndex: 		0,
 			moveType: 			'move',
 			word: 				'BEANS',
 			wordValue: 			10,
@@ -13,7 +14,7 @@ describe('Play', function() {
 		this.objectKeys = [ 'playRange', 'newPosition' ]; // object attributes that need .equals() comparison
 
 		this.play = new Play(
-			this.p['moveType'], this.p['word'], this.p['wordValue'], this.p['playRange'], this.p['newPosition'], this.p['attackMultiplier'] );
+			this.p['playerIndex'], this.p['moveType'], this.p['word'], this.p['wordValue'], this.p['playRange'], this.p['newPosition'], this.p['attackMultiplier'] );
 	});
 
 	describe("#constructor(..)", function () {
@@ -35,7 +36,7 @@ describe('Play', function() {
 			var p = this.p;
 
 			play.loadFromJson( JSON.parse(` {
-				"player": 			0,
+				"playerIndex": 		0,
 				"moveType": 		"move",
 				"word": 			"BEANS",
 				"wordValue": 		10,

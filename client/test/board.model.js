@@ -8,7 +8,7 @@ describe('BoardModel', function() {
 	<tr> <td></td><td></td><td class="test-middle"></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
 	<tr> <td></td><td></td><td></td><td></td><td></td> </tr>
-	<tr> <td class='player-local'></td><td></td><td></td><td></td><td class='test-bottom-right'></td> </tr>
+	<tr> <td class='player-0'></td><td></td><td></td><td></td><td class='test-bottom-right'></td> </tr>
 </tbody></table>
 `);
 	});
@@ -55,17 +55,17 @@ describe('BoardModel', function() {
 		});
 	});
 
-	describe('#getPlayerCell("local")', function () {
+	describe('#getPlayerCell( 0 )', function () {
 		it('should return correct cell', function () {
-			var cell = this._boardModel.getPlayerCell( 'local' );
-			expect( cell.hasClass( 'player-local' ) ).toEqual( true );
+			var cell = this._boardModel.getPlayerCell( 0 );
+			expect( cell.hasClass( 'player-0' ) ).toEqual( true );
 			expect( cell.length ).toEqual( 1 );
 		});
 	});
 
 	describe("#_getAllCellsInDirection(,'left')", function () {
 		beforeEach( function() {
-			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.fromCell  = this._boardModel.getPlayerCell( 0 );
 			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'left' );
 		});
 
@@ -76,7 +76,7 @@ describe('BoardModel', function() {
 
 	describe("#_getAllCellsInDirection(,'right')", function () {
 		beforeEach( function() {
-			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.fromCell  = this._boardModel.getPlayerCell( 0 );
 			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'right' );
 		});
 
@@ -91,7 +91,7 @@ describe('BoardModel', function() {
 
 	describe("#_getAllCellsInDirection(,'up')", function () {
 		beforeEach( function() {
-			this.fromCell  = this._boardModel.getPlayerCell('local');
+			this.fromCell  = this._boardModel.getPlayerCell( 0 );
 			this.cells = this._boardModel._getAllCellsInDirection( this.fromCell, 'up' );
 		});
 
@@ -118,25 +118,25 @@ describe('BoardModel wordcandidate - right', function() {
 		this._boardModel._placedDirection = 'right';
 		this.testTables = {
 			noWord: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td></td><td></td><td></td><td></td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td></td><td></td><td></td><td></td> </tr> </tbody></table>
 				`),
 			onePlaced: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><td></td><td></td><td></td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='placed'>A</td><td></td><td></td><td></td> </tr> </tbody></table>
 				`),
 			twoPlaced: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='placed'>A</td><td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
 				`),
 			oneStaticOnePlaced: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='static'>A</td><<td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='static'>A</td><<td class='placed'>P</td><td></td><td></td> </tr> </tbody></table>
 				`),
 			onePlacedOneStatic: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td></td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td></td> </tr> </tbody></table>
 				`),
 			trailingStatic: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td class='static'>Z</td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='placed'>A</td><<td class='static'>P</td><td></td><td class='static'>Z</td> </tr> </tbody></table>
 				`),
 			fullRow: $( `
-				<table><tbody> <tr> <td class='player-local'></td><td class='placed'>A</td><<td class='static'>P</td><td class='static'>P</td><td class='static'>L</td> </tr> </tbody></table>
+				<table><tbody> <tr> <td class='player-0'></td><td class='placed'>A</td><<td class='static'>P</td><td class='static'>P</td><td class='static'>L</td> </tr> </tbody></table>
 				`),
 		};
 	});
@@ -144,14 +144,14 @@ describe('BoardModel wordcandidate - right', function() {
 	describe('#_getWordCandidateCellsInDirection()', function () {
 		it('should return no cells if nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 0 );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 1 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -159,7 +159,7 @@ describe('BoardModel wordcandidate - right', function() {
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -168,7 +168,7 @@ describe('BoardModel wordcandidate - right', function() {
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -177,7 +177,7 @@ describe('BoardModel wordcandidate - right', function() {
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 4 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -188,7 +188,7 @@ describe('BoardModel wordcandidate - right', function() {
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -197,7 +197,7 @@ describe('BoardModel wordcandidate - right', function() {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'right' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -208,37 +208,37 @@ describe('BoardModel wordcandidate - right', function() {
 	describe('#getPlayedWord()', function () {
 		it('should return an empty string nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( '' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( '' );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'A' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'A' );
 		});
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'APPL' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'APPL' );
 		});
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 	});
 });
@@ -249,25 +249,25 @@ describe('BoardModel wordcandidate - up', function() {
 		this._boardModel._placedDirection = 'up';
 		this.testTables = {
 			noWord: $( `
-				<table><tbody> <tr><td /></tr> <tr><td /></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td /></tr> <tr><td /></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			onePlaced: $( `
-				<table><tbody> <tr><td /></tr> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td /></tr> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			twoPlaced: $( `
-				<table><tbody> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			oneStaticOnePlaced: $( `
-				<table><tbody> <tr><td /></tr> <tr><td class='static'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td /></tr> <tr><td class='static'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			onePlacedOneStatic: $( `
-				<table><tbody> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='static'>P</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='static'>P</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			trailingStatic: $( `
-				<table><tbody> <tr><td class='static'>Z</td></tr> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='static'>P</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td class='static'>Z</td></tr> <tr><td /></tr> <tr><td class='placed'>A</td></tr> <tr><td class='static'>P</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 			fullRow: $( `
-				<table><tbody> <tr><td class='placed'>A</tr> <tr><td class='placed'>P</td></tr> <tr><td class='static'>E</td></tr> <tr><td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td class='placed'>A</tr> <tr><td class='placed'>P</td></tr> <tr><td class='static'>E</td></tr> <tr><td class='player-0'></td></tr> </tbody></table>
 				`),
 		};
 	});
@@ -275,14 +275,14 @@ describe('BoardModel wordcandidate - up', function() {
 	describe('#_getWordCandidateCellsInDirection()', function () {
 		it('should return no cells if nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 0 );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 1 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -290,7 +290,7 @@ describe('BoardModel wordcandidate - up', function() {
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -299,7 +299,7 @@ describe('BoardModel wordcandidate - up', function() {
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -308,7 +308,7 @@ describe('BoardModel wordcandidate - up', function() {
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 3 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -318,7 +318,7 @@ describe('BoardModel wordcandidate - up', function() {
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -327,7 +327,7 @@ describe('BoardModel wordcandidate - up', function() {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			var fromCell  = this._boardModel.getPlayerCell('local');
+			var fromCell  = this._boardModel.getPlayerCell( 0 );
 			var cells =  this._boardModel._getWordCandidateCellsInDirection( fromCell, 'up' );
 			expect( cells.length ).toEqual( 2 );
 			expect( cells[0].text() ).toEqual( 'A' );
@@ -338,37 +338,37 @@ describe('BoardModel wordcandidate - up', function() {
 	describe('#getPlayedWord()', function () {
 		it('should return an empty string nothing is placed', function () {
 			this._boardModel._table = this.testTables['noWord'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( '' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( '' );
 		});
 
 		it('should return first cell for a one placed letter', function () {
 			this._boardModel._table = this.testTables['onePlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'A' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'A' );
 		});
 
 		it('should return first two cells for two placed letter', function () {
 			this._boardModel._table = this.testTables['twoPlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should return first two cells for a one static, one placed word', function () {
 			this._boardModel._table = this.testTables['oneStaticOnePlaced'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should return all letters on a full row', function () {
 			this._boardModel._table = this.testTables['fullRow'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'APE' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'APE' );
 		});
 
 		it('should return first two cells for a one placed, one static word', function () {
 			this._boardModel._table = this.testTables['onePlacedOneStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 	});
 });
@@ -379,7 +379,7 @@ describe('BoardModel wordcandidate - left', function() {
 		this._boardModel._placedDirection = 'left';
 		this.testTables = {
 			trailingStatic: $( `
-				<table><tbody> <tr><td class='static'>Z</td> <td /> <td class='placed'>A</td> <td class='static'>P</td> <td class='player-local'></td></tr> </tbody></table>
+				<table><tbody> <tr><td class='static'>Z</td> <td /> <td class='placed'>A</td> <td class='static'>P</td> <td class='player-0'></td></tr> </tbody></table>
 				`),
 		};
 	});
@@ -388,7 +388,7 @@ describe('BoardModel wordcandidate - left', function() {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 	});
 });
@@ -399,7 +399,7 @@ describe('BoardModel wordcandidate - down', function() {
 		this._boardModel._placedDirection = 'down';
 		this.testTables = {
 			trailingStatic: $( `
-				<table><tbody> <tr><td class='player-local'></td></tr> <tr><td class='static'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td /></tr> <tr><td class='static'>Z</td></tr> </tbody></table>
+				<table><tbody> <tr><td class='player-0'></td></tr> <tr><td class='static'>A</td></tr> <tr><td class='placed'>P</td></tr> <tr><td /></tr> <tr><td class='static'>Z</td></tr> </tbody></table>
 				`),
 		};
 	});
@@ -408,7 +408,7 @@ describe('BoardModel wordcandidate - down', function() {
 
 		it('should ignore trailing static cells', function () {
 			this._boardModel._table = this.testTables['trailingStatic'];
-			expect( this._boardModel.getPlayedWord() ).toEqual( 'AP' );
+			expect( this._boardModel.getPlayedWord( 0 ) ).toEqual( 'AP' );
 		});
 	});
 });

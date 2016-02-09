@@ -47,13 +47,13 @@ table.gameboard td.wildcard {
 
 
 /* order is extra !important - later rules override earlier ones */
-table.gameboard td.played-remote {
+table.gameboard td.played-1 {
 	background: 	#00ccff !important;
 	border-color: 	#00ccff;
 	color: 			#00ccff !important;
 }
 
-table.gameboard td.played-local {
+table.gameboard td.played-0 {
 	background: 	magenta	!important;
 	border-color: 	magenta;
 	color: 			magenta !important;
@@ -87,12 +87,12 @@ table.gameboard td.attackable {
 
 
 /* Avatars */
-table.gameboard td.player-remote {
+table.gameboard td.player-1 {
 	background: 	#00ccff !important;
 	content:url( '../images/Bowie.png' );
 }
 
-table.gameboard td.player-local {
+table.gameboard td.player-0 {
 	background: 	magenta	!important;
 	content:url( '../images/MadWizard.png' );
 }

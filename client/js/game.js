@@ -9,18 +9,27 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.debug( this.constructor.name, '.newGame( gameInfo=', gameInfo, ')' );
 
 		var boardUrl = gameInfo.board;
+		this.playerIndex = gameInfo.playerIndex;
+		this.playerCount = gameInfo.playerCount;
 
 		this._lettersModel.setLetterCount( gameInfo.letterCount );
 		this._lettersView.updateLetters();
 
-		this._scoreModel.setScore( 'local',  gameInfo.startScore );
-		this._scoreModel.setScore( 'remote', gameInfo.startScore );
-		this._scoreModel.setLost( 'local', false );
-		this._scoreModel.setLost( 'remote', false );
+		for (var p = this.playerCount - 1; p >= 0; p--) {
+			this._scoreModel.setScore( p, gameInfo.startScore );
+			this._scoreModel.setLost( p, false );
+		}
 
 		this._boardModel.loadBoard(	boardUrl );
 
 		this._audio.newGame();
+	}
+
+	// called back when board has loaded
+	this._boardLoaded = function() {
+		for (var p = this.playerCount - 1; p >= 0; p--) {
+			this._boardController.addPlayedRange( p, this._boardModel.getCellRange( this._boardModel.getPlayerCell( p ) ));
+		}
 	}
 
 	this.newTurn = function( turnInfo ) {
@@ -54,7 +63,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 		this._lettersModel.select(index);
 		this._lettersView.updateSelection();
-		this._boardController.highlightPlaceablePositions();
+		this._boardController.highlightPlaceablePositions( this.playerIndex );
 	}
 
 	this.placeLetterOnBoard = function( cell ) {
@@ -81,23 +90,30 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableMoveButton(  true );
 		this._buttonsView.enableResetButton( true );
 
-		if ( this._scoreModel.getAttackMultiplier() > 0 &&
-			this._attackRangeStrategy.isAttackInRange(
-				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' )),
-				this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'remote' )),
-				this._boardModel.getPlacedRange() )) { // if attack is in range
+		if ( this._scoreModel.getAttackMultiplier() > 0 && this.isAttackInRange() ) {
 
 			this._buttonsView.enableAttackButton( true );
 
-			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( 'local' ))
+			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this.playerIndex ))
 			var placedRange = this._boardModel.getPlacedRange();
 			var strategy = this._attackRangeStrategy;
 			this._boardController.highlightAttackableWhere( function( _ignore_cell, coords ) {
 				return ( strategy.isAttackInRange( localPlayerCoords, coords, placedRange ));
 			});
-
 		} else {
-			this._buttonsView.enableAttackButton( false );			
+			this._buttonsView.enableAttackButton( false );
+		}
+	}
+
+	this.isAttackInRange = function() {
+		for (var p = this.playerCount - 1; p >= 0; p--) { // check the other players
+			if ( 	p != this.playerIndex && // can't attack ourself
+					this._attackRangeStrategy.isAttackInRange(
+						this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this.playerIndex )),
+						this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( p )),
+						this._boardModel.getPlacedRange() )) {
+				return true;
+			}
 		}
 	}
 
@@ -109,7 +125,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	// user has clicked Move or Attack
 	this.playWord = function( moveType ) {
 		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
-		var wordPlaced = this._boardModel.getPlayedWord();
+		var wordPlaced = this._boardModel.getPlayedWord( this.playerIndex );
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
 			this._boardView.flash('flash-error');
@@ -117,11 +133,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 
 		var myPlay = new Play(
+			this.playerIndex,
 			moveType,
-			this._boardModel.getPlayedWord(),
-			this._boardController.getPlayedScore(), //
+			this._boardModel.getPlayedWord( this.playerIndex ),
+			this._boardController.getPlayedScore( this.playerIndex ),
 			this._boardModel.getPlacedRange(),
-			this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell() ),
+			this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
 			this._scoreModel.getAttackMultiplier()
 		);
 
@@ -160,48 +177,49 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._boardModel.unplaceAll();
 		this._boardController.unhighlightAttackable();
 
-		var localPlay  = this._stateContext.getLocalPlay();
-		var remotePlay = this._stateContext.getRemotePlay();
- 		// map the remote play coordinates
- 		remotePlay.newPosition = remotePlay.newPosition.getRotated( this._boardModel.getBoardRange() );
- 		remotePlay.playRange   = remotePlay.playRange.getRotated( this._boardModel.getBoardRange() );
+		var plays = this._stateContext.getPlays();
+		var localPlay  = plays[ this.playerIndex ];
+		var remotePlay = plays[ 1 - this.playerIndex ];
 
- 		var gameEnded = this.updateScore( localPlay, remotePlay );
+ 		var gameEnded = this.updateScore( plays );
 
- 		if ( 'move' == localPlay.moveType && 'move' == remotePlay.moveType ) {
+ 		var movePlays = [];
+ 		var attackPlays = [];
+		for (var p = plays.length - 1; p >= 0; p--) {
+			switch ( plays[p].moveType ) {
+				case 'move':
+					movePlays.push( plays[p] );
+					break;
+				case 'attack':
+					attackPlays.push( plays[p] );
+					break;
+			}
+		}
+
+
+		if ( attackPlays.length > 0 ) { // attacks, if any, shown first
+			this._audio.attack();
+
+			for (var p = attackPlays.length - 1; p >= 0; p--) {
+				this.executeAttack( attackPlays[p] );
+			}
+			if ( movePlays.length > 0 ) { // move vs attack, shown next
+				setTimeout( (function() { 
+					for (var p = movePlays.length - 1; p >= 0; p--) {
+						this.executeMove( movePlays[p] );
+					}
+				}).bind( this ), 700 );
+			}
+		} else { // only moves
 			this._audio.move();
+			for (var p = movePlays.length - 1; p >= 0; p--) {
+				this.executeMove( movePlays[p] );
+			}
+		}
 
-	 		// show the local player updates
-	 		this.executeMove( 'local',  localPlay );
-			this.executeMove( 'remote', remotePlay );
- 		} else if ( 'attack' == localPlay.moveType && 'move' == remotePlay.moveType ) {
-			this._audio.attack();
-
-	 		// show the local player updates
-	 		this.executeAttack( 'local',  localPlay );
-			setTimeout( (function() { 
-				this.executeMove( 'remote', remotePlay );
-			}).bind( this ), 700 );
-
- 		} else if ( 'move' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
-			this._audio.attack();
-
-	 		// show the local player updates
-	 		this.executeAttack( 'remote',  remotePlay );
-			setTimeout( (function() { 
-				this.executeMove( 'local', localPlay );
-			}).bind( this ), 700 );
-
- 		} else if ( 'attack' == localPlay.moveType && 'attack' == remotePlay.moveType ) {
-			this._audio.attack();
-
-	 		// show the local player updates
-	 		this.executeAttack( 'remote',  remotePlay );
-			this.executeAttack( 'local',   localPlay );
- 		}
-
-		this.addPlayedItem( 'local',  localPlay );
-		this.addPlayedItem( 'remote', remotePlay );
+		for (var p = plays.length - 1; p >= 0; p--) {
+			this.addPlayedItem( plays[p] );
+		}
 
 		if ( gameEnded ) {
  			this.endGame();
@@ -209,42 +227,39 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	}
 
 	// update score, return true if game has ended
- 	this.updateScore = function( localPlay, remotePlay ) {
+ 	this.updateScore = function( plays ) {
 		this.log.info( this.constructor.name + '.updateScore(.)');
-		this._scoreStrategy.calculateScore([ localPlay, remotePlay ]);
+		this._scoreStrategy.calculateScore( plays );
 
-		this._scoreModel.incrementScore( 'local',  localPlay.score );
-		this._scoreModel.incrementScore( 'remote', remotePlay.score );
+		this._scoreModel.setAttackMultiplier( plays[ this.playerIndex ].attackMultiplier );
 
-		this._scoreModel.setAttackMultiplier( localPlay.attackMultiplier );
-
-		if ( this._scoreModel.getScore( 'local' ) < 0 ) {
-			this._scoreModel.setLost( 'local', true );
-			return true;
+		for (var i = plays.length - 1; i >= 0; i--) {
+			this._scoreModel.incrementScore( i, plays[i].score );
+			if ( this._scoreModel.getScore( i ) < 0 ) {
+				this._scoreModel.setLost( i, true );
+				return true;
+			}
 		}
 
-		if ( this._scoreModel.getScore( 'remote' ) < 0 ) {
-			this._scoreModel.setLost( 'remote', true );
-			return true;
-		}
 		return false;
 	}
 
-	this.executeMove = function( who, play ) {
-		this.log.info( this.constructor.name + '.executeMove(who=' + who + ', play=.)' );
-		this._boardModel.setPlayerCell( who, play.newPosition );
-		this._boardController.addPlayedRange( who, play.playRange );
+	this.executeMove = function( play ) {
+		this.log.info( this.constructor.name + '.executeMove(play=.)' );
+		this._boardModel.setPlayerCell( play.playerIndex, play.newPosition );
+		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 	}
 
-	this.executeAttack = function( who, play ) {
-		this.log.info( this.constructor.name + '.executeAttack(who=' + who + ', play=.)' );
-		this._boardController.addPlayedRange( who, play.playRange );
-		this._boardView.flashAttackOnPlayer( 'local' == who ? 'remote' : 'local' );
+	// execute attack initiated by giver play(-er)
+	this.executeAttack = function( play ) {
+		this.log.info( this.constructor.name + '.executeAttack(play=.)' );
+		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
+		this._boardView.flashAttackOnPlayer( 1 - play.playerIndex ); // TODO: this is hard-coded for 2-player, should be generic
 	}
 
-	this.addPlayedItem = function( who, play ) {
-		this.log.info( this.constructor.name + '.addPlayedItem(who=' + who + ', play=.)' );
-		this._boardView.addPlayedItem( who,
+	this.addPlayedItem = function( play ) {
+		this.log.info( this.constructor.name + '.addPlayedItem(play=.)' );
+		this._boardView.addPlayedItem( play.playerIndex,
 			play.moveType.toTitleCase() + ': ' + play.word +
 			'(' + play.wordValue + ') ' +
 			( play.score > 0 ? '+' : '' ) +
@@ -296,6 +311,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._lettersView.onClick( (function(index, letter) {
 		this.selectLetterToPlace(index, letter);
 	}).bind(this) );
+
+	this._boardModel.onBoardLoaded(( function() {
+		this._boardLoaded()
+	}).bind( this ));
 
 	this._boardView.onClick( (function(cell) {
 		this.placeLetterOnBoard(cell);

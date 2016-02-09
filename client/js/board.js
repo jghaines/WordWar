@@ -1,4 +1,3 @@
-
 "use strict";
 
 function BoardModel() {
@@ -14,13 +13,13 @@ function BoardModel() {
 		}).bind( this ));
 	}
 
- 	this.getHeight = function() {
- 		return this._table.find('tr').length;
- 	}
+	this.getHeight = function() {
+		return this._table.find('tr').length;
+	}
 
- 	this.getWidth = function() {
- 		return this._table.find('tr:eq(0) td').length;
- 	}
+	this.getWidth = function() {
+		return this._table.find('tr:eq(0) td').length;
+	}
 
 	this.getBoardRange = function() {
 		return new CoordRange(
@@ -136,19 +135,19 @@ function BoardModel() {
 	}
 
 	// TODO: this sholud be Controller logic
-	this.getWordCandidateCells = function() {
+	this.getWordCandidateCells = function( playerIndex ) {
 		this.log.info( this.constructor.name + '.getWordCandidateCells()' );
 
-		return this._getWordCandidateCellsInDirection( this.getPlayerCell( 'local' ), this.getPlacedDirection() );
+		return this._getWordCandidateCellsInDirection( this.getPlayerCell( playerIndex ), this.getPlacedDirection() );
 	}
 
-	this.getPlayerCell = function(who) {
-		return this._table.find('td.player-' + who);
+	this.getPlayerCell = function( playerIndex ) {
+		return this._table.find('td.player-' + playerIndex);
 	}
 
-	this.setPlayerCell = function(who, coordinates) {
-		this.log.info('BoardModel.setPlayerCell(who =' + who +', coordinates)');
-		var cssClass = 'player-' + who;
+	this.setPlayerCell = function(playerIndex, coordinates) {
+		this.log.info('BoardModel.setPlayerCell(playerIndex =' + playerIndex +', coordinates)');
+		var cssClass = 'player-' + playerIndex;
 		this._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
 		this._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
 	}
@@ -182,8 +181,8 @@ function BoardModel() {
 		return this._table.find('td.placed');
 	}
 
-	this.getPlayedWord = function() {
-		return 	$.map( this.getWordCandidateCells(), function( val, i ) {
+	this.getPlayedWord = function( playerIndex ) {
+		return 	$.map( this.getWordCandidateCells( playerIndex ), function( val, i ) {
 		  return $(val).text();
 		}).join('');
 
@@ -256,12 +255,12 @@ function BoardView( boardModel ) {
 		this._status.text( statusMessage );
 	}
 
-	this.addPlayedItem = function ( who, text, styleClass ) {
+	this.addPlayedItem = function ( playerIndex, text, styleClass ) {
 		var element = $('<li/>').text( text );
 		if ( typeof styleClass !== 'undefined' ) {
 			element.addClass( 'move-' + styleClass );
 		}
-		this._wordLists[who].append( element );
+		this._wordLists[playerIndex].append( element );
 	}
 
 
@@ -269,8 +268,8 @@ function BoardView( boardModel ) {
 		flash( this._table, flash_class );
 	}
 
-	this.flashAttackOnPlayer = function( who ) {
-		var cell = this._boardModel.getPlayerCell( who );
+	this.flashAttackOnPlayer = function( playerIndex ) {
+		var cell = this._boardModel.getPlayerCell( playerIndex );
 		flash( cell, 'flash-attack' );
 	}
 
@@ -300,10 +299,10 @@ function BoardView( boardModel ) {
 
 	this._table  = $( 'table.gameboard' );
 	this._status = $( '.status' );
-	this._wordLists = {
-		'local': 	$( 'div.playedwords.local  ul' ),
-		'remote': 	$( 'div.playedwords.remote ul' ),
-	};
+	this._wordLists = [
+		$( 'div.playedwords.player-0 ul' ),
+		$( 'div.playedwords.player-1 ul' ),
+	];
 
 	this._clickCallbacks = $.Callbacks();
 
@@ -320,15 +319,12 @@ function BoardController(boardModel, boardView) {
 
 	this._boardLoaded = function() {
 		this.log.info( this.constructor.name + '._boardLoaded()' );
-
-		this.addPlayedRange( 'local',  this._boardModel.getCellRange( this._boardModel.getPlayerCell('local' ) ));
-		this.addPlayedRange( 'remote', this._boardModel.getCellRange( this._boardModel.getPlayerCell('remote') ));
 	}
 
-	this.addPlayedRange = function( who, range ) {
+	this.addPlayedRange = function( playerIndex, range ) {
 		range.foreach( ( function( coords ) {
 			var cell = this._boardModel.getCellAtCoordinates( coords );
-			cell.addClass( 'played-' + who );
+			cell.addClass( 'played-' + playerIndex );
 			if ( cell.hasClass('bonus') ) {
 				cell.attr( 'ww_value', 1 ); // bonus will only work on first play
 			}
@@ -375,10 +371,10 @@ function BoardController(boardModel, boardView) {
 		}
 	}
 
-	this.highlightPlaceablePositions = function() {
+	this.highlightPlaceablePositions = function( playerIndex ) {
 		this.log.info("BoardController.highlightPlaceablePositions()");
 		var placedCells =  this._boardModel.getPlacedCells();
-		var playerCell =  this._boardModel.getPlayerCell('local');
+		var playerCell =  this._boardModel.getPlayerCell( playerIndex );
 
 		this.unhighlightPlaceablePositions();
 
@@ -410,21 +406,6 @@ function BoardController(boardModel, boardView) {
 		});
 	}
 
-	this.validPlacement = function() { 
-		var cells = this._boardModel.getWordCandidateCells();
-
-		if ( cells.length <= 0 ) {
-			return false;
-		}
-
-		for ( var i = cells.length - 1; i >= 0 ; --i ) {
-			if ( '' == cells[i].text() ) { // blank cell
-				return false;
-			}
-		}
-		return true;
-	}
-
 	this.resetWord = function() {
 		var cells = this._boardModel.getPlacedCells();
 		this._boardModel.unplaceAll();
@@ -433,22 +414,22 @@ function BoardController(boardModel, boardView) {
 		this.unhighlightAttackable();
 	}
 
-	this.getEndOfWordCell = function() {
+	this.getEndOfWordCell = function( playerIndex ) {
 		switch ( this._boardModel._placedDirection ) {
 			case 'right': // fall through
 			case 'down':
-				return this._boardModel.getWordCandidateCells().last()[0]; // not sure why [0] is required
+				return this._boardModel.getWordCandidateCells( playerIndex ).last()[0]; // not sure why [0] is required
 			case 'left': // fall through
 			case 'up':
-				return this._boardModel.getWordCandidateCells().first()[0];
+				return this._boardModel.getWordCandidateCells( playerIndex ).first()[0];
 		}
 		return null;
 	}
 
-	this.getPlayedScore = function() {
+	this.getPlayedScore = function( playerIndex ) {
 		var score = 0;
 		var wordBonus = 1;
-		this._boardModel.getWordCandidateCells().each( function() {
+		this._boardModel.getWordCandidateCells( playerIndex ).each( function() {
 			var letterBonus = 1;
 			var letterScore = scoreForLetter( $( this ).text() );
 			if ( $(this).hasClass('bonus') ) {

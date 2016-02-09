@@ -1,11 +1,11 @@
 'use strict';
 
-function Play( moveType, word, wordValue, playRange, newPosition, attackMultiplier ) {
+function Play( playerIndex, moveType, word, wordValue, playRange, newPosition, attackMultiplier ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
 	this.loadFromJson = function( json ) {
-		this.player 			= json.player;
+		this.playerIndex  		= json.playerIndex;
 		this.moveType			= json.moveType;
 		this.word				= json.word;
 		this.wordValue			= json.wordValue;
@@ -20,7 +20,7 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 
 	this.toJSON = function() {
 		return {
-			player: 			this.player,
+			playerIndex: 		this.playerIndex,
 			moveType: 			this.moveType,
 			word: 				this.word,
 			wordValue: 			this.wordValue,
@@ -63,7 +63,7 @@ function Play( moveType, word, wordValue, playRange, newPosition, attackMultipli
 	}
 
 	// constructor code
-	this.player 			= 0;
+	this.playerIndex 		= playerIndex;
 	this.moveType 			= moveType;
 	this.word				= word;
 	this.wordValue			= wordValue;

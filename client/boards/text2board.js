@@ -18,8 +18,8 @@ rl.on('line', function(line){
 		switch ( true ) {
 			case ( '.' == letter ) : process.stdout.write( "<td/>" ); break; // blank cell
 
-			case ( '<' == letter ) : process.stdout.write( "<td class='player-local'/>" ); break;
-			case ( '>' == letter ) : process.stdout.write( "<td class='player-remote'/>" ); break;
+			case ( '<' == letter ) : process.stdout.write( "<td class='player-0'/>" ); break;
+			case ( '>' == letter ) : process.stdout.write( "<td class='player-1'/>" ); break;
 
 			case ( '_' == letter ) : process.stdout.write( "<td class='block'/>" ); break;
 			case ( '?' == letter ) : process.stdout.write( "<td class='wildcard' ww_value='?'/>" ); break;

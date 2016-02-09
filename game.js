@@ -25,6 +25,7 @@ module.exports = class Game {
 			board 		: this.board,
 			letterCount : this.letterCount,
 			startScore  : this.startScore,
+			playerCount : this.maxPlayers,
 		}
 	}
 

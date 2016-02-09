@@ -19,12 +19,12 @@ function StateContext(remote) {
 	}
 
 	// local move - called by GameController
-	this.localMove = function(localPlay) {
+	this.localMove = function( play ) {
 		this.log.info(this.constructor.name + '.localMove(.)');
-		this.log.debug(this.constructor.name + '.localMove(', localPlay, ')');
+		this.log.debug(this.constructor.name + '.localMove(', play, ')');
 
-		this._localPlay = localPlay; 
-		this._remote.executeLocalPlay( localPlay );
+		this._plays[ play.playerIndex ] = play; 
+		this._remote.executeLocalPlay( play );
 
 		this._state.localMove();
 	}
@@ -34,8 +34,9 @@ function StateContext(remote) {
  		this.log.info(this.constructor.name + '.remoteMove(.)');
  		this.log.debug(this.constructor.name + '.remoteMove(', msg, ')');
 
-		this._remotePlay = new Play();
-		this._remotePlay.loadFromJson( JSON.parse( msg ));
+		var play = new Play();
+		play.loadFromJson( JSON.parse( msg ));
+		this._plays[ play.playerIndex ] = play; 
 
  		this._state.remoteMove();
  	}
@@ -58,13 +59,10 @@ function StateContext(remote) {
 	//
 	// Accessors
 	//
-	this.getLocalPlay = function() {
-		return this._localPlay;
+	this.getPlays = function() {
+		return this._plays;
 	}
 
-	this.getRemotePlay = function() {
-		return this._remotePlay;
-	}
 
 	//
 	// register callbacks
@@ -87,8 +85,7 @@ function StateContext(remote) {
 	}
 
 	// our buffer for most recent plays
-	this._localPlay = {};
-	this._remotePlay = {};
+	this._plays = [];
 
 	this._newGameCallbacks = $.Callbacks();
 	this._newTurnCallbacks = $.Callbacks();

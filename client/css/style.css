@@ -14,12 +14,12 @@ body {
 	font-weight: bold;
 }
 
-.score.local {
+.score.player-0 {
 	color:	magenta;
 }
 
-.score.remote {
-	color:	black;
+.score.player-1 {
+	color:	#00ccff;
 }
 
 .score.lost {
@@ -32,12 +32,12 @@ body {
 	border-style: solid;
 }
 
-.playedwords.local {
+.playedwords.player-0 {
 	border-color: magenta;
 }
 
-.playedwords.remote {
-	border-color: black;
+.playedwords.player-1 {
+	border-color: #00ccff;
 }
 
 .playedwords ul {
