@@ -3,6 +3,7 @@
 
 const LetterGenerator = require('./wordyLetters.js');
 const Game = require('./game.js');
+const Player = require('./player.js');
 
 var
     gameServer = module.exports = { games : [] },
@@ -76,7 +77,7 @@ gameServer.findPendingGame = function( userId, client ) {
 	for ( var i = this.games.length - 1; i >= 0; i-- ) {
 		var game = this.games[i];
 		if ( game.players.length < 2 ) {
-			var player = { userId: userId, client : client }
+			var player = new Player( userId, client );
 			game.addPlayer( player );
 			this.logSummary.info('G', game.id, 'P[1]', player.userId, 'joined game' );
 			this.startGame(game);
@@ -102,7 +103,7 @@ gameServer.createGame = function( userId, client ) {
 	this.log.info( this.constructor.name + '.createGame(..)' );
 	this.log.debug( this.constructor.name, '.createGame( userId= ', userId, ', client=.)' );
 
-	var player = { userId: userId, client : client };
+	var player = new Player( userId, client );
 
 	var newGame = new Game( './boards/' + gameServer.defaultBoard );
 	newGame.addPlayer( player );

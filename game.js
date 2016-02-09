@@ -24,7 +24,10 @@ module.exports = class Game {
 		if ( this.players.length >= this.maxPlayers ) {
 			throw new Error( this.constructor.name + '.addPlayer() - maximum number of players exceeded' );
 		}
-		this.players.push( player );
+		var playerIndex = this.players.length;
 
+		player.setIndex( playerIndex );
+		player.setGame( this );
+		this.players.push( player );
 	}
 }
