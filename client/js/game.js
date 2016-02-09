@@ -27,6 +27,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	// called back when board has loaded
 	this._boardLoaded = function() {
+		// mark starting position as played for cosmetics
 		for (var p = this.playerCount - 1; p >= 0; p--) {
 			this._boardController.addPlayedRange( p, this._boardModel.getCellRange( this._boardModel.getPlayerCell( p ) ));
 		}
@@ -171,20 +172,20 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
  	}
 
 	// State machine callback - local player and remote compnent have completed move
- 	this.endTurn = function() {
+		this.endTurn = function() {
 		this.log.info( this.constructor.name + '.endTurn()' );
 
-		this._boardModel.unplaceAll();
+		this._boardController.resetWord();
 		this._boardController.unhighlightAttackable();
 
 		var plays = this._stateContext.getPlays();
 		var localPlay  = plays[ this.playerIndex ];
 		var remotePlay = plays[ 1 - this.playerIndex ];
 
- 		var gameEnded = this.updateScore( plays );
+			var gameEnded = this.updateScore( plays );
 
- 		var movePlays = [];
- 		var attackPlays = [];
+			var movePlays = [];
+			var attackPlays = [];
 		for (var p = plays.length - 1; p >= 0; p--) {
 			switch ( plays[p].moveType ) {
 				case 'move':
@@ -222,8 +223,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 
 		if ( gameEnded ) {
- 			this.endGame();
- 		}
+				this.endGame();
+			}
 	}
 
 	// update score, return true if game has ended
@@ -246,7 +247,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.executeMove = function( play ) {
 		this.log.info( this.constructor.name + '.executeMove(play=.)' );
-		this._boardModel.setPlayerCell( play.playerIndex, play.newPosition );
+		this._boardController.setPlayerCell( play.playerIndex, play.newPosition );
 		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 	}
 

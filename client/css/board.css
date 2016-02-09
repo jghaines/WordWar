@@ -87,14 +87,8 @@ table.gameboard td.attackable {
 
 
 /* Avatars */
-table.gameboard td.player-1 {
-	background: 	#00ccff !important;
-	content:url( '../images/BabyDuck.png' );
+table.gameboard td.player-0 img,
+table.gameboard td.player-1 img {
+	width: 		25px;
+	height: 	25px;
 }
-
-table.gameboard td.player-0 {
-	background: 	magenta	!important;
-	content:url( '../images/MadWizard.png' );
-}
-
-

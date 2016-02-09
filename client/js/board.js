@@ -142,14 +142,24 @@ function BoardModel() {
 	}
 
 	this.getPlayerCell = function( playerIndex ) {
-		return this._table.find('td.player-' + playerIndex);
+		var cell = this._table.find('td.player-' + playerIndex);
+		if ( cell.length > 0 ) {
+			return cell;
+		} else {
+			return null;
+		}
 	}
 
 	this.setPlayerCell = function(playerIndex, coordinates) {
 		this.log.info('BoardModel.setPlayerCell(playerIndex =' + playerIndex +', coordinates)');
 		var cssClass = 'player-' + playerIndex;
-		this._table.find('td.' + cssClass).removeClass(cssClass); // remove existing
-		this._table.find('tr:eq(' + coordinates.row + ') td:eq(' + coordinates.col + ')').addClass(cssClass);
+		var prevCell = this.getPlayerCell( playerIndex );
+		prevCell.html( '' ); // empty previous cell
+		prevCell.removeClass( cssClass );
+
+		var newCell = this.getCellAtCoordinates( coordinates );
+		newCell.addClass( cssClass );
+		newCell.html( '<img src="/images/player-' + playerIndex + '.png" />' );
 	}
 
 	this.isCellPlaceable = function(cell) {
@@ -239,7 +249,13 @@ function BoardView( boardModel ) {
 		this.log.debug( '  ', this.constructor.name,'.fillSpecials(.) - cells.length=', cells.length );
 
 		cells.each( function() {
-			if ( $(this).hasClass( 'bonus' ) ) {
+			if ( $(this).hasClass( 'player-0' ) ) { // player
+				var playerIndex = 0;
+				$(this).html( '<img src="/images/player-' + playerIndex + '.png" />' );
+			} else if ( $(this).hasClass( 'player-1' ) ) { // player
+				var playerIndex = 1;
+				$(this).html( '<img src="/images/player-' + playerIndex + '.png" />' );
+			} else if ( $(this).hasClass( 'bonus' ) ) { // bonus
 				$(this).html(
 					'<div class="bonus">' + 'x' + $(this).attr( 'ww_value' ) + '<br />' +
 					 ( $(this).hasClass( 'letter' ) ? "<span class='bonusType'>letter</span>": '' ) +
@@ -441,6 +457,12 @@ function BoardController(boardModel, boardView) {
 			score += letterBonus * letterScore;
 		} );
 		return wordBonus * score;
+	}
+
+	this.setPlayerCell = function(playerIndex, coordinates) {
+		var prevCell = this._boardModel.getPlayerCell( playerIndex );
+		this._boardModel.setPlayerCell( playerIndex, coordinates );
+		this._boardView._fillSpecials( prevCell );
 	}
 
 
