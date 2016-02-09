@@ -241,11 +241,11 @@ function BoardView( boardModel ) {
 		cells.each( function() {
 			if ( $(this).hasClass( 'bonus' ) ) {
 				$(this).html(
-					'x' + $(this).attr( 'ww_value' ) + '<br />' +
+					'<div class="bonus">' + 'x' + $(this).attr( 'ww_value' ) + '<br />' +
 					 ( $(this).hasClass( 'letter' ) ? "<span class='bonusType'>letter</span>": '' ) +
-					 ( $(this).hasClass( 'word'   ) ? "<span class='bonusType'>word</span>": '' )
-					);
-			} else if ( $(this).attr('ww_value') ) {
+					 ( $(this).hasClass( 'word'   ) ? "<span class='bonusType'>word</span>": '' ) +
+					'</div>');
+			} else if ( $(this).attr('ww_value') ) { // static
 				$(this).text( $(this).attr('ww_value') );
 			}
 		});
@@ -309,7 +309,6 @@ function BoardView( boardModel ) {
 	this._boardModel.onBoardLoaded(( function() {
 		this._boardLoaded()
 	}).bind( this ));
-
 }
 
 

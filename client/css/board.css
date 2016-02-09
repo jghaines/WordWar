@@ -17,7 +17,7 @@ table.gameboard td {
 	background: grey;
 }
 
-table.gameboard td.bonus {
+table.gameboard td.bonus div.bonus {
 	line-height: 0.6;
 	font-size: 16px;
 	padding: 0;
