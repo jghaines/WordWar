@@ -120,7 +120,7 @@ gameServer.startGame = function(game) {
 
 	for ( var i = 0; i < game.players.length; ++i ) {
 		game.players[i].client.game = game;
-		game.players[i].client.emit( 'new game', JSON.stringify( game, ['board', 'letterCount', 'startScore' ]));
+		game.players[i].client.emit( 'new game', JSON.stringify( game ));
 	}
 
 	this.nextTurn(game);

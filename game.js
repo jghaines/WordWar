@@ -20,6 +20,14 @@ module.exports = class Game {
 		this.maxVowels = 8;
 	}
 
+	toJSON() {
+		return {
+			board 		: this.board,
+			letterCount : this.letterCount,
+			startScore  : this.startScore,
+		}
+	}
+
 	addPlayer( player ) {
 		if ( this.players.length >= this.maxPlayers ) {
 			throw new Error( this.constructor.name + '.addPlayer() - maximum number of players exceeded' );
