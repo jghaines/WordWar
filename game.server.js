@@ -4,6 +4,7 @@
 const LetterGenerator = require('./wordyLetters.js');
 const Game = require('./game.js');
 const Player = require('./player.js');
+const JsonDecorator = require('./json.decorator.js');
 
 var
     gameServer = module.exports = { games : [] },
@@ -114,13 +115,16 @@ gameServer.createGame = function( userId, client ) {
 }
 
 gameServer.startGame = function(game) {
-	this.log.debug( this.constructor.name, '.startGame(.)' );
+	this.log.info( this.constructor.name, '.startGame(.)' );
 
 	this.logSummary.info('G', game.id, 'started' );
 
 	for ( var i = 0; i < game.players.length; ++i ) {
+		var gameJson =  JSON.stringify( new JsonDecorator( game.toJSON(),  { playerIndex : i }));
+		this.log.debug( this.constructor.name, '.startGame() - gameJson = ', gameJson );
+
 		game.players[i].client.game = game;
-		game.players[i].client.emit( 'new game', JSON.stringify( game ));
+		game.players[i].client.emit( 'new game', gameJson );
 	}
 
 	this.nextTurn(game);
