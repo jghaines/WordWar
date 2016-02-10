@@ -85,7 +85,7 @@ function AttackPenalisesMoveScoreStrategy() {
 	}
 }
 
-function WinnerPenalisesLoserScoreStrategy() {
+function WinnerBeatsLoserScoreStrategy() {
  	this.calculateScore = function( plays ) {
 		if ( 'attack' == plays[0].moveType && 'move' == plays[1].moveType ||
 			 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score > plays[1].score ) {
@@ -112,6 +112,35 @@ function WinnerPenalisesLoserScoreStrategy() {
 		}
 
  	}
+}
+
+function WinnerPenalisesLoserScoreStrategy() {
+	this.calculateScore = function( plays ) {
+		if ( 'move' == plays[0].moveType && 'move' == plays[1].moveType ) { // move vs. move
+			// score unchanged
+
+		} else if ( 'attack' == plays[0].moveType && 'move' == plays[1].moveType ) {
+			plays[1].score = plays[1].score - ( plays[0].attackMultiplier * plays[0].score );
+			plays[0].score = 0;
+
+		} else if ( 'move' == plays[0].moveType && 'attack' == plays[1].moveType ) {
+			plays[0].score = plays[0].score - ( plays[1].attackMultiplier * plays[1].score );
+			plays[1].score = 0;
+
+		} else if ( 'attack' == plays[0].moveType && 'attack' == plays[1].moveType ) {
+			var highestScore = Math.max( plays[0].score, plays[1].score );
+			if ( plays[0].score == plays[1].score ) {
+				plays[0].score = 0;
+				plays[1].score = 0;
+			} else if ( plays[0].score < plays[1].score ) {
+				plays[0].score = ( plays[0].attackMultiplier * plays[0].score ) - ( plays[1].attackMultiplier * plays[1].score );
+				plays[1].score = 0;
+			} else if ( plays[0].score > plays[1].score ) {
+				plays[1].score = ( plays[1].attackMultiplier * plays[1].score ) - ( plays[0].attackMultiplier * plays[0].score );
+				plays[0].score = 0;
+			}
+		}
+	}
 }
 
 // each play will use the same attackMultiplier
