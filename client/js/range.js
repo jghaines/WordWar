@@ -14,8 +14,8 @@ function CoordRange( _min, _max ) {
 
 	this.toJSON = function() {
 		return {
-			min: this.min,
-			max: this.max
+			min: this.min.toJSON(),
+			max: this.max.toJSON()
 		};
 	}
 

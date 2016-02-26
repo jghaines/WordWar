@@ -11,6 +11,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		var boardUrl = gameInfo.board;
 		this.playerIndex = gameInfo.playerIndex;
 		this.playerCount = gameInfo.playerCount;
+		this.gameId      = gameInfo.gameId;
+		this.turnIndex   = 0;
 
 		this._lettersModel.setLetterCount( gameInfo.letterCount );
 		this._lettersView.updateLetters();
@@ -36,6 +38,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.newTurn = function( turnInfo ) {
 		this.log.info( this.constructor.name + '.newTurn(.)' );
 		this.log.debug( this.constructor.name, '.newTurn( turnInfo=', turnInfo, ')' );
+
+		this.turnIndex = turnInfo.turnIndex;
 
 		for ( var i = turnInfo.letters.length - 1; i >= 0; i-- ) {
 			this._lettersModel.setLetter(i, turnInfo.letters[i] );
@@ -133,15 +137,17 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			return;
 		}
 
-		var myPlay = new Play(
-			this.playerIndex,
-			moveType,
-			this._boardModel.getPlayedWord( this.playerIndex ),
-			this._boardController.getPlayedScore( this.playerIndex ),
-			this._boardModel.getPlacedRange(),
-			this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
-			this._scoreModel.getAttackMultiplier()
-		);
+		var myPlay = new Play( {
+			gameId: 			this.gameId,
+			turnIndex: 			this.turnIndex,
+			playerIndex: 		this.playerIndex,
+			moveType: 			moveType,
+			word: 				this._boardModel.getPlayedWord( this.playerIndex ),
+			wordValue: 			this._boardController.getPlayedScore( this.playerIndex ),
+			playRange: 			this._boardModel.getPlacedRange(),
+			newPosition: 		this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
+			attackMultiplier: 	this._scoreModel.getAttackMultiplier()
+		});
 
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();

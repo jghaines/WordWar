@@ -134,13 +134,13 @@ gameServer.nextTurn = function(game) {
 	this.log.debug( this.constructor.name, '.nextTurn(.)' );
 
 	var msg = {
-		turnNumber: game.turn,
+		turnIndex: game.turnIndex,
 		letters: this._letterGenerator.getLetters( game.letterCount, (function(letters) {
 				return this._vowelCountChecker( letters, game.minVowels, game.maxVowels );
 			}).bind( this ))
 	}
 
-	++game.turn;
+	++game.turnIndex;
 	game.playsThisTurn = 0;
 
 	this.logSummary.info('G', game.id, 'start turn[' + msg.turnNumber + ']', msg.letters );

@@ -10,7 +10,7 @@ module.exports = class Game {
 		this.players = [];
 
 		this.startScore = 0;
-		this.turn = 0;
+		this.turnIndex = 0;
 		this.playsThisTurn = 0;
 		this.finished = false;
 
@@ -22,6 +22,7 @@ module.exports = class Game {
 
 	toJSON() {
 		return {
+			gameId 		: this.gameId,
 			board 		: this.board,
 			letterCount : this.letterCount,
 			startScore  : this.startScore,

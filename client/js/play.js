@@ -1,10 +1,12 @@
 'use strict';
 
-function Play( playerIndex, moveType, word, wordValue, playRange, newPosition, attackMultiplier ) {
+function Play( parameters ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
 	this.loadFromJson = function( json ) {
+		this.gameId 			= json.gameId;
+		this.turnIndex 			= json.turnIndex;
 		this.playerIndex  		= json.playerIndex;
 		this.moveType			= json.moveType;
 		this.word				= json.word;
@@ -20,12 +22,14 @@ function Play( playerIndex, moveType, word, wordValue, playRange, newPosition, a
 
 	this.toJSON = function() {
 		return {
+			gameId: 			this.gameId,
+			turnIndex: 			this.turnIndex,
 			playerIndex: 		this.playerIndex,
 			moveType: 			this.moveType,
 			word: 				this.word,
 			wordValue: 			this.wordValue,
-			playRange: 			this.playRange,
-			newPosition:		this.newPosition,
+			playRange: 			this.playRange.toJSON(),
+			newPosition:		this.newPosition.toJSON(),
 			attackMultiplier: 	this.attackMultiplier,
 			score: 				this.score
 		};
@@ -63,13 +67,7 @@ function Play( playerIndex, moveType, word, wordValue, playRange, newPosition, a
 	}
 
 	// constructor code
-	this.playerIndex 		= playerIndex;
-	this.moveType 			= moveType;
-	this.word				= word;
-	this.wordValue			= wordValue;
-	this.playRange			= playRange;
-	this.newPosition 		= newPosition;
-	this.attackMultiplier 	= attackMultiplier;
-
-	this.score				= 0;
+	if ( parameters !== undefined ) {
+		this.loadFromJson( parameters );
+	}
 }
