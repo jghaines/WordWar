@@ -2,6 +2,7 @@
 'use strict';
 
 var readline = require('readline');
+var aiCount = 0;
 
 console.log( '<tbody>' );
 
@@ -20,9 +21,11 @@ rl.on('line', function(line){
 
 			case ( '<' == letter ) : process.stdout.write( "<td class='player-0'/>" ); break;
 			case ( '>' == letter ) : process.stdout.write( "<td class='player-1'/>" ); break;
+			case ( '+' == letter ) : process.stdout.write( "<td class='ai ai-" + aiCount++ + "'/>" ); break;
 
+			case ( '*' == letter ) : process.stdout.write( "<td class='exit'/>" ); break;
 			case ( '_' == letter ) : process.stdout.write( "<td class='block'/>" ); break;
-			case ( '?' == letter ) : process.stdout.write( "<td class='wildcard' ww_value='?'/>" ); break;
+
 			case ( '2' == letter ) : process.stdout.write( "<td class='bonus letter' ww_value='2'/>" ); break;
 			case ( '3' == letter ) : process.stdout.write( "<td class='bonus letter' ww_value='3'/>" ); break;
 			case ( '4' == letter ) : process.stdout.write( "<td class='bonus letter' ww_value='4'/>" ); break;

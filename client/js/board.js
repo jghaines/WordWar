@@ -255,6 +255,10 @@ function BoardView( boardModel ) {
 			} else if ( $(this).hasClass( 'player-1' ) ) { // player
 				var playerIndex = 1;
 				$(this).html( '<img src="/images/player-' + playerIndex + '.png" />' );
+			} else if ( $(this).hasClass( 'ai' ) ) { // ai
+				$(this).html( '<img src="/images/ai.gif" />' );
+			} else if ( $(this).hasClass( 'exit' ) ) { // exit
+				$(this).html( '<img src="/images/exit.png" />' );
 			} else if ( $(this).hasClass( 'bonus' ) ) { // bonus
 				$(this).html(
 					'<div class="bonus">' + 'x' + $(this).attr( 'ww_value' ) + '<br />' +

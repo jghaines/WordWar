@@ -61,9 +61,14 @@ table.gameboard td.played-0 {
 
 
 table.gameboard td.block  {
-	background: 	black !important;
+	background: 	black;
 	border-color: 	black;
-	color: 			white !important;
+}
+
+table.gameboard td.exit  {
+	background: 	black;
+	border-color: 	#ff9900;
+	color: 			#ff9900;
 }
 
 table.gameboard td.static {
@@ -87,8 +92,7 @@ table.gameboard td.attackable {
 
 
 /* Avatars */
-table.gameboard td.player-0 img,
-table.gameboard td.player-1 img {
+table.gameboard td img {
 	width: 		25px;
 	height: 	25px;
 }
