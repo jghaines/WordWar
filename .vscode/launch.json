@@ -10,7 +10,7 @@
 			"args": [
                 "--lambdapath",     "lamdba.js",
                 "--handler",        "putMove",
-                "--eventpath",      "player1.js",
+                "--eventpath",      "lambda-event/player1.js",
                 "--timeout",        "600"/*seconds*/
             ],
 			"cwd": "${workspaceRoot}",
