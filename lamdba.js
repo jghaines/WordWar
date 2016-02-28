@@ -2,9 +2,7 @@ console.log('Loading function');
 
 //var doc = require('dynamodb-doc');
 var AWS = require('aws-sdk');
-var dynamo = new AWS.DynamoDB.DocumentClient( { 
-//    endpoint :  "http://localhost:8000",
-    region:     "us-west-2"     } );
+var dynamo = new AWS.DynamoDB.DocumentClient( { region: "us-west-2"} );
 
 var getKey = function( gameId, turnIndex ) {
     return 'game-' + gameId + '-turn-' + turnIndex;
@@ -23,13 +21,13 @@ var putMove = function(play, context) {
         }
     };
     
-    dynamo.put(putParams, ( err, data ) => {
+    dynamo.put(putParams, function( err, data ) {
         getMoveCount( err, { gameId: play.gameId, turnIndex: play.turnIndex }, context );
     });
 };
 
 var getMoveCount = function( err, turnInfo, context ) {
-    if ( null != err ) {
+    if ( null !== err ) {
         context.fail( err );
         return;
     } 
@@ -42,25 +40,25 @@ var getMoveCount = function( err, turnInfo, context ) {
         }
     };
     
-    dynamo.query(queryParams, ( err, data ) => {
+    dynamo.query(queryParams, function( err, data ) {
         checkMoveCount( err, { gameId: turnInfo.gameId, turnIndex: turnInfo.turnIndex }, context, data );
     });
 };
 
 var checkMoveCount = function( err, turnInfo, context, data ) {
-    if ( null != err ) {
+    if ( null !== err ) {
         context.fail( err );
         return;
     } 
         
-    if ( data == null || data.Items == null || data.Items.length <= 0 ) {
+    if ( data === null || data.Items === null || data.Items.length <= 0 ) {
         context.fail( {
             message: "Expected at least one move in game",
             turnInfo: turnInfo
         });
     } else { 
         var moves = [];
-        data.Items.forEach( ( item ) => {
+        data.Items.forEach( function( item ) {
            moves.push( item.Play ); 
         });
         context.succeed( {
