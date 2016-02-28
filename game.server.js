@@ -80,7 +80,7 @@ gameServer.findPendingGame = function( userId, client ) {
 		if ( game.players.length < 2 ) {
 			var player = new Player( userId, client );
 			game.addPlayer( player );
-			this.logSummary.info('G', game.id, 'P[1]', player.userId, 'joined game' );
+			this.logSummary.info('G', game.gameId, 'P[1]', player.userId, 'joined game' );
 			this.startGame(game);
 
 			return true;
@@ -109,7 +109,7 @@ gameServer.createGame = function( userId, client ) {
 	var newGame = new Game( './boards/' + gameServer.defaultBoard );
 	newGame.addPlayer( player );
 
-	this.logSummary.info('G', newGame.id, 'P[0]', player.userId, 'created game' );
+	this.logSummary.info('G', newGame.gameId, 'P[0]', player.userId, 'created game' );
 
 	this.games.push(newGame);
 }
@@ -117,7 +117,7 @@ gameServer.createGame = function( userId, client ) {
 gameServer.startGame = function(game) {
 	this.log.info( this.constructor.name, '.startGame(.)' );
 
-	this.logSummary.info('G', game.id, 'started' );
+	this.logSummary.info('G', game.gameId, 'started' );
 
 	for ( var i = 0; i < game.players.length; ++i ) {
 		var gameJson =  JSON.stringify( new JsonDecorator( game.toJSON(),  { playerIndex : i }));
@@ -143,7 +143,7 @@ gameServer.nextTurn = function(game) {
 	++game.turnIndex;
 	game.playsThisTurn = 0;
 
-	this.logSummary.info('G', game.id, 'start turn[' + msg.turnNumber + ']', msg.letters );
+	this.logSummary.info('G', game.gameId, 'start turn[' + msg.turnIndex + ']', msg.letters );
 	for ( var i = 0; i < game.players.length; ++i ) {
 		game.players[i].client.emit('start turn', msg);
 	}
@@ -161,7 +161,7 @@ gameServer.onPlayMessage = function(player, msg) {
 
 	for ( var i = 0; i < game.players.length; ++i ) {
 		if ( game.players[i].userId != player.userId ) {
-			this.logSummary.info('G', game.id, 'P['+(1-i)+']', player.userId, '-send move-> P['+i+']', game.players[i].userId );
+			this.logSummary.info('G', game.gameId, 'P['+(1-i)+']', player.userId, '-send move-> P['+i+']', game.players[i].userId );
 			game.players[i].client.emit('play message', msg);			
 		}
 	}
