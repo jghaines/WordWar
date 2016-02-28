@@ -4,7 +4,8 @@ var gc = {};
 
 window.onload = function(){
 	var socket = io();
-	var remote = new RemoteProxy( socket );
+	var restUrl = "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod/ExecutePlay";
+	var remote = new RemoteProxy( socket, restUrl );
 
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
@@ -35,3 +36,4 @@ window.onload = function(){
 
 	gc = new GameController( remote, scoreStrategy, attackRangeStrategy );
 }
+

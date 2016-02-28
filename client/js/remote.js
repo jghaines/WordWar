@@ -1,9 +1,10 @@
+/* global jQuery */
 'use strict';
 
 
-function RemoteProxy(socket) {
+function RemoteProxy( socket, restUrl ) {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
 
 	//
@@ -73,8 +74,20 @@ function RemoteProxy(socket) {
 	// send local event to server
 	//
 	this.executeLocalPlay = function( localPlay ) {
-		this.log.info( this.constructor.name + '.play(.)');
+		this.log.info( this.constructor.name + '.executeLocalPlay(.)');
 		this._socket.emit('play message', JSON.stringify( localPlay ));
+
+		jQuery.ajax({
+			url: 	this._restUrl,
+			type: 	'POST',
+			data: 	 JSON.stringify( localPlay ),
+			success: (function( data ) {
+				this.log.debug( this.constructor.name + '.executeLocalPlay(.)-ajax success ' + data);
+			}).bind( this ),
+			error: 	(function( jqXHR, textStatus, errorThrown ) {
+				this.log.debug( this.constructor.name + '.executeLocalPlay(.)-ajax error: ' + errorThrown );
+			}).bind( this )
+		});
 	}
 
 	//
@@ -90,8 +103,7 @@ function RemoteProxy(socket) {
 
 	// constructor code
 	this._socket = socket;
-	this._userid = undefined;
-	this._player = 0;
+	this._restUrl = restUrl;
 
 	this._startGameCallbacks = $.Callbacks();
 	this._startTurnCallbacks = $.Callbacks();
