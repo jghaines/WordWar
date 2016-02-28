@@ -64,9 +64,9 @@ var checkMoveCount = function( err, turnInfo, context, data ) {
            moves.push( item.Play ); 
         });
         context.succeed( {
-            status : ( data.Items.length < 2 ? "AWAITING_MOVES" : "TURN_COMPLETE" ),
             gameId : moves[0].gameId,
             turnIndex : moves[0].turnIndex,
+            moveCount : moves.length,
             moves : moves
         } );
     }
