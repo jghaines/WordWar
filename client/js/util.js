@@ -25,6 +25,12 @@ function binaryIndexOf(searchElement) {
     return -1;
 }
 
+function countWhere( callback ) {
+    return this.reduce( function( previousValue, currentValue, currentIndex, array ) {
+        return previousValue + ( callback( currentValue ) ? 1 : 0 );
+    } , 0 );
+}
+
 
 // last array element where callback function returns true
 function lastIndexWhere( callback ) {
@@ -47,6 +53,7 @@ function firstIndexWhere( callback, fromIndex ) {
 }
 
 Array.prototype.binaryIndexOf   = binaryIndexOf;
+Array.prototype.countWhere      = countWhere;
 Array.prototype.lastIndexWhere  = lastIndexWhere;
 Array.prototype.firstIndexWhere = firstIndexWhere;
 

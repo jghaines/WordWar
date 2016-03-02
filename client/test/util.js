@@ -40,6 +40,15 @@ describe('Array', function() {
 			expect( [1,0,1].firstIndexWhere( function() { return this == 1 }, 3 ) ).toEqual( -1 );
 		});
 	});
+    
+	describe('#countWhere()', function () {
+		it('should return array length for true callback', function () {
+			expect( [1,0,1].countWhere( function(o) { return true } ) ).toEqual( 3 );
+		});
+		it('should return non-null count for non-null callback', function () {
+			expect( [null,0,null,1].countWhere( function(o) { return o !== null } ) ).toEqual( 2 );
+		});
+	});
 });
 
 
