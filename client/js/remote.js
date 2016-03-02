@@ -2,10 +2,9 @@
 'use strict';
 
 
-function RemoteProxy( socket, restUrl ) {
+function RemoteProxy( socket, restBaseUrl ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
-
 
 	//
 	// register callbacks
@@ -78,7 +77,7 @@ function RemoteProxy( socket, restUrl ) {
 		this._socket.emit('play message', JSON.stringify( localPlay ));
 
 		jQuery.ajax({
-			url: 	this._restUrl,
+			url:     this._executePlayUrl,
 			type: 	'POST',
 			data: 	 JSON.stringify( localPlay ),
 			success: (function( data ) {
@@ -103,7 +102,8 @@ function RemoteProxy( socket, restUrl ) {
 
 	// constructor code
 	this._socket = socket;
-	this._restUrl = restUrl;
+	this._restBaseUrl = restBaseUrl;
+    this._executePlayUrl = this._restBaseUrl + '/ExecutePlay';
 
 	this._startGameCallbacks = $.Callbacks();
 	this._startTurnCallbacks = $.Callbacks();
