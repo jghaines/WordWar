@@ -14,6 +14,7 @@ describe('Play', function() {
 		this.objectKeys = [ 'playRange', 'newPosition' ]; // object attributes that need .equals() comparison
 
 		this.play = new Play( this.p );
+    });
 
 	describe("#constructor(..)", function () {
 		it('should set the properties', function () {
