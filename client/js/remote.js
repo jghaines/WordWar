@@ -14,14 +14,19 @@ function RemoteProxy( socket, restBaseUrl ) {
 		this._startGameCallbacks.add(callback);
 	}
 
-	this.onStartTurn = function(callback) {
+	this.onStartTurn = function( callback ) {
 		this.log.info( this.constructor.name + '.onStartTurn(.) - callback registered');
 		this._startTurnCallbacks.add(callback);
 	}
+    
+    this.onTurnInfoReceived = function( callback ) {
+		this.log.info( this.constructor.name + '.onTurnInfoReceived(.) - callback registered');
+		this._turnInfoCallbacks.add(callback);
+	}
 
-	this.onPlayReceived = function(callback) {
+	this.onPlaysReceived = function(callback) {
 		this.log.info( this.constructor.name + '.onPlayReceived(.) - callback registered');
-		this._playReceivedCallbacks.add(callback);
+		this._playsReceivedCallbacks.add(callback);
 	}
 
 
@@ -37,14 +42,58 @@ function RemoteProxy( socket, restBaseUrl ) {
 	this._startTurn = function(msg) {
 		this.log.info( this.constructor.name + '._startTurn(.)');
 		this.log.info( this.constructor.name, '_startTurn( msg', msg);
+
+        this._turnInfoReceived( [ {
+            turnIndex : 0,
+            tiles : "ETANOISRLY"
+        } ] );
+
 		this._startTurnCallbacks.fire(msg);
 	}
 
-	this._playRecived = function(msg) {
-		this.log.info( this.constructor.name + '._playRecived(.)');
-		this.log.info( this.constructor.name, '_playRecived( msg', msg);
-		this._playReceivedCallbacks.fire(msg);
+	this._remotePlayNotification = function( turnInfo ) {
+		this.log.info( this.constructor.name + '._remotePlayNotification(.)');
+
+        var turnInfoData = {
+            gameId : turnInfo.gameId,
+            turnIndex : turnInfo.turnIndex
+        };
+        
+		jQuery.ajax({
+			url: 	this._getPlayUrl,
+			type: 	'POST',
+			data: 	 JSON.stringify( turnInfoData ),
+			success: this._receiveRemoteData.bind( this ),
+			error: 	 function( jqXHR, textStatus, errorThrown ) {
+                        throw new Error ( errorThrown );
+			}
+		});
 	}
+
+    this._receiveRemoteData = function( data, textStatus, jqXHR ) {
+        this.log.info( this.constructor.name + '._receiveRemoteData()' );
+        this.log.debug( this.constructor.name, '_receiveRemoteData( ', data );
+        if ( data.hasOwnProperty( 'turnInfo' )) {
+            this._turnInfoReceived( data.turnInfo );
+        }
+        if ( data.hasOwnProperty( 'moves' )) {
+            this._playsReceived( data.moves );
+        }
+    }
+
+    // we have received Play info from remote, parse and send on
+    this._playsReceived = function( playList ) {
+        var plays = [];
+        playList.forEach( function( play ) {
+            plays.push( new Play( play ));
+        });
+		this._playsReceivedCallbacks.fire( plays );
+    }
+    
+    // we have received turn info from remote, send it on
+    this._turnInfoReceived = function( turnInfoList ) {
+		this._turnInfoCallbacks.fire( turnInfoList );
+    }
 
 	// connection management event handlers 
 	this._receiveUserid = function( msg ) {
@@ -78,57 +127,47 @@ function RemoteProxy( socket, restBaseUrl ) {
 
 		jQuery.ajax({
 			url:     this._executePlayUrl,
-			type: 	'POST',
+			type:    'POST',
 			data: 	 JSON.stringify( localPlay ),
-			success: (function( data ) {
-				this.log.debug( this.constructor.name + '.executeLocalPlay(.)-ajax success ' + data);
-			}).bind( this ),
-			error: 	(function( jqXHR, textStatus, errorThrown ) {
-				this.log.debug( this.constructor.name + '.executeLocalPlay(.)-ajax error: ' + errorThrown );
-			}).bind( this )
+			success: this._receiveRemoteData.bind( this ),
+			error: 	 function( jqXHR, textStatus, errorThrown ) {
+                        throw new Error ( errorThrown );
+			}
 		});
 	}
 
-	//
-	// Accessors
-	//
-	this.getLocalPlay = function() {
-		return this._localPlay;
-	}
-
-	this.getRemotePlay = function() {
-		return this._remotePlay;
-	}
 
 	// constructor code
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
     this._executePlayUrl = this._restBaseUrl + '/ExecutePlay';
+    this._getPlayUrl = this._restBaseUrl + '/GetPlay';
 
 	this._startGameCallbacks = $.Callbacks();
 	this._startTurnCallbacks = $.Callbacks();
-	this._playReceivedCallbacks = $.Callbacks();
+    this._turnInfoCallbacks =  $.Callbacks();
+	this._playsReceivedCallbacks = $.Callbacks();
 
 	// event bindings - connection management 
-	this._socket.on('userId', (function(msg) {
-		this._receiveUserid(msg);
- 	}).bind(this ));
+	this._socket.on('userId', (function( msg ) {
+		this._receiveUserid( msg );
+ 	}).bind( this ));
 
-	this._socket.on('reconnect', (function(msg) {
-		this._reconnect(msg);
- 	}).bind(this ));
+	this._socket.on('reconnect', (function( msg ) {
+		this._reconnect( msg );
+ 	}).bind( this ));
 
 	// event bindings - game events
-	this._socket.on('new game', (function(msg){
-		this._startGame(msg);
+	this._socket.on('new game', (function( msg ){
+		this._startGame( msg );
 	}).bind( this ));
 
-	this._socket.on('start turn', (function(msg){
-		this._startTurn(msg);
+	this._socket.on('start turn', (function( msg ){
+		this._startTurn( msg );
 	}).bind( this ));
 
-	this._socket.on('play message', (function(msg) {
-		this._playRecived(msg);
+	this._socket.on('play message', (function( msg ) {
+		this._remotePlayNotification( JSON.parse( msg ));
 	}).bind( this ));
 
 

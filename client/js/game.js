@@ -4,9 +4,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
-	this.newGame = function(gameInfo) {
+	this.newGame = function( gameInfo ) {
 		this.log.info( this.constructor.name + '.newGame(.)' );
-		this.log.debug( this.constructor.name, '.newGame( gameInfo=', gameInfo, ')' );
+		this.log.debug( this.constructor.name, 'newGame( gameInfo=', gameInfo, ')' );
 
 		var boardUrl = gameInfo.board;
 		this.playerIndex = gameInfo.playerIndex;
@@ -35,17 +35,16 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 	}
 
-	this.newTurn = function( turnInfo ) {
+	this.newTurn = function() {
 		this.log.info( this.constructor.name + '.newTurn(.)' );
-		this.log.debug( this.constructor.name, '.newTurn( turnInfo=', turnInfo, ')' );
 
-		this.turnIndex = turnInfo.turnIndex;
-
-		for ( var i = turnInfo.letters.length - 1; i >= 0; i-- ) {
-			this._lettersModel.setLetter(i, turnInfo.letters[i] );
+		for ( var i = this._letterTiles[ this.turnIndex ].length - 1; i >= 0; i-- ) {
+			this._lettersModel.setLetter(i, this._letterTiles[ this.turnIndex ][ i ] );
 			this._lettersModel.setPlaced(i, false);
 		};
 		this._lettersModel.unselect();
+
+        this._boardView.setStatus( "Place your word" );
 
 		this._lettersView.updateLetters();
 		this._lettersView.updatePlaced();
@@ -159,7 +158,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableResetButton(  false );
 		this._lettersView.setEnabled( false );
 
-		this._stateContext.localMove( myPlay );
+        this._boardView.setStatus( "Waiting for other player" );
+
+		this._remote.executeLocalPlay( myPlay );
 
  	}
 
@@ -175,30 +176,55 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableMoveButton(   false );
 		this._buttonsView.enableAttackButton( false );
 		this._buttonsView.enableResetButton(  false );
- 	}
+    }
+     
+    this.receiveTurnInfo = function( turnList ) {
+ 		this.log.info( this.constructor.name + '.receiveTurnInfo(.)');
+       turnList.forEach( (function( turn ) {
+            this._letterTiles[ turn.turnIndex ] = turn.tiles;
+        }).bind( this ));
+    }
+     
+    this.receivePlays = function( playList ) {
+ 		this.log.info( this.constructor.name + '.receivePlays(.)');
+         var _plays = this._plays;
+         playList.forEach( function( play ) {
+            _plays[ play.turnIndex ] = _plays[ play.turnIndex ] || [];
+            _plays[ play.turnIndex ][ play.playerIndex ] = play;            
+         });
+         
+         // have we receieved enough Plays to end this turn
+         var playsForThisTurn = this._plays[ this.turnIndex ];
+         if ( playsForThisTurn !== undefined ) {
+            var playsForThisTurnCount = playsForThisTurn.countWhere( function( o ) { return ( o !== null ) });
 
-	// State machine callback - local player and remote compnent have completed move
-		this.endTurn = function() {
+            if ( playsForThisTurnCount >= this.playerCount ) {
+                this.endTurn();
+            }
+         } else {
+             this.log.warn( this.constructor.name + '.receivePlays(.) - this._plays[' + this.turnIndex + '] === undefined' );
+         }
+     }
+
+    this.endTurn = function() {
 		this.log.info( this.constructor.name + '.endTurn()' );
 
 		this._boardController.resetWord();
 		this._boardController.unhighlightAttackable();
 
-		var plays = this._stateContext.getPlays();
-		var localPlay  = plays[ this.playerIndex ];
-		var remotePlay = plays[ 1 - this.playerIndex ];
+        var playsForTurn = this._plays[ this.turnIndex ];
 
-			var gameEnded = this.updateScore( plays );
+        var gameEnded = this.updateScore( playsForTurn );
 
-			var movePlays = [];
-			var attackPlays = [];
-		for (var p = plays.length - 1; p >= 0; p--) {
-			switch ( plays[p].moveType ) {
+        var movePlays = [];
+        var attackPlays = [];
+		for (var p = playsForTurn.length - 1; p >= 0; p--) {
+			switch ( playsForTurn[p].moveType ) {
 				case 'move':
-					movePlays.push( plays[p] );
+					movePlays.push( playsForTurn[p] );
 					break;
 				case 'attack':
-					attackPlays.push( plays[p] );
+					attackPlays.push( playsForTurn[p] );
 					break;
 			}
 		}
@@ -224,13 +250,17 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			}
 		}
 
-		for (var p = plays.length - 1; p >= 0; p--) {
-			this.addPlayedItem( plays[p] );
+		for (var p = playsForTurn.length - 1; p >= 0; p--) {
+			this.addPlayedItem( playsForTurn[p] );
 		}
 
 		if ( gameEnded ) {
-				this.endGame();
-			}
+            this.endGame();
+            return true;
+        } else { // next turn
+            ++this.turnIndex;
+            this.newTurn();
+        }
 	}
 
 	// update score, return true if game has ended
@@ -277,7 +307,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.endGame = function() {
 		this.log.info( this.constructor.name + '.endGame())' );
-		this.statusUpdate( 'End of Game' );
+		this._boardView.setStatus( 'End of Game' );
 		this._lettersView.setEnabled( false );
 
 		this._buttonsView.enableMoveButton(   false );
@@ -285,25 +315,27 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enableResetButton(  false );		
 	 }
 
-	// State machine callback
-	this.statusUpdate = function ( statusMessage ) {
-		this._boardView.setStatus( statusMessage );
-	}
-
+    //
 	// constructor code
+    //
+
+    // 2 dimensional array of Play objects - plays[turnIndex][playerIndex]
+    this._plays = [];
+    // 2 dimensional array of letters - _letterTiles[turnIndex][letterIndex]
+    this._letterTiles = []
+    
 	this._audio = new AudioProxy();
 
-	this._remote = remoteProxy;
 	this._scoreStrategy = scoreStrategy;
 	this._attackRangeStrategy = attackRangeStrategy;
-	this._stateContext = new StateContext( this._remote );
+    this._remote = remoteProxy;
 
 	this._lettersModel = new LettersModel();
-	this._lettersView = new LettersView(this._lettersModel );
+	this._lettersView = new LettersView( this._lettersModel );
 	this._lettersView.setEnabled( true );
 
 	this._boardModel = new BoardModel();
-	this._boardView = new BoardView(this._boardModel);
+	this._boardView = new BoardView( this._boardModel );
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
 	this._scoreModel = new ScoreModel();
@@ -327,21 +359,22 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.placeLetterOnBoard(cell);
 	}).bind(this) );
 
-	this._stateContext.onNewGame( (function(msg) { 
-		this.newGame(msg);
+
+	this._remote.onStartGame( (function(msg) {
+        this.newGame(msg);
 	}).bind(this));
 
-	this._stateContext.onNewTurn( (function(msg) { 
-		this.newTurn(msg);
+	this._remote.onStartTurn( (function(msg) {
+//		this.newTurn(msg);
 	}).bind(this));
 
-	this._stateContext.onendTurn( (function() {
-		this.endTurn();
-	}).bind(this) );
+	this._remote.onPlaysReceived( (function(msg) {
+        this.receivePlays(msg);
+	}).bind(this));
 
-	this._stateContext.onStatusUpdate( (function(statusMessage) {
-		this.statusUpdate(statusMessage);
-	}).bind(this) );
+	this._remote.onTurnInfoReceived( (function(msg) {
+        this.receiveTurnInfo( msg );
+	}).bind(this));
 
 	this._buttonsView.onMoveClicked( (function() {
 		this.playWord('move');
