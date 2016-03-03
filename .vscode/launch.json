@@ -2,15 +2,15 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch",
+			"name": "Lambda",
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/lambda-local/bin/lambda-local", 
 			"stopOnEntry": false,
 			"args": [
                 "--lambdapath",     "lamdba.js",
-                "--handler",        "putMove",
-                "--eventpath",      "lambda-event/player1.js",
+                "--handler",        "getGame",
+                "--eventpath",      "lambda-event/game0.js",
                 "--timeout",        "600"/*seconds*/
             ],
 			"cwd": "${workspaceRoot}",
@@ -25,7 +25,28 @@
 			"externalConsole": false,
 			"sourceMaps": false,
 			"outDir": null
-		},
+		},/*
+        {
+            "name": "Node Server",
+			"type": "node",
+			"request": "launch",
+			"program": "/usr/local/bin/node", // request 'launch': cannot launch program '/usr/local/bin/node'; enabling source maps might help
+			"stopOnEntry": false,
+			"args": [
+                "index.js", "2.html"
+            ],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},*/
 		{
 			"name": "Attach",
 			"type": "node",
