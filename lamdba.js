@@ -9,7 +9,7 @@ var getKey = function( gameId, turnIndex ) {
 };
 
 var putMove = function(play, context) {
-    //console.log('Received event:', JSON.stringify(event, null,'game-' +  2));
+    log.info('putMove()');
     var playerIndex = parseInt( play.playerIndex );
 
     var putParams = {
@@ -22,16 +22,16 @@ var putMove = function(play, context) {
     };
     
     dynamo.put(putParams, function( err, data ) {
-        getMoveCount( err, { gameId: play.gameId, turnIndex: play.turnIndex }, context );
-    });
-};
-
-var getMoveCount = function( err, turnInfo, context ) {
     if ( null !== err ) {
         context.fail( err );
         return;
     } 
+        getMovesForTurn( { gameId: play.gameId, turnIndex: play.turnIndex }, context );
+    });
+};
 
+var getMovesForTurn = function( turnInfo, context ) {
+    log.info('getMovesForTurn()');
     var queryParams = {
         "TableName": "Play",
         "KeyConditionExpression" : "GameId_TurnIndex = :v_Id",
@@ -41,11 +41,12 @@ var getMoveCount = function( err, turnInfo, context ) {
     };
     
     dynamo.query(queryParams, function( err, data ) {
-        checkMoveCount( err, { gameId: turnInfo.gameId, turnIndex: turnInfo.turnIndex }, context, data );
+        returnMovesForTurn( err, { gameId: turnInfo.gameId, turnIndex: turnInfo.turnIndex }, data, context );
     });
 };
 
-var checkMoveCount = function( err, turnInfo, context, data ) {
+var returnMovesForTurn = function( err, turnInfo, data, context ) {
+    log.info('returnMovesForTurn()');
     if ( null !== err ) {
         context.fail( err );
         return;
@@ -53,7 +54,7 @@ var checkMoveCount = function( err, turnInfo, context, data ) {
         
     if ( data === null || data.Items === null || data.Items.length <= 0 ) {
         context.fail( {
-            message: "Expected at least one move in game",
+            message: "Expected at least one move in turn",
             turnInfo: turnInfo
         });
     } else { 
@@ -65,11 +66,26 @@ var checkMoveCount = function( err, turnInfo, context, data ) {
             gameId : moves[0].gameId,
             turnIndex : moves[0].turnIndex,
             moveCount : moves.length,
-            moves : moves
+            moves : moves,
+            turnInfo : [
+                {
+                    turnIndex : 0,
+                    tiles : 'DOGDICIMTP'
+                },
+                {
+                    turnIndex : 1,
+                    tiles : 'CATDICIMTP'
+                },
+                {
+                    turnIndex : 2,
+                    tiles : 'BEANICIMTP'
+                }   
+            ]
         } );
     }
 };
 
 module.exports = {
-    putMove : putMove
+    getGame : getGame,
+    putMove : putMove,
 }
