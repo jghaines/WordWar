@@ -159,15 +159,13 @@ gameServer.onPlayMessage = function(player, msg) {
 
 	var game = player.game;
 
-	for ( var i = 0; i < game.players.length; ++i ) {
-		if ( game.players[i].userId != player.userId ) {
-			this.logSummary.info('G', game.gameId, 'P['+(1-i)+']', player.userId, '-send move-> P['+i+']', game.players[i].userId );
-			game.players[i].client.emit('play message', msg);			
-		}
-	}
-
 	++game.playsThisTurn;
 	if ( game.playsThisTurn >= game.players.length ) {
+        for ( var i = 0; i < game.players.length; ++i ) {
+            this.logSummary.info('G', game.gameId, 'P['+(1-i)+']', player.userId, '-send move-> P['+i+']', game.players[i].userId );
+            game.players[i].client.emit('play message', msg);			
+        }
+
 		this.nextTurn(game);
 	}
 
