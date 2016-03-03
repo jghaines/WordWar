@@ -1,3 +1,4 @@
+/* global log */
 /* global jQuery */
 'use strict';
 
@@ -70,6 +71,12 @@ function RemoteProxy( socket, restBaseUrl ) {
 		});
 	}
 
+    this._joinedGame = function( data, textStatus, jqXHR ) {
+        this.log.info( this.constructor.name + '._joinedGame()' );
+        this._gameId = data.GameId;
+        this.log.debug( this.constructor.name, '._joinedGame() gameId = ' + this._gameId );
+	}
+
     this._receiveRemoteData = function( data, textStatus, jqXHR ) {
         this.log.info( this.constructor.name + '._receiveRemoteData()' );
         this.log.debug( this.constructor.name, '_receiveRemoteData( ', data );
@@ -138,8 +145,10 @@ function RemoteProxy( socket, restBaseUrl ) {
 
 
 	// constructor code
+    this._playerId = guid();
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
+    this._getGameUrl = this._restBaseUrl + '/GetGame';
     this._executePlayUrl = this._restBaseUrl + '/ExecutePlay';
     this._getPlayUrl = this._restBaseUrl + '/GetPlay';
 
@@ -147,6 +156,17 @@ function RemoteProxy( socket, restBaseUrl ) {
 	this._startTurnCallbacks = $.Callbacks();
     this._turnInfoCallbacks =  $.Callbacks();
 	this._playsReceivedCallbacks = $.Callbacks();
+
+
+    jQuery.ajax({
+        url:     this._getGameUrl,
+        type:    'POST',
+        data: 	 JSON.stringify( { PlayerId : this._playerId } ),
+        success: this._joinedGame.bind( this ),
+        error: 	 function( jqXHR, textStatus, errorThrown ) {
+                    throw new Error ( errorThrown );
+        }
+    });
 
 	// event bindings - connection management 
 	this._socket.on('userId', (function( msg ) {
