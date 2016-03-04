@@ -39,6 +39,8 @@ var getKey = function( gameId, turnIndex ) {
 };
 
 // AWS LAMBDA function
+// playerInfo.PlayerId:   'guid id of player'
+// context - lambda
 var getGame = function(playerInfo, context) {
     log.info('getGame()');
     if ( playerInfo.PlayerId === undefined ) {
@@ -63,7 +65,7 @@ var getPendingGame = function( err, playerInfo, data, context ) {
         return;
     }
     if ( data.Messages !== undefined && data.Messages.length == 1 ) { // found a game on the queue
-        var receiptHandle = data.Messages[0].ReceiptHandle;
+        var sqsHandle = data.Messages[0].ReceiptHandle;
         var body = JSON.parse( data.Messages[0].Body );
         var gameId = body.GameId;
 
@@ -83,8 +85,9 @@ var getPendingGame = function( err, playerInfo, data, context ) {
             ReturnValues: "ALL_NEW"
         };
 
-        dynamo.update(updateParams, function( err, data ) {
-            playerAddedToGameDb( err, {  GameId : gameId, PlayerId : playerId }, data, receiptHandle, context )
+        dynamo.update(updateParams, function( err, dbData ) {
+            var gameInfo = {  GameId : gameId, PlayerId : playerId };
+            playerAddedToGameDb( err, gameInfo, dbData, sqsHandle, context )
         });
 
     } else if ( data.Messages === undefined ) { // no game found, request one
@@ -95,12 +98,12 @@ var getPendingGame = function( err, playerInfo, data, context ) {
 }
 
 // player has been added to game from queue
-var playerAddedToGameDb = function( err, gameInfo, data, receiptHandle, context ) {
+var playerAddedToGameDb = function( err, gameInfo, dbData, sqsHandle, context ) {
     log.info('playerAddedToGameDb()');
 
     if ( null !== err ) {
         if ( err.code === "ConditionalCheckFailedException" ) {
-            // we have found a game we are already a player in, create a new one
+            // we have found a game we are already a player in, create a new one instead
             createNewGame( gameInfo.PlayerId, context )
         } else {
             context.fail( err );
@@ -110,14 +113,15 @@ var playerAddedToGameDb = function( err, gameInfo, data, receiptHandle, context 
     
     var deleteParams = {
         QueueUrl : queueUrl, 
-        ReceiptHandle: receiptHandle
+        ReceiptHandle: sqsHandle
     };
-    sqs.deleteMessage( deleteParams, function( err, data ) {
-        pendingGameDeletedFromQueue( err, gameInfo, data, context );
+    sqs.deleteMessage( deleteParams, function( err, sqsData ) {
+        pendingGameDeletedFromQueue( err, gameInfo, sqsData, context );
     });
 }
 
-var pendingGameDeletedFromQueue = function( err, gameInfo, data, context ) {
+var pendingGameDeletedFromQueue = function( err, gameInfo, sqsData, context ) {
+    log.info('pendingGameDeletedFromQueue()');
     if ( null !== err ) {
         context.fail( err );
         return;
@@ -136,12 +140,12 @@ var createNewGame = function( playerId, context ) {
             TableName: "Game",
             Item :  game
         };
-        dynamo.put(putParams, function( err, data ) {
-            gameAddedToDb( err, game, data, context )
+        dynamo.put(putParams, function( err, dbData ) {
+            gameAddedToDb( err, game, dbData, context )
         });
 }
 
-    var gameAddedToDb = function( err, gameInfo, data, context) {
+var gameAddedToDb = function( err, gameInfo, dbData, context) {
     log.info('gameAddedToDb()');
     if ( null !== err ) {
         context.fail( err );
@@ -164,28 +168,33 @@ var gameSentToQueue = function( err, gameInfo, sqsData, context ) {
         context.fail( err );
         return;
     } 
-    context.succeed( {
+    var gameInfo = {
         GameId : gameInfo.GameId,
         QueueMessageId : sqsData.MessageId, 
-    });
+    }
+    context.succeed( gameInfo );
 }
 
 
 // AWS LAMBDA function
-var putMove = function(play, context) {
+// playParams.gameId      requried - guid id of game
+// playParams.turnIndex   requried - integer index of turn in game
+// playParams.playerIndex requried - integer index of player in game
+// playParams.*           optional - other play data
+var putMove = function( playParams, context) {
     log.info('putMove()');
-    var playerIndex = parseInt( play.playerIndex );
+    var playerIndex = parseInt( playParams.playerIndex );
 
     var putParams = {
         TableName: "Play",
         Item :  {
-            GameId_TurnIndex    : getKey( play.gameId, play.turnIndex ),
+            GameId_TurnIndex    : getKey( playParams.gameId, playParams.turnIndex ),
             PlayerIndex         : playerIndex,
-            Play                : play
+            Play                : playParams
         }
     };
     
-    dynamo.put(putParams, function( err, data ) {
+    dynamo.put( putParams, function( err, dbData ) {
         if ( null !== err ) {
             context.fail( err );
             return;
@@ -199,40 +208,44 @@ var putMove = function(play, context) {
 };
 
 // AWS LAMBDA function
-var getMovesForTurn = function( turnInfo, context ) {
+// turnParams.gameId:     'guid id of game'
+// turnParams.turnIndex:  <0-based integer index of turn>,
+// turnParmas.snsPublish: optional boolean - whether to fire SNS event if turn for move is complete 
+// context - lambda
+var getMovesForTurn = function( turnParams, context ) {
     log.info('getMovesForTurn()');
     var queryParams = {
         "TableName": "Play",
         "KeyConditionExpression" : "GameId_TurnIndex = :v_Id",
         "ExpressionAttributeValues" : {
-            ":v_Id" : getKey( turnInfo.gameId, turnInfo.turnIndex )
+            ":v_Id" : getKey( turnParams.gameId, turnParams.turnIndex )
         }
     };
     
-    dynamo.query(queryParams, function( err, data ) {
-        gotMovesForTurnFromDb( err, turnInfo, data, context );
+    dynamo.query(queryParams, function( err, dbData ) {
+        gotMovesForTurnFromDb( err, turnParams, dbData, context );
     });
 };
 
-var gotMovesForTurnFromDb = function( err, turnInfo, data, context ) {
+var gotMovesForTurnFromDb = function( err, turnInfo, dbData, context ) {
     log.info('gotMovesForTurnFromDb()');
     if ( null !== err ) {
         context.fail( err );
         return;
     } 
         
-    if ( data === null || data.Items === null || data.Items.length <= 0 ) {
+    if ( dbData === null || dbData.Items === null || dbData.Items.length <= 0 ) {
         context.fail( {
             message: "Expected at least one move in turn",
             turnInfo: turnInfo
         });
     } else { 
         var moves = [];
-        data.Items.forEach( function( item ) {
+        dbData.Items.forEach( function( item ) {
            moves.push( item.Play ); 
         });
         
-        var moveData = {
+        var moveInfo = {
             gameId : moves[0].gameId,
             turnIndex : moves[0].turnIndex,
             moveCount : moves.length,
@@ -256,24 +269,24 @@ var gotMovesForTurnFromDb = function( err, turnInfo, data, context ) {
         if ( typeof turnInfo.snsPublish === "boolean" && turnInfo.snsPublish && // if this is flagged for SNS 
             moves.length == 2 ) { // and turn complete
                 var snsParams = {
-                    Message: JSON.stringify( moveData  ),
+                    Message: JSON.stringify( moveInfo  ),
                     TargetArn: snsArn
                 };
-                sns.publish( snsParams, function( err, data ) {
+                sns.publish( snsParams, function( err, snsData ) {
                     if ( err !== null ) {
                         log.error( "SNS Publish error: ", err );
                         // fall through; SNS error is not fatal
                     }
-                    returnMoves( moveData, context );
+                    returnMoves( moveInfo, context );
                 });
         } else { // no SNS, just return
-            returnMoves( moveData, context );            
+            returnMoves( moveInfo, context );            
         }
     }
 };
 
-var returnMoves = function( moveData, context ) {
-    context.succeed( moveData );
+var returnMoves = function( moveInfo, context ) {
+    context.succeed( moveInfo );
 };
 
 module.exports = {
@@ -281,4 +294,3 @@ module.exports = {
     putMove : putMove,
     getMovesForTurn : getMovesForTurn
 }
-    
