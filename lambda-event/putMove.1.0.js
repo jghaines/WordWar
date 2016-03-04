@@ -2,6 +2,6 @@
 module.exports = {
         "playerIndex"	:	"0",
         "gameId"		:	"aa00",
-        "turnIndex"		:	"4",
-        "word"			:	"YING"
+        "turnIndex"		:	"1",
+        "word"			:	"CAT"
 }
