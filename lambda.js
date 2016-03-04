@@ -23,6 +23,7 @@ var getKey = function( gameId, turnIndex ) {
     return 'game-' + gameId + '-turn-' + turnIndex;
 };
 
+// AWS LAMBDA function
 var getGame = function(playerInfo, context) {
     log.info('getGame()');
     if ( playerInfo.PlayerId === undefined ) {
@@ -155,6 +156,7 @@ var gameSentToQueue = function( err, gameInfo, sqsData, context ) {
 }
 
 
+// AWS LAMBDA function
 var putMove = function(play, context) {
     log.info('putMove()');
     var playerIndex = parseInt( play.playerIndex );
@@ -177,6 +179,7 @@ var putMove = function(play, context) {
     });
 };
 
+// AWS LAMBDA function
 var getMovesForTurn = function( turnInfo, context ) {
     log.info('getMovesForTurn()');
     var queryParams = {
@@ -237,3 +240,4 @@ module.exports = {
     putMove : putMove,
     getMovesForTurn : getMovesForTurn
 }
+    
