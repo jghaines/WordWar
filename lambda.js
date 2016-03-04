@@ -10,10 +10,10 @@ var AWS = require('aws-sdk');
 AWS.config.apiVersions = {
     dynamodb: '2012-08-10',
     lambda: '2015-03-31',
+    sns: '2010-03-31',
     sqs: '2012-11-05'
 };
 AWS.config.update({region: 'us-west-2'});
-var queueUrl = "https://sqs.us-west-2.amazonaws.com/458298098107/PendingGames";
 
 // http://stackoverflow.com/a/35251621/358224
 var https = require('https');
@@ -28,6 +28,10 @@ var dynamodb = new AWS.DynamoDB({
 
 var dynamo = new AWS.DynamoDB.DocumentClient( { service: dynamodb });
 var sqs = new AWS.SQS();
+var sns = new AWS.SNS();
+
+var queueUrl = "https://sqs.us-west-2.amazonaws.com/458298098107/PendingGames";
+var snsArn = "arn:aws:sns:us-west-2:458298098107:GameEvent";
 
 
 var getKey = function( gameId, turnIndex ) {
@@ -186,7 +190,11 @@ var putMove = function(play, context) {
             context.fail( err );
             return;
         } 
-        getMovesForTurn( { gameId: play.gameId, turnIndex: play.turnIndex }, context );
+        getMovesForTurn( { 
+            gameId: play.gameId,
+            turnIndex: play.turnIndex,
+            snsPublish : true // flag to SNS publish if turn complete
+        }, context );
     });
 };
 
@@ -202,12 +210,12 @@ var getMovesForTurn = function( turnInfo, context ) {
     };
     
     dynamo.query(queryParams, function( err, data ) {
-        returnMovesForTurn( err, { gameId: turnInfo.gameId, turnIndex: turnInfo.turnIndex }, data, context );
+        gotMovesForTurnFromDb( err, turnInfo, data, context );
     });
 };
 
-var returnMovesForTurn = function( err, turnInfo, data, context ) {
-    log.info('returnMovesForTurn()');
+var gotMovesForTurnFromDb = function( err, turnInfo, data, context ) {
+    log.info('gotMovesForTurnFromDb()');
     if ( null !== err ) {
         context.fail( err );
         return;
@@ -223,7 +231,8 @@ var returnMovesForTurn = function( err, turnInfo, data, context ) {
         data.Items.forEach( function( item ) {
            moves.push( item.Play ); 
         });
-        context.succeed( {
+        
+        var moveData = {
             gameId : moves[0].gameId,
             turnIndex : moves[0].turnIndex,
             moveCount : moves.length,
@@ -242,8 +251,29 @@ var returnMovesForTurn = function( err, turnInfo, data, context ) {
                     tiles : 'BEANICIMTP'
                 }   
             ]
-        } );
+        };
+        
+        if ( typeof turnInfo.snsPublish === "boolean" && turnInfo.snsPublish && // if this is flagged for SNS 
+            moves.length == 2 ) { // and turn complete
+                var snsParams = {
+                    Message: JSON.stringify( moveData  ),
+                    TargetArn: snsArn
+                };
+                sns.publish( snsParams, function( err, data ) {
+                    if ( err !== null ) {
+                        log.error( "SNS Publish error: ", err );
+                        // fall through; SNS error is not fatal
+                    }
+                    returnMoves( moveData, context );
+                });
+        } else { // no SNS, just return
+            returnMoves( moveData, context );            
+        }
     }
+};
+
+var returnMoves = function( moveData, context ) {
+    context.succeed( moveData );
 };
 
 module.exports = {
@@ -251,4 +281,4 @@ module.exports = {
     putMove : putMove,
     getMovesForTurn : getMovesForTurn
 }
-    
+    
