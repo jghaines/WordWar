@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "aws-sdk": "^2.2.41",
     "chai": "^3.4.1",
     "express": "^4.13.3",
     "loglevel": "^1.4.0",
