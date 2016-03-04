@@ -15,7 +15,18 @@ AWS.config.apiVersions = {
 AWS.config.update({region: 'us-west-2'});
 var queueUrl = "https://sqs.us-west-2.amazonaws.com/458298098107/PendingGames";
 
-var dynamo = new AWS.DynamoDB.DocumentClient();
+// http://stackoverflow.com/a/35251621/358224
+var https = require('https');
+var dynamodb = new AWS.DynamoDB({
+    httpOptions: {
+        agent: new https.Agent({
+            ciphers: 'ALL',
+            secureProtocol: 'TLSv1_method'
+        })
+    }
+});
+
+var dynamo = new AWS.DynamoDB.DocumentClient( { service: dynamodb });
 var sqs = new AWS.SQS();
 
 
