@@ -1,0 +1,64 @@
+{
+   "Description" : "WordWar environment template",
+
+   "Parameters" : {
+      "Env" : {
+        "Type" : "String",
+        "Default" : "",
+        "Description" : "Name of the environment. Default is empty (=> prod). e.g. dev_ test_"
+      }
+   },
+
+   "Resources" : {
+       "GameTable" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+                "TableName" : "Game",
+                "KeySchema" : [ {
+                    "KeyType" : "HASH",
+                    "AttributeName" : "gameId"
+                } ],
+                "AttributeDefinitions" : [
+                    {
+                        "AttributeName" : "gameId",
+                        "AttributeType" : "S"
+                    }
+                ],
+                "ProvisionedThroughput" : {
+                    "ReadCapacityUnits" :  5,
+                    "WriteCapacityUnits" : 5
+                }
+            }
+        },
+       "PlayTable" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+                "TableName" : "Play",
+                "KeySchema" : [
+                    {
+                        "KeyType" : "HASH",
+                        "AttributeName" : "gameId_turnIndex"
+                    },
+                    {
+                        "KeyType" : "RANGE",
+                        "AttributeName" : "playerIndex"
+                    }
+                ],
+                "AttributeDefinitions" : [
+                    {
+                        "AttributeName" : "gameId_turnIndex",
+                        "AttributeType" : "S"
+                    },
+                    {
+                        "AttributeName" : "playerIndex",
+                        "AttributeType" : "N"
+                    }
+                ],
+                "ProvisionedThroughput" : {
+                    "ReadCapacityUnits" :  5,
+                    "WriteCapacityUnits" : 5
+                }
+            }
+        }
+    }
+}
