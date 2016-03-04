@@ -50,9 +50,9 @@ app.post('/GameEvent', function(req, res){
                 else     log.info(data);           // successful response
             });        
         } else if ( body.Type === "Notification" ) {
-            
+            var message = JSON.parse( body.Message );
+            log.debug( JSON.stringify( message ));
         }
-        log.debug( JSON.stringify( body ));
         res.json( body );
     })  
 });
