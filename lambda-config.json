@@ -1,0 +1,8 @@
+{
+    "region"            : "us-west-2",
+    "sqsUrl"            : "https://sqs.us-west-2.amazonaws.com/458298098107/PendingGames",
+    "snsArn"            : "arn:aws:sns:us-west-2:458298098107:GameEvent",
+    "s3configbucketUri" : "s3://wordwar-config/",
+    "GameTableName"     : "Game",
+    "PlayTableName"     : "Play"    
+}
