@@ -27,15 +27,15 @@
 			"outDir": null
 		},
 		{
-			"name": "Lambda putMove",
+			"name": "Lambda putPlay",
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/lambda-local/bin/lambda-local", 
 			"stopOnEntry": false,
 			"args": [
                 "--lambdapath",     "lambda.js",
-                "--handler",        "putMove",
-                "--eventpath",      "lambda-event/putMove.1.1.js",
+                "--handler",        "putPlay",
+                "--eventpath",      "lambda-event/putPlay.0.0.js",
                 "--timeout",        "600"
             ],
 			"cwd": "${workspaceRoot}",
