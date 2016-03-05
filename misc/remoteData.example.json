@@ -1,0 +1,22 @@
+{
+    "gameId"  : "gameId",
+    "maxPlayers" : 2,
+
+    "playerList" : [ "player-id", "player-id" ],
+    
+    "playList" : [
+        {
+            "gameId" : "gameId",
+            "playerIndex" : 0,
+            "turnIndex" : 0,
+            "word" : "DOG" 
+        }
+    ],
+ 
+    "tileList" : [
+        {
+            "turnIndex" : 0,
+            "tiles" : "DOGDICIMTP"
+        }   
+    ]
+}
