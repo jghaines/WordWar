@@ -6,123 +6,101 @@
 function RemoteProxy( socket, restBaseUrl ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
+    this.swaggerUrl = '/js/swagger.json';
 
-	//
-	// register callbacks
-	//
-	this.onStartGame = function(callback) {
-		this.log.info( this.constructor.name + '.onNewGame(.) - callback registered');
-		this._startGameCallbacks.add(callback);
-	}
-
-	this.onStartTurn = function( callback ) {
-		this.log.info( this.constructor.name + '.onStartTurn(.) - callback registered');
-		this._startTurnCallbacks.add(callback);
-	}
+    // enum for remote source
+    this.source = {
+        WEBSOCKET   : { id:1, name:"WEBSOCKET" },
+        API         : { id:2, name:"API" }
+    };
     
-    this.onTurnInfoReceived = function( callback ) {
-		this.log.info( this.constructor.name + '.onTurnInfoReceived(.) - callback registered');
-		this._turnInfoCallbacks.add(callback);
-	}
-
-	this.onPlaysReceived = function(callback) {
-		this.log.info( this.constructor.name + '.onPlayReceived(.) - callback registered');
-		this._playsReceivedCallbacks.add(callback);
-	}
-
-
+    // enum for EventEmitter types
+    this.Event = {
+        GAME_INFO : 'game_info',
+        PLAY_INFO : 'play_info',
+        TURN_INFO : 'turn_info',
+    };
+    
 	//
 	// server message receieve event handlers, fire callbacks
 	//
-	this._startGame = function(msg) {
-		this.log.info( this.constructor.name + '._startGame(.)');
-		this.log.info( this.constructor.name, '_startGame( msg', msg);
-		this._startGameCallbacks.fire( JSON.parse( msg ));
-	}
-
-	this._startTurn = function(msg) {
-		this.log.info( this.constructor.name + '._startTurn(.)');
-		this.log.info( this.constructor.name, '_startTurn( msg', msg);
-
-        this._turnInfoReceived( [ {
-            turnIndex : 0,
-            tiles : "ETANOISRLY"
-        } ] );
-
-		this._startTurnCallbacks.fire(msg);
-	}
-
-	this._remotePlayNotification = function( turnInfo ) {
-		this.log.info( this.constructor.name + '._remotePlayNotification(.)');
-
-        var turnInfoData = {
-            gameId : turnInfo.gameId,
-            turnIndex : turnInfo.turnIndex
-        };
-        
-		jQuery.ajax({
-			url: 	this._getPlayUrl,
-			type: 	'POST',
-			data: 	 JSON.stringify( turnInfoData ),
-			success: this._receiveRemoteData.bind( this ),
-			error: 	 function( jqXHR, textStatus, errorThrown ) {
-                        throw new Error ( errorThrown );
-			}
-		});
-	}
-
-    this._joinedGame = function( data, textStatus, jqXHR ) {
-        this.log.info( this.constructor.name + '._joinedGame()' );
-        this._gameId = data.GameId;
-        this.log.debug( this.constructor.name, '._joinedGame() gameId = ' + this._gameId );
-	}
-
-    this._receiveRemoteData = function( data, textStatus, jqXHR ) {
+    this._receiveRemoteData = function( source, data, textStatus, jqXHR ) {
         this.log.info( this.constructor.name + '._receiveRemoteData()' );
-        this.log.debug( this.constructor.name, '_receiveRemoteData( ', data );
+        this.log.debug( this.constructor.name, "_receiveRemoteData( source=", source.name, " data=", data, ", textStatus=" + textStatus + ", jqXHR=" + jqXHR + " )" );
+
+		if ( textStatus && textStatus !== "success" ) {
+			throw new Error( "HTTP call error" + data );
+		}
+
+        if ( data.errorMessage ) { // API Gateway-Lambda error
+            throw new Error( data.errorMessage );
+        }
+        
+        this._gameInfoReceived( data );
+
         if ( data.hasOwnProperty( 'turnInfo' )) {
             this._turnInfoReceived( data.turnInfo );
         }
-        if ( data.hasOwnProperty( 'moves' )) {
-            this._playsReceived( data.moves );
+        if ( data.hasOwnProperty( 'playList' )) {
+            this._playsReceived( data.playList );
         }
+        
+        // postback to notification websocket if the data didn't already come from there 
+        if ( source != this.source.WEBSOCKET ) {
+            this._socket.emit('gameEvent', data);
+        }
+    }
+
+    // we have received game info from remote, send it on
+    this._gameInfoReceived = function( data ) {
+        this.log.info( this.constructor.name + '._gameInfoReceived()' );
+
+        if ( this.gameId !== data.gameId ) {
+            this.gameId = data.gameId;
+            this._subscribeGameNotifications();
+        }
+
+        // don't send the turn and play data with this callback
+        var gameInfo = JSON.parse(JSON.stringify(data)); // ugh - Javascript object copy - http://stackoverflow.com/a/18359187/358224
+        delete gameInfo.turnInfo;
+        delete gameInfo.plays;
+		this.emit( this.Event.GAME_INFO, gameInfo );
     }
 
     // we have received Play info from remote, parse and send on
     this._playsReceived = function( playList ) {
-        var plays = [];
+        this.log.info( this.constructor.name + '._playsReceived()' );
+
+        var playInfo = [];
         playList.forEach( function( play ) {
-            plays.push( new Play( play ));
+            playInfo.push( new Play( play ));
         });
-		this._playsReceivedCallbacks.fire( plays );
+		this.emit( this.Event.PLAY_INFO, playInfo );
     }
     
     // we have received turn info from remote, send it on
     this._turnInfoReceived = function( turnInfoList ) {
-		this._turnInfoCallbacks.fire( turnInfoList );
+        this.log.info( this.constructor.name + '._turnInfoReceived()' );
+		this.emit( this.Event.TURN_INFO, turnInfoList );
+    }
+    
+    this._subscribeGameNotifications = function() {
+        this.log.info( this.constructor.name + '._subscribeGameNotifications()' );
+		// let the server know who we are
+        var subscriptionData = { 
+            gameId : this.gameId,
+            playerId : this.playerId
+        }
+        if ( subscriptionData.gameId && subscriptionData.playerId ) {
+            this._socket.emit( 'subscribe', subscriptionData );            
+        }
     }
 
-	// connection management event handlers 
-	this._receiveUserid = function( msg ) {
-		this.log.info( this.constructor.name + '._receiveUserid(.)');
-		this.log.debug( this.constructor.name, '_receiveUserid( msg', msg, ')');
-
-		// first time connection, take user id
-		if ( this._userid === undefined ) {
-			this._userid = msg.userId;
-
-			// confirm new id with server
-			this._socket.emit( 'player', { userId : this._userid } );
-		} 
-
-	}
 
 	this._reconnect = function( msg ) {
 		this.log.info( this.constructor.name + '._reconnect(.)');
-		this.log.debug( this.constructor.name, '._reconnect( msg=', msg, ')' );
 
-		// let the server know who we are
-		this._socket.emit( 'player', { userId : this._userid } );
+        this._subscribeGameNotifications();
 	}
 
 	//
@@ -136,7 +114,9 @@ function RemoteProxy( socket, restBaseUrl ) {
 			url:     this._executePlayUrl,
 			type:    'POST',
 			data: 	 JSON.stringify( localPlay ),
-			success: this._receiveRemoteData.bind( this ),
+			success: (function( jqXHR, textStatus, errorThrown ) {
+                this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
+            }).bind( this ),
 			error: 	 function( jqXHR, textStatus, errorThrown ) {
                         throw new Error ( errorThrown );
 			}
@@ -145,50 +125,36 @@ function RemoteProxy( socket, restBaseUrl ) {
 
 
 	// constructor code
-    this._playerId = guid();
+    this.playerId = guid();
+    this.gameId = null;
+    
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
-    this._getGameUrl = this._restBaseUrl + '/GetGame';
-    this._executePlayUrl = this._restBaseUrl + '/ExecutePlay';
-    this._getPlayUrl = this._restBaseUrl + '/GetPlay';
+    this._getGameUrl = this._restBaseUrl + '/Game';
+    this._executePlayUrl = this._restBaseUrl + '/Game/{gameId}/Play';
 
-	this._startGameCallbacks = $.Callbacks();
-	this._startTurnCallbacks = $.Callbacks();
-    this._turnInfoCallbacks =  $.Callbacks();
-	this._playsReceivedCallbacks = $.Callbacks();
-
-
+    this.log.debug( this.constructor.name, '() - POST ' + this._getGameUrl ); 
     jQuery.ajax({
         url:     this._getGameUrl,
         type:    'POST',
-        data: 	 JSON.stringify( { PlayerId : this._playerId } ),
-        success: this._joinedGame.bind( this ),
+        data: 	 JSON.stringify( { playerId : this.playerId } ),
+			success: (function( jqXHR, textStatus, errorThrown ) {
+                this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
+            }).bind( this ),
         error: 	 function( jqXHR, textStatus, errorThrown ) {
                     throw new Error ( errorThrown );
         }
     });
 
 	// event bindings - connection management 
-	this._socket.on('userId', (function( msg ) {
-		this._receiveUserid( msg );
+	this._socket.on('gameEvent', (function( msg ) {
+		this._receiveRemoteData( this.source.WEBSOCKET, msg );
  	}).bind( this ));
 
 	this._socket.on('reconnect', (function( msg ) {
 		this._reconnect( msg );
  	}).bind( this ));
 
-	// event bindings - game events
-	this._socket.on('new game', (function( msg ){
-		this._startGame( msg );
-	}).bind( this ));
-
-	this._socket.on('start turn', (function( msg ){
-		this._startTurn( msg );
-	}).bind( this ));
-
-	this._socket.on('play message', (function( msg ) {
-		this._remotePlayNotification( JSON.parse( msg ));
-	}).bind( this ));
-
-
 }
+
+RemoteProxy.prototype = Object.create(EventEmitter.prototype);
