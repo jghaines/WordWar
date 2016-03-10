@@ -8,12 +8,12 @@
 			"program": "${workspaceRoot}/node_modules/lambda-local/bin/lambda-local", 
 			"stopOnEntry": false,
 			"args": [
-                "--lambdapath",     "lambda.js",
+                "--lambdapath",     "index.js",
                 "--handler",        "getGame",
-                "--eventpath",      "lambda-event/getGame.0.js",
+                "--eventpath",      "../lambda-event/getGame.1.js",
                 "--timeout",        "600"
             ],
-			"cwd": "${workspaceRoot}",
+			"cwd": "${workspaceRoot}/lambda",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
@@ -33,12 +33,12 @@
 			"program": "${workspaceRoot}/node_modules/lambda-local/bin/lambda-local", 
 			"stopOnEntry": false,
 			"args": [
-                "--lambdapath",     "lambda.js",
+                "--lambdapath",     "index.js",
                 "--handler",        "putPlay",
-                "--eventpath",      "lambda-event/putPlay.0.0.js",
+                "--eventpath",      "../lambda-event/putPlay.0.0.js",
                 "--timeout",        "600"
             ],
-			"cwd": "${workspaceRoot}",
+			"cwd": "${workspaceRoot}/lambda",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
