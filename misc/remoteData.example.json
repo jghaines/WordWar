@@ -1,6 +1,6 @@
 {
     "gameId"  : "gameId",
-    "maxPlayers" : 2,
+    "playerCount" : 2,
 
     "playerList" : [ "player-id", "player-id" ],
     

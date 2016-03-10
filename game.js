@@ -6,7 +6,7 @@ module.exports = class Game {
 
 	constructor( board ) {
 		this.gameId = UUID();
-		this.maxPlayers = 2;
+		this.playerCount = 2;
 		this.players = [];
 
 		this.startScore = 0;
@@ -26,12 +26,12 @@ module.exports = class Game {
 			board 		: this.board,
 			letterCount : this.letterCount,
 			startScore  : this.startScore,
-			playerCount : this.maxPlayers,
+			playerCount : this.playerCount,
 		}
 	}
 
 	addPlayer( player ) {
-		if ( this.players.length >= this.maxPlayers ) {
+		if ( this.players.length >= this.playerCount ) {
 			throw new Error( this.constructor.name + '.addPlayer() - maximum number of players exceeded' );
 		}
 		var playerIndex = this.players.length;
