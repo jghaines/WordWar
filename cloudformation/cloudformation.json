@@ -18,7 +18,7 @@
                     "S3Key"             : { "Fn::Join" : [ "", [ "lambda/lambda", { "Ref" : "Env" }, ".zip" ]]}
                 },
                 "Description"   : "Connect to a pending game, or create a new one",
-                "Handler"       : "lambda.getGame",
+                "Handler"       : "index.getGame",
                 "MemorySize"    : 128,
                 "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
                 "Runtime"       : "nodejs",
@@ -33,7 +33,7 @@
                     "S3Key"             : { "Fn::Join" : [ "", [ "lambda/lambda", { "Ref" : "Env" }, ".zip" ]]}
                 },
                 "Description"   : "Execute a Play from the client",
-                "Handler"       : "lambda.putPlay",
+                "Handler"       : "index.putPlay",
                 "MemorySize"    : 128,
                 "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
                 "Runtime"       : "nodejs",
