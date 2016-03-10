@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* global Buffer */
+/* global process */
 
 var log = require('loglevel');
 log.setLevel( log.levels.DEBUG );
@@ -12,92 +13,178 @@ AWS.config.apiVersions = {
     sqs: '2012-11-05'
 };
 AWS.config.update({region: 'us-west-2'});
+var mds = new AWS.MetadataService();
 var sns = new AWS.SNS();
 
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
-var http = require('http').Server(app);
+var http = require('http');
+var httpServer = http.Server(app);
 var sio = require('socket.io')(http);
-var UUID = require('node-uuid');
-var gameServer = require('./game.server.js');
-
 
 app.set('port', (process.env.PORT || 5000));
 
+var ENV = require('./node-config.json');
+
+const SNS_ENDPOINT = '/GameEvent';
+var snsActive = false; // whether this server is receiving SNS notifications
+
+
+// SNS sends JSON as text/plain (idiots), so we need to override it before running the JSON bodyParser
+// See: http://stackoverflow.com/questions/18484775/how-do-you-access-an-amazon-sns-post-body-with-express-node-js
+app.use( '/GameEvent',  function overrideContentType(req, res, next) {
+    if (req.headers['x-amz-sns-message-type']) {
+        req.headers['content-type'] = 'application/json;charset=UTF-8';
+    }
+    next();
+});
+app.use( bodyParser.json() );
+
+// serve up static data - HTML, CSS, Javascript game client
 app.use(express.static(__dirname + '/client'));
 
+// respond to pings - e.g. ELB
 app.get('/hello', function(req, res){
   res.send('<h1>WordWar app server</h1>');
 });
 
-app.post('/GameEvent', function(req, res){
-    log.info( "/GameEvent ");
+// SNS subscriber endpoint
+app.post(SNS_ENDPOINT, function(req, res){
+    log.info( SNS_ENDPOINT );
 
-    var bodyarr = []
-    req.on('data', function(chunk){
-      bodyarr.push.apply( bodyarr, chunk ); // array append
-    })  
-    req.on('end', function(){
-        var body = JSON.parse( (new Buffer( bodyarr )).toString('utf-8'));
+    snsActive = true;
 
-        if ( body.Type === "SubscriptionConfirmation" ) {
-            var params = {
-                Token: body.Token,
-                TopicArn: body.TopicArn
-            };
-            sns.confirmSubscription(params, function(err, data) {
-                if (err) log.error(err, err.stack); // an error occurred
-                else     log.info(data);           // successful response
-            });        
-        } else if ( body.Type === "Notification" ) {
-            var message = JSON.parse( body.Message );
-            log.debug( JSON.stringify( message ));
-        }
-        res.json( body );
-    })  
+    if ( req.body.Type === "SubscriptionConfirmation" ) {
+        var params = {
+            Token: req.body.Token,
+            TopicArn: req.body.TopicArn
+        };
+        sns.confirmSubscription(params, function(err, data) {
+            if (err) log.error(err, err.stack); // an error occurred
+            else     log.info(data);           // successful response
+        });        
+    } else if ( req.body.Type === "Notification" ) {
+        log.info( '/GameEvent Notification' );
+        var gameInfo = JSON.parse( req.body.Message ); // SNS stringifies the (JSON) Message (idiots)
+        log.debug( '/GameEvent Notification: ', JSON.stringify( gameInfo ));
+        
+        notifySubscribers( gameInfo );
+    }
+    // just return the body for debugging
+    res.json( req.body );
 });
 
-
+//
+// web socket connection events
+//
 
 sio.on('connection', function (client) {
-	console.log('connection - client.id=', client.id, ' client.userId=', client.userId);
+	log.info('connection');
+	log.debug('connection - client.id=', client.id);
 
-	//Generate a new UUID, looks something like
-	//5b2ca132-64bd-4513-99da-90e838ca47d1
-	//and store this on their socket/connection
-    client.userId = UUID();
-
-	//tell the player they connected, giving them their id
-	client.emit('userId', { userId: client.userId } );
-
-	//Now we want to handle some of the messages that clients will send.
-	//They send messages here, and we send them to the game_server to handle.
-	client.on('player', function( m )  {
-	    gameServer.findGame( m.userId, client );
+    // process subscribe events from client
+	client.on('subscribe', function(msg)  {
+        subscribeClient(client, msg);
 	});
-
-	client.on('play message', function(m) {
-		gameServer.onPlayMessage(client, m);
+	client.on('gameEvent', function(msg)  {
+        notifySubscribers(msg, client);
 	});
 });
 
 sio.on('reconnection', function (client) {
-	console.log('reconnection');
-	console.log(client.id);
+	log.info('reconnection');
+	log.debug('reconnection - client.id=', client.id);
 });
-
 
 sio.on('reconnect', function (client) {
-	console.log('reconnect');
-	console.log(client.id);
+	log.info('reconnect');
+	log.debug('reconnect - client.id=', client.id);
 });
-
 
 sio.on('disconnect', function (client) {
-	console.log('disconnect');
-	console.log(client);
+	log.info('disconnect');
+	log.debug('disconnect - client.id=', client.id);
 });
 
-http.listen(app.get('port'), function() {
+// subscribe the given client to events from given game
+// msg.gameId UUID of game
+// msg.playerId UUID of player
+var subscribeClient = function(client, msg) {
+	log.info('subscribeClient()');
+	log.debug('subscribeClient( client.id=' + client.id + ', msg = ' + JSON.stringify(msg) + ')');
+
+    var gameId = msg.gameId;
+    var playerId = msg.playerId;
+    subscriptions[gameId] = subscriptions[gameId] || [];
+
+    // update existing
+    var found = false;
+    subscriptions[gameId].forEach( function( gameSub ) {
+        if ( gameSub.playerId === playerId ) {
+            gameSub.client = client;
+            found = true;
+        }
+    });
+    // or add new
+    if ( ! found ) {
+        subscriptions[gameId].push( {
+            playerId : playerId,
+            client : client
+        })
+    }
+}
+
+// we have SNS/websocket received a game update - distribute it
+// @gameInfo - object
+// @exceptClient - optional - don't notify this client
+var notifySubscribers = function( gameInfo, exceptClient ) {
+	log.info('notifySubscribers()');
+	log.debug('notifySubscribers( gameInfo=' + JSON.stringify(gameInfo) + ', exceptClient.id=' + exceptClient.id + ')');
+
+    var gameId = gameInfo.gameId;
+    if ( !snsActive && // in SNS mode, we only send SNS events, not these peer->node->peer ones
+        subscriptions[gameId] ) {
+        subscriptions[gameId].forEach( function( subscriber ) {
+            if ( subscriber.client !== exceptClient ) {
+                subscriber.client.emit( 'gameEvent', gameInfo ); 
+            }
+        });
+    } 
+}
+
+var retreiveInstanceDns = function() {
+    mds.httpOptions.timeout = 1000/*ms*/;
+
+    mds.request('/latest/meta-data/hostname', function(err, dns) {
+        if ( err !== null ) {
+            log.info("retreiveInstanceDns() - no EC2 detected");
+        } else {
+            subscribeToSNS( 'http://' + dns + SNS_ENDPOINT )
+        }
+    });
+}
+
+var subscribeToSNS = function( url ) {
+    var params = {
+        Protocol: 'HTTP',
+        TopicArn: ENV.snsArn,
+        Endpoint: url
+    };
+    sns.subscribe(params, function(err, data) {
+        if (err) {
+            log.error(err);
+        } else {
+            log.debug("subscribeToSNS() - subscribe: " + data);
+        }
+    });
+}
+
+// 2-dimensional array of subscriptions[gameId][] = { playerId: 'uuid', client: obj }
+var subscriptions = [];
+
+retreiveInstanceDns();
+
+httpServer.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });

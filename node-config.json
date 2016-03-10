@@ -1,0 +1,4 @@
+{
+    "region"            : "us-west-2",
+    "snsArn"            : "arn:aws:sns:us-west-2:458298098107:GameEvent"
+}
