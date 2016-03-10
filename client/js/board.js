@@ -8,8 +8,12 @@ function BoardModel() {
 		this.log.info( this.constructor.name + '.loadBoard('+url+', callback)');
 
 		var that = this;
-		this._table.load( url, '', ( function() { // fire callbacks once load is complete
-			this._boardLoadedCallbacks.fire();
+		this._table.load( url, '', ( function(responseText, status, jqXHR) { // fire callbacks once load is complete
+            if ( status === "error" ) {
+                throw new Error( "Failed to load url='" + url +"' : " + jqXHR.status + " " + jqXHR.statusText );
+            } else {
+                this._boardLoadedCallbacks.fire();
+            }
 		}).bind( this ));
 	}
 
