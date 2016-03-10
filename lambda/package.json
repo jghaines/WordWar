@@ -1,0 +1,27 @@
+{
+  "name": "WordWarLambda",
+  "version": "1.0.0",
+  "description": "Lambda functions to support WordWar",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.2.41",
+    "iz": "^0.7.1",
+    "loglevel": "^1.4.0",
+    "node-uuid": "^1.4.7",
+    "validator": "^5.1.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "5.4.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jghaines/WordWar"
+  },
+  "author": "Good Knight Studios",
+  "license": "N/A"
+}
