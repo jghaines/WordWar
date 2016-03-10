@@ -1,0 +1,11 @@
+## VTL script for AWS API Gateway
+## Inserts gameId from path /Game/{gameId}/Play into Lambda function parameters
+## Getting a mysterious "cannot convert NaN to integer" error when used
+
+#set($inputRoot = $input.path('$'))
+{
+ "gameId" : "$input.params('gameId')",
+
+#foreach( $key in $inputRoot )
+    "$key" : "$inputRoot.get($key)"#if($foreach.hasNext),#end
+#end
