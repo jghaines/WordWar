@@ -11,8 +11,46 @@ AWS.config.update({region: 'us-west-2'});
 
 var dynamo = new AWS.DynamoDB.DocumentClient();
 
+var createTurnInfo = function( turnIndex, letterCount ) {
+        return {
+            turnIndex : this.turnIndex,
+            tiles : this.tiles
+        }
+} 
 
-function run() {
+
+function create() {
+    var remoteData = {
+        gameId      : "gameId-dynamo-client-js-0000-00001",
+        playerList  : [ "playerId-dynamo-client-js-0000-00000" ],
+        playerCount  : 2,
+        board       : "/boards/2.html",
+        letterCount : 10,
+        startScore  : 0,
+        turnInfo    : []        
+    };
+    
+    for (var turnIndex = 0; turnIndex < 10; turnIndex++) {
+        remoteData.turnInfo.push( createTurnInfo( turnIndex, 'ABCDE' ) ); //   
+//        remoteData.turnInfo.push( new TurnInfo( turnIndex, 'ABCDE' ) ); // ommitted  
+//        remoteData.turnInfo.push( new TurnInfo( turnIndex, 'ABCDE' ).toJSON()); // works 
+//        remoteData.turnInfo.push( { turnIndex : turnIndex, tiles : 'ABC' }); // works 
+    }
+    
+    var putParams = {
+        TableName   : "Game",
+        Item        : remoteData
+    };
+    dynamo.put(putParams, function( err, data ) {
+        if ( null !== err ) {
+            console.log( err );
+            return;
+        } 
+        console.log( data );
+    });
+}
+
+function update() {
     var updateParams = {
         TableName: "Game",
         Key: { GameId : 'gameId-101' },
@@ -43,4 +81,5 @@ function run() {
     });
 }
 
-run();
+create();
+//update();
