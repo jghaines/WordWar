@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "GameModel",
+  "type": "object",
+  "properties": {
+    "gameId": { "type": "string" },
+    "playerCount" : { "type" : "integer" },
+
+    "playerList" : {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
