@@ -55,7 +55,7 @@
             "name": "Node",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}/index.js",
+			"program": "${workspaceRoot}/app.js",
             "stopOnEntry": false,
 			"args": [
                 "index.js", "2.html"
