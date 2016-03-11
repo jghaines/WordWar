@@ -21,7 +21,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var http = require('http');
 var httpServer = http.Server(app);
-var sio = require('socket.io')(http);
+var sio = require('socket.io')(httpServer);
 
 app.set('port', (process.env.PORT || 5000));
 
