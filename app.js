@@ -33,7 +33,7 @@ var snsActive = false; // whether this server is receiving SNS notifications
 
 // SNS sends JSON as text/plain (idiots), so we need to override it before running the JSON bodyParser
 // See: http://stackoverflow.com/questions/18484775/how-do-you-access-an-amazon-sns-post-body-with-express-node-js
-app.use( '/GameEvent',  function overrideContentType(req, res, next) {
+app.use(SNS_ENDPOINT,  function overrideContentType(req, res, next) {
     if (req.headers['x-amz-sns-message-type']) {
         req.headers['content-type'] = 'application/json;charset=UTF-8';
     }
@@ -46,7 +46,7 @@ app.use(express.static(__dirname + '/client'));
 
 // respond to pings - e.g. ELB
 app.get('/hello', function(req, res){
-  res.send('<h1>WordWar app server</h1>');
+  res.send('<h1>WordWar app server</h1>\n');
 });
 
 // SNS subscriber endpoint
@@ -56,13 +56,17 @@ app.post(SNS_ENDPOINT, function(req, res){
     snsActive = true;
 
     if ( req.body.Type === "SubscriptionConfirmation" ) {
+        log.info( '/GameEvent SubscriptionConfirmation' );
         var params = {
             Token: req.body.Token,
             TopicArn: req.body.TopicArn
         };
         sns.confirmSubscription(params, function(err, data) {
-            if (err) log.error(err, err.stack); // an error occurred
-            else     log.info(data);           // successful response
+            if (err) {
+                log.error( "/GameEvent sns.confirmSubscription callback error: " + err);
+            } else {
+                log.info( "/GameEvent sns.confirmSubscription callback success: " + data);
+            }
         });        
     } else if ( req.body.Type === "Notification" ) {
         log.info( '/GameEvent Notification' );
@@ -154,9 +158,11 @@ var notifySubscribers = function( gameInfo, exceptClient ) {
 }
 
 var retreiveInstanceDns = function() {
+	log.info('retreiveInstanceDns()');
+
     mds.httpOptions.timeout = 1000/*ms*/;
 
-    mds.request('/latest/meta-data/hostname', function(err, dns) {
+    mds.request('/latest/meta-data/public-hostname', function(err, dns) {
         if ( err !== null ) {
             log.info("retreiveInstanceDns() - no EC2 detected");
         } else {
@@ -166,6 +172,9 @@ var retreiveInstanceDns = function() {
 }
 
 var subscribeToSNS = function( url ) {
+	log.info('subscribeToSNS(.)');
+	log.debug('subscribeToSNS(url = ' + url + ')');
+
     var params = {
         Protocol: 'HTTP',
         TopicArn: ENV.snsArn,
@@ -173,9 +182,9 @@ var subscribeToSNS = function( url ) {
     };
     sns.subscribe(params, function(err, data) {
         if (err) {
-            log.error(err);
+            log.error("subscribeToSNS() sns.subscribe callback error: " + JSON.stringify( err ));
         } else {
-            log.debug("subscribeToSNS() - subscribe: " + data);
+            log.debug("subscribeToSNS() sns.subscribe callback success: " + JSON.stringify( data ));
         }
     });
 }
