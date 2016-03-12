@@ -91,6 +91,7 @@ function RemoteProxy( socket, restBaseUrl ) {
             gameId : this.gameId,
             playerId : this.playerId
         }
+        this.log.debug( this.constructor.name, '_subscribeGameNotifications() - subscriptionData=', JSON.stringify( subscriptionData ));
         if ( subscriptionData.gameId && subscriptionData.playerId ) {
             this._socket.emit( 'subscribe', subscriptionData );            
         }
