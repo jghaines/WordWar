@@ -279,6 +279,14 @@ function BoardView( boardModel ) {
 		this._status.text( statusMessage );
 	}
 
+	this.setStateMood = function( gameState ) {
+        // clear existing mood, set new
+        Object.keys( GameState ).forEach( (function(key) {
+            this._body.removeClass( "state_" + GameState[key].name );
+        }).bind(this) );
+        this._body.addClass( "state_" + gameState.name );
+    }
+
 	this.addPlayedItem = function ( playerIndex, text, styleClass ) {
 		var element = $('<li/>').text( text );
 		if ( typeof styleClass !== 'undefined' ) {
@@ -323,6 +331,7 @@ function BoardView( boardModel ) {
 
 	this._table  = $( 'table.gameboard' );
 	this._status = $( '.status' );
+	this._body   = $( 'body' );
 	this._wordLists = [
 		$( 'div.playedwords.player-0 ul' ),
 		$( 'div.playedwords.player-1 ul' ),

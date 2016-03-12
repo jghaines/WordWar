@@ -8,6 +8,26 @@ body {
 	background: #EEEEEE;
 }
 
+body.state_NOT_STARTED {
+	background: #8c8c8c;
+}
+
+body.state_REMOTE_MOVE {
+	background: #bfbfbf;
+}
+
+body.state_PLAYER_MOVE {
+	background: #EEEEEE;
+}
+
+body.state_PLAYER_WIN {
+	background: Lime;
+}
+
+body.state_REMOTE_WIN {
+	background: Maroon;
+}
+
 .score {
 	text-align:	center;	 
 	font-size: 24px;

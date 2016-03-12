@@ -4,17 +4,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
-    this.GameState = {
-        NOT_STARTED : { id:1, name: "NOT_STARTED" },
-        RUNNING     : { id:2, name: "RUNNING" },
-        COMPLETE    : { id:3, name: "COMPLETE" }
-    };
-
     // remote callback when we receive gameInfo from remote
     // will start the game when required
     this._receiveGameInfo = function( gameInfo ) {
 		this.log.info( this.constructor.name + '._receiveGameInfo(.)' );
-        if ( this.state !== this.GameState.NOT_STARTED ) {
+        if ( this.state !== GameState.NOT_STARTED ) {
             return; // ignore redundant updates
         }
         
@@ -64,7 +58,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.info( this.constructor.name + '.checkForGameStart(.)' );
 
         // return if we aren't ready
-        if ( this.state !== this.GameState.NOT_STARTED ||
+        if ( this.state !== GameState.NOT_STARTED ||
             ! this._isBoardLoaded ||
             this.playerIndex === null ||
             this._letterTiles.length < 1 
@@ -74,10 +68,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         }
 		this.log.debug( this.constructor.name + '.checkForGameStart() - ready!' );
 
-        this.state = this.GameState.RUNNING;
-    	this._audio.newGame();
+        this.state = GameState.PLAYER_MOVE;
         this.turnIndex = 0;
         this.newTurn();
+
+    	this._audio.newGame();
+	    this._boardView.setStateMood( this.state );
     }            
 
 	this.newTurn = function() {
@@ -89,8 +85,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		};
 		this._lettersModel.unselect();
 
+        this.state = GameState.PLAYER_MOVE;
         this._boardView.setStatus( "Place your word" );
 
+        this._boardView.setStateMood( this.state );
 		this._lettersView.updateLetters();
 		this._lettersView.updatePlaced();
 		this._lettersView.updateSelection();
@@ -198,15 +196,17 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 		this._boardController.unhighlightPlaceablePositions();
 
+        this._boardView.setStatus( "Waiting for other player" );
+        this.state = GameState.REMOTE_MOVE;
+
+        this._boardView.setStateMood( this.state );
  		this._buttonsView.enableMoveButton(   false );
  		this._buttonsView.enableAttackButton( false );
 		this._buttonsView.enableResetButton(  false );
 		this._lettersView.setEnabled( false );
 
-        this._boardView.setStatus( "Waiting for other player" );
 
 		this._remote.executeLocalPlay( myPlay );
-
  	}
 
 	this.resetWord = function() {
@@ -317,12 +317,18 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this._scoreModel.incrementScore( i, plays[i].score );
 			if ( this._scoreModel.getScore( i ) < 0 ) {
 				this._scoreModel.setLost( i, true );
-				return true;
+
+                if ( i === this.playerIndex ) {
+                    this.state = GameState.REMOTE_WIN;
+                } else {
+                    this.state = GameState.PLAYER_WIN;
+                }
+                return true;
 			}
 		}
 
-		return false;
-	}
+        return false;
+    }
 
 	this.executeMove = function( play ) {
 		this.log.info( this.constructor.name + '.executeMove(play=.)' );
@@ -350,9 +356,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.endGame = function() {
 		this.log.info( this.constructor.name + '.endGame())' );
-        this.state = this.GameState.COMPLETE;
 
 		this._boardView.setStatus( 'End of Game' );
+		this._boardView.setStateMood( this.state );
         
 		this._lettersView.setEnabled( false );
 
@@ -364,7 +370,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     //
 	// constructor code
     //
-    this.state = this.GameState.NOT_STARTED;
+    this.state = GameState.NOT_STARTED;
     this._isBoardLoaded = false;
 
     this.playerIndex = null;
@@ -390,6 +396,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._scoreModel = new ScoreModel();
 
 	this._buttonsView = new ButtonsView();
+
+	this._boardView.setStatus( "Waiting for remote player" );
+
+	this._boardView.setStateMood( this.state );
 	this._buttonsView.enableMoveButton(   false );
 	this._buttonsView.enableAttackButton( false );
 	this._buttonsView.enableResetButton(  false );
