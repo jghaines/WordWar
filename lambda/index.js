@@ -39,17 +39,11 @@ var getKey = function( gameId, turnIndex ) {
     return 'game-' + gameId + '-turn-' + turnIndex;
 };
 
-var TILE_PLAY_BLOCK = 10; // generate a new set of TILE_PLAY_BLOCK tiles every TILE_PLAY_BLOCK moves
-// parameters for generating sets of tiles
-var MIN_VOWELS = 2; 
-var MAX_VOWELS = 6; 
-
-
 var createTurnInfo = function( turnIndex, letterCount ) {
     return {
         turnIndex : turnIndex,
         tiles : letterGenerator( letterCount, function(letters) {
-            return vowelCountChecker( letters, MIN_VOWELS, MAX_VOWELS );
+            return vowelCountChecker( letters, ENV.MIN_VOWELS, ENV.MAX_VOWELS );
         })
     }
 };
@@ -177,7 +171,7 @@ var createNewGame = function( gameInfo, context ) {
         turnInfo    : []        
     };
     
-    for (var turnIndex = 0; turnIndex < TILE_PLAY_BLOCK; turnIndex++) {
+    for (var turnIndex = 0; turnIndex < ENV.TILE_PLAY_BLOCK; turnIndex++) {
         remoteData.turnInfo.push( createTurnInfo( turnIndex, remoteData.letterCount )); 
     }
     
