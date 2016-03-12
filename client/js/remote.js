@@ -21,6 +21,29 @@ function RemoteProxy( socket, restBaseUrl ) {
         TURN_INFO : 'turn_info',
     };
     
+    // request a game from the server
+    this.getGame = function() {
+        this.log.info(this.constructor.name + '.getGame()');
+        this.log.debug( this.constructor.name, '() - POST ' + this._getGameUrl ); 
+        var gameInfo = {
+            playerList : [ { playerId : this.playerId } ]
+        }; 
+        if ( ENV && ENV.requestedBoard ) {
+            gameInfo.board = ENV.requestedBoard;
+        }
+        jQuery.ajax({
+            url:     this._getGameUrl,
+            type:    'POST',
+            data: 	 JSON.stringify( gameInfo ),
+                success: (function( jqXHR, textStatus, errorThrown ) {
+                    this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
+                }).bind( this ),
+            error: 	 function( jqXHR, textStatus, errorThrown ) {
+                        throw new Error ( errorThrown );
+            }
+        });
+    }
+
 	//
 	// server message receieve event handlers, fire callbacks
 	//
@@ -84,6 +107,7 @@ function RemoteProxy( socket, restBaseUrl ) {
 		this.emit( this.Event.TURN_INFO, turnInfoList );
     }
     
+    // create a subscription on the game server for game event updates
     this._subscribeGameNotifications = function() {
         this.log.info( this.constructor.name + '._subscribeGameNotifications()' );
 		// let the server know who we are
@@ -97,7 +121,7 @@ function RemoteProxy( socket, restBaseUrl ) {
         }
     }
 
-
+    // when we have a websocket reconnect, (re-)subscribe to notifications
 	this._reconnect = function( msg ) {
 		this.log.info( this.constructor.name + '._reconnect(.)');
 
@@ -105,7 +129,8 @@ function RemoteProxy( socket, restBaseUrl ) {
 	}
 
 	//
-	// send local event to server
+	// called by Game object
+    // send local event to server
 	//
 	this.executeLocalPlay = function( localPlay ) {
 		this.log.info( this.constructor.name + '.executeLocalPlay(.)');
@@ -133,19 +158,6 @@ function RemoteProxy( socket, restBaseUrl ) {
 	this._restBaseUrl = restBaseUrl;
     this._getGameUrl = this._restBaseUrl + '/Game';
     this._executePlayUrl = this._restBaseUrl + '/Game/{gameId}/Play';
-
-    this.log.debug( this.constructor.name, '() - POST ' + this._getGameUrl ); 
-    jQuery.ajax({
-        url:     this._getGameUrl,
-        type:    'POST',
-        data: 	 JSON.stringify( { playerId : this.playerId } ),
-			success: (function( jqXHR, textStatus, errorThrown ) {
-                this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
-            }).bind( this ),
-        error: 	 function( jqXHR, textStatus, errorThrown ) {
-                    throw new Error ( errorThrown );
-        }
-    });
 
 	// event bindings - connection management 
 	this._socket.on('gameEvent', (function( msg ) {

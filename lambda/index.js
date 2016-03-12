@@ -55,11 +55,14 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 };
 
 // AWS LAMBDA function
-// playerInfo.PlayerId:   'guid id of player'
+// @gameInfo - partial Game object defining gameInfo.playerList[0].playerId guid
+//  and (optionally, for dev), gameInfo.board
+// @context - lambda context
 // context - lambda
-var getGame = function( params, context ) {    
-    log.info('getGame()');    
-    var playerId = params.playerId;
+var getGame = function( gameInfo, context ) {    
+    log.info('getGame()');
+    iz.anArray( gameInfo.playerList );
+    var playerId = gameInfo.playerList[0].playerId;
     iz.uuid( playerId );
 
     var receiveParams = {
@@ -67,12 +70,12 @@ var getGame = function( params, context ) {
         VisibilityTimeout : 30 // seconds
     };
     sqs.receiveMessage( receiveParams, function( err, sqsData ) {
-        getPendingGame( err, params, sqsData, context );
+        getPendingGame( err, gameInfo, sqsData, context );
     });
 }
 
 // see if there is a game on the queue, otherwise create one
-var getPendingGame = function( err, playerId, sqsData, context ) {
+var getPendingGame = function( err, gameInfo, sqsData, context ) {
     log.info('getPendingGame()');
     if ( err !== null) {
         context.fail( err );
@@ -92,31 +95,31 @@ var getPendingGame = function( err, playerId, sqsData, context ) {
                 "#playerList" : "playerList"
             },
             ExpressionAttributeValues : {
-                ":newPlayer" : playerId,
-                ":newPlayerList" : [ playerId ]
+                ":newPlayer" : gameInfo.playerList[0],
+                ":newPlayerList" : gameInfo.playerList
             },
             ReturnValues        : "ALL_NEW"
         };
 
         dynamo.update(updateParams, function( err, dbData ) {
-            playerAddedToGameDb( err, playerId, dbData, sqsHandle, context )
+            playerAddedToGameDb( err, gameInfo, dbData, sqsHandle, context )
         });
 
     } else if ( sqsData.Messages === undefined ) { // no game found, request one
-        createNewGame( playerId, context );
+        createNewGame( gameInfo, context );
     } else {
         context.fail( "getPendingGame() - unexpected SQS data' structure: " + JSON.stringify( sqsData ));
     }
 }
 
 // player has been added to game from queue
-var playerAddedToGameDb = function( err, playerId, dbData, sqsHandle, context ) {
+var playerAddedToGameDb = function( err, gameInfo, dbData, sqsHandle, context ) {
     log.info('playerAddedToGameDb()');
 
     if ( null !== err ) {
         if ( err.code === "ConditionalCheckFailedException" ) {
             // we have found a game we are already a player in, create a new one instead
-            createNewGame( playerId, context )
+            createNewGame( gameInfo, context )
         } else {
             context.fail( err );
         }
@@ -162,20 +165,20 @@ var returnGameInfo = function( remoteData, context ) {
     context.succeed( remoteData );
 };
 
-var createNewGame = function( playerId, context ) {
-    log.info('createNewGame()');
+var createNewGame = function( gameInfo, context ) {
+    log.info('createNewGame(..)');
+    var board =  gameInfo.board || ENV.defaultBoard || "/boards/4.html";
     var remoteData = {
         gameId      : UUID(),
-        playerList  : [ playerId ],
+        playerList  : gameInfo.playerList,
         playerCount : 2,
-        board       : "/boards/2.html",
+        board       : board,
         letterCount : 10,
         startScore  : 0,
         turnInfo    : []        
     };
     
     for (var turnIndex = 0; turnIndex < TILE_PLAY_BLOCK; turnIndex++) {
-        // DynamoDB won't serialise
         remoteData.turnInfo.push( createTurnInfo( turnIndex, remoteData.letterCount )); 
     }
     

@@ -1,4 +1,6 @@
 // Sample event data 
 module.exports = {
-        "playerId"	:	"player-xx00001"
+        "playerList" : [
+            { "playerId"	:	"player-xx00001" }
+        ]
 }

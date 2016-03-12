@@ -4,5 +4,6 @@
     "snsArn"            : "arn:aws:sns:us-west-2:458298098107:GameEvent",
     "s3configbucketUri" : "s3://wordwar-config/",
     "GameTableName"     : "Game",
-    "PlayTableName"     : "Play"    
+    "PlayTableName"     : "Play",
+    "defaultBoard"      : "/boards/4.html"    
 }

@@ -33,7 +33,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
                 }
             }).bind(this));
             if ( this.playerIndex === null ) {
-                throw new Error( "Received gameInfo for which we (playerId=" + this._remote.playerId + ") are not a member" );
+                throw new Error( "Received gameInfo for gameId=" + gameInfo.gameId + " which we (playerId=" + this._remote.playerId + ") are not a member" );
             }
             
     		this.turnIndex = 0;
@@ -435,4 +435,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.resetWord();
 	}).bind(this) );
 
+    // get ourselves a game
+    this._remote.getGame();
 }

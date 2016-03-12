@@ -95,7 +95,8 @@ app.use('/js/env.js', function(req, res, next) {
 `// development config generated from node:app.js
 var ENV = {
     webSocketUrl    : null, // default to localhost
-    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod"
+    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod",
+    requestedBoard  : "/boards/2.html"
 }`);
     res.end();
     // we are overriding express.static(..) below; we don't call next()
