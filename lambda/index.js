@@ -241,20 +241,39 @@ var putPlay = function( playParams, context) {
             turnIndex:  playParams.turnIndex,
             snsPublish: true // flag to SNS publish if turn complete
         };
-        getPlaysForTurn( turnParams, context );
+        getTurn( turnParams, context );
     });
 };
 
 // AWS LAMBDA function
-// turnParams.gameId:     'guid id of game'
-// turnParams.turnIndex:  <0-based integer index of turn>,
-// turnParmas.snsPublish: optional boolean - whether to fire SNS event if turn is complete 
-// context - lambda
-var getPlaysForTurn = function( turnParams, context ) {
-    log.info('getPlaysForTurn()');
+// Also called indirectly by putPlay
+// Get Plays for specified turn and possibly turnInfo
+// @turnParams.gameId:     'guid id of game'
+// @turnParams.turnIndex:  <0-based integer index of turn>,
+// @turnParmas.snsPublish: optional boolean - whether to fire SNS event if turn is complete 
+// @context - lambda context
+var getTurn = function( turnParams, context ) {
+    log.info('getTurn()');
     iz.uuid( turnParams.gameId );
     iz.int( turnParams.turnIndex );
 
+    var remoteData = {
+        gameId : turnParams.gameId
+    }
+    if ( turnParams.turnIndex % ENV.TILE_PLAY_BLOCK === 0 ) {
+        getTilesForTurn( turnParams, remoteData, context );
+    } else {
+        getPlaysForTurn( turnParams, remoteData, context );
+    }
+}
+
+var getTilesForTurn = function( turnParams, remoteData, context ) {
+    log.info('getTilesForTurn()');
+
+    getPlaysForTurn( turnParams, remoteData, context );
+}
+
+var getPlaysForTurn = function( turnParams, remoteData, context ) {
     var queryParams = {
         TableName               : ENV.TableName.Play,
         KeyConditionExpression  : "gameId_turnIndex = :v_Id",
@@ -264,11 +283,11 @@ var getPlaysForTurn = function( turnParams, context ) {
     };
     
     dynamo.query(queryParams, function( err, dbData ) {
-        gotPlaysForTurnFromDb( err, turnParams, dbData, context );
+        gotPlaysForTurnFromDb( err, remoteData, turnParams, dbData, context );
     });
 };
 
-var gotPlaysForTurnFromDb = function( err, turnParams, dbData, context ) {
+var gotPlaysForTurnFromDb = function( err, remoteData, turnParams, dbData, context ) {
     log.info('gotPlaysForTurnFromDb()');
     if ( null !== err ) {
         context.fail( err );
@@ -280,32 +299,13 @@ var gotPlaysForTurnFromDb = function( err, turnParams, dbData, context ) {
             turnInfo: turnParams
         });
     } else { 
-        var plays = [];
+        remoteData.playList = []; 
         dbData.Items.forEach( function( item ) {
-           plays.push( item.play ); 
+           remoteData.playList.push( item.play ); 
         });
         
-        var remoteData = {
-            gameId      : plays[0].gameId,
-            playList    : plays,
-            turnList : [
-                {
-                    turnIndex : 0,
-                    tiles : 'DOGDICIMTP'
-                },
-                {
-                    turnIndex : 1,
-                    tiles : 'CATDICIMTP'
-                },
-                {
-                    turnIndex : 2,
-                    tiles : 'BEANICIMTP'
-                }   
-            ]
-        };
-        
        if ( typeof turnParams.snsPublish === "boolean" && turnParams.snsPublish && // if this is flagged for SNS 
-            plays.length == 2 ) { // and turn complete
+            remoteData.playList.length == 2 ) { // and turn complete // TODO: remove hard-coded player count
                 var snsParams = {
                     Message: JSON.stringify( remoteData ),
                     TargetArn: ENV.snsArn
