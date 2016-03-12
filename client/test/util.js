@@ -46,7 +46,10 @@ describe('Array', function() {
 			expect( [1,0,1].countWhere( function(o) { return true } ) ).toEqual( 3 );
 		});
 		it('should return non-null count for non-null callback', function () {
-			expect( [null,0,null,1].countWhere( function(o) { return o !== null } ) ).toEqual( 2 );
+            var sparseArray = [];
+            sparseArray[1] =  1;
+            sparseArray[3] = 3;
+			expect( sparseArray.countWhere( notNull )).toEqual( 2 );
 		});
 	});
 });
@@ -70,4 +73,31 @@ describe('String', function() {
 			expect( 'mIXedCasE'.toTitleCase() ).toEqual( 'Mixedcase' );
 		});
 	});
+});
+
+describe('notNull', function() {
+    it('return false for null', function () {
+        expect( notNull( null ) ).toEqual( false );
+    });
+    it('return true for existent element in sparseArray', function () {
+        var sparseArray = [];
+        sparseArray[1] =  1;
+        sparseArray[3] = 3;
+        expect( notNull( sparseArray[1] )).toEqual( true );
+        expect( notNull( sparseArray[3] )).toEqual( true );
+    });
+    it('return false for non-existent elements in sparseArray', function () {
+        var sparseArray = [];
+        sparseArray[1] =  1;
+        sparseArray[3] = 3;
+        expect( notNull( sparseArray[0] )).toEqual( false );
+        expect( notNull( sparseArray[2] )).toEqual( false );
+        expect( notNull( sparseArray[4] )).toEqual( false );
+    });
+    it('return true for {} object', function () {
+        expect( notNull( {} )).toEqual( true );
+    });
+    it('return true for 42 integer', function () {
+        expect( notNull( 42 )).toEqual( true );
+    });
 });

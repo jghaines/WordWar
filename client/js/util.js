@@ -82,3 +82,8 @@ function guid() {
         return v.toString(16);
     });
 }
+
+// whether the argument is null or undefined
+function notNull( o ) {
+    return ( o !== null && o !== undefined );
+}

@@ -241,13 +241,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
          // have we receieved enough Plays to end this turn
          var playsForThisTurn = this._plays[ this.turnIndex ];
          if ( playsForThisTurn !== undefined ) {
-            var playsForThisTurnCount = playsForThisTurn.countWhere( function( o ) { return ( o !== null ) });
+            var playsForThisTurnCount = playsForThisTurn.countWhere( notNull );
 
             if ( playsForThisTurnCount >= this.playerCount ) {
                 this.endTurn();
             }
-         } else {
-             this.log.warn( this.constructor.name + '.receivePlays(.) - this._plays[' + this.turnIndex + '] === undefined' );
          }
      }
 
