@@ -3,9 +3,8 @@
 var gc = {};
 
 window.onload = function(){
-	var socket = io();
-	var restBaseUrl = "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod";
-	var remote = new RemoteProxy( socket, restBaseUrl );
+	var socket = io(ENV.webSocketUrl);
+	var remote = new RemoteProxy( socket, ENV.restBaseUrl );
 
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },

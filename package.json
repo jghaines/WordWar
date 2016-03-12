@@ -6,6 +6,7 @@
   "dependencies": {
     "aws-sdk": "^2.2.42",
     "body-parser": "^1.15.0",
+    "cors": "^2.7.1",
     "express": "^4.13.4",
     "http": "0.0.0",
     "loglevel": "^1.4.0",

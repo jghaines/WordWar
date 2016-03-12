@@ -18,6 +18,7 @@ var sns = new AWS.SNS();
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 var app = express();
 var http = require('http');
 var httpServer = http.Server(app);
@@ -30,6 +31,11 @@ var ENV = require('./node-config.json');
 const SNS_ENDPOINT = '/GameEvent';
 var snsActive = false; // whether this server is receiving SNS notifications
 
+// allow CORS requests originating from the static data S3 bucket website
+var corsOptions = {
+    origin: 'http://wordwar-web-client.s3-website-us-west-2.amazonaws.com/'
+};
+app.use( cors( corsOptions ));
 
 // SNS sends JSON as text/plain (idiots), so we need to override it before running the JSON bodyParser
 // See: http://stackoverflow.com/questions/18484775/how-do-you-access-an-amazon-sns-post-body-with-express-node-js
@@ -41,12 +47,10 @@ app.use(SNS_ENDPOINT,  function overrideContentType(req, res, next) {
 });
 app.use( bodyParser.json() );
 
-// serve up static data - HTML, CSS, Javascript game client
-app.use(express.static(__dirname + '/client'));
-
 // respond to pings - e.g. ELB
 app.get('/hello', function(req, res){
-  res.send('<h1>WordWar app server</h1>\n');
+    log.info( '/hello' );
+    res.send('<h1>WordWar app server</h1>\n');
 });
 
 // SNS subscriber endpoint
@@ -65,7 +69,7 @@ app.post(SNS_ENDPOINT, function(req, res){
             if (err) {
                 log.error( "/GameEvent sns.confirmSubscription callback error: " + err);
             } else {
-                log.info( "/GameEvent sns.confirmSubscription callback success: " + data);
+                log.info( "/GameEvent sns.confirmSubscription callback success: " + JSON.stringify( data ));
             }
         });        
     } else if ( req.body.Type === "Notification" ) {
@@ -73,42 +77,66 @@ app.post(SNS_ENDPOINT, function(req, res){
         var gameInfo = JSON.parse( req.body.Message ); // SNS stringifies the (JSON) Message (idiots)
         log.debug( '/GameEvent Notification: ', JSON.stringify( gameInfo ));
         
-        notifySubscribers( gameInfo );
+        notifySubscribers( gameInfo, null );
     }
     // just return the body for debugging
     res.json( req.body );
 });
 
 //
+// In development, node.js also server static assets
+// In production, the static assets are depolyed on S3 and not deployed on node.js
+//
+
+// override static /js/env.js for development settings
+app.use('/js/env.js', function(req, res, next) {
+    log.info( '/js/env.js' );
+    res.send(
+`// development config generated from node:app.js
+var ENV = {
+    webSocketUrl    : null, // default to localhost
+    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod"
+}`);
+    res.end();
+    // we are overriding express.static(..) below; we don't call next()
+});
+
+// serve up static data - HTML, CSS, Javascript game client
+app.use(express.static(__dirname + '/client'));
+
+
+//
 // web socket connection events
 //
 
 sio.on('connection', function (client) {
-	log.info('connection');
+	log.info('WS.connection()');
 	log.debug('connection - client.id=', client.id);
 
     // process subscribe events from client
 	client.on('subscribe', function(msg)  {
+	    log.info('WS.subscribe()');
         subscribeClient(client, msg);
 	});
 	client.on('gameEvent', function(msg)  {
-        notifySubscribers(msg, client);
+        log.info( 'WS.gameEvent()' );
+        receiveWebSocketGameEvent(msg, client);
 	});
 });
 
 sio.on('reconnection', function (client) {
-	log.info('reconnection');
-	log.debug('reconnection - client.id=', client.id);
+	log.info('WS.reconnection()');
+	log.debug('WS.reconnection() - client.id=', client.id);
 });
 
 sio.on('reconnect', function (client) {
-	log.info('reconnect');
-	log.debug('reconnect - client.id=', client.id);
+	log.info('WS.reconnect()');
+	log.debug('WS.reconnect() - client.id=', client.id);
 });
 
 sio.on('disconnect', function (client) {
-	log.info('disconnect');
-	log.debug('disconnect - client.id=', client.id);
+	log.info('WS.disconnect()');
+	log.debug('WS.disconnect() - client.id=', client.id);
 });
 
 // subscribe the given client to events from given game
@@ -139,18 +167,27 @@ var subscribeClient = function(client, msg) {
     }
 }
 
+// callback on receipt of GameEvent from a websocket client
+var receiveWebSocketGameEvent = function(msg, client) {
+	log.info('receiveWebSocketGameEvent(..)');
+    if ( !snsActive ) { // if we are in SNS mode, don't propagate websocket GameEvents
+        notifySubscribers(msg, client);
+    }
+}
+
+
 // we have SNS/websocket received a game update - distribute it
 // @gameInfo - object
 // @exceptClient - optional - don't notify this client
 var notifySubscribers = function( gameInfo, exceptClient ) {
 	log.info('notifySubscribers()');
-	log.debug('notifySubscribers( gameInfo=' + JSON.stringify(gameInfo) + ', exceptClient.id=' + exceptClient.id + ')');
+	log.debug('notifySubscribers( exceptClient.id=' + ( exceptClient ? exceptClient.id : 'null' ) + ', gameInfo=' + JSON.stringify(gameInfo) + ')' );
 
     var gameId = gameInfo.gameId;
-    if ( !snsActive && // in SNS mode, we only send SNS events, not these peer->node->peer ones
-        subscriptions[gameId] ) {
+    if ( subscriptions[gameId] ) {
         subscriptions[gameId].forEach( function( subscriber ) {
             if ( subscriber.client !== exceptClient ) {
+            	log.debug('notifySubscribers() - emit to client.id ' + subscriber.client.id + ' client.playerId=' + subscriber.playerId );
                 subscriber.client.emit( 'gameEvent', gameInfo ); 
             }
         });
