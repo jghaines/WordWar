@@ -80,7 +80,7 @@ var getPendingGame = function( err, gameInfo, sqsData, context ) {
 
         // register player for game
         var updateParams = {
-            TableName           : ENV.GameTableName,
+            TableName           : ENV.TableName.Game,
             Key                 : { gameId : gameId },
             UpdateExpression    : "SET #playerList = list_append( #playerList, :newPlayerList )",
             ConditionExpression : "NOT contains( #playerList, :newPlayer )",
@@ -176,7 +176,7 @@ var createNewGame = function( gameInfo, context ) {
     }
     
     var putParams = {
-        TableName   : ENV.GameTableName,
+        TableName   : ENV.TableName.Game,
         Item        : remoteData
     };
     dynamo.put(putParams, function( err, dbData ) {
@@ -224,7 +224,7 @@ var putPlay = function( playParams, context) {
     var playerIndex = parseInt( playParams.playerIndex );
 
     var putParams = {
-        TableName   : ENV.PlayTableName,
+        TableName   : ENV.TableName.Play,
         Item :  {
             gameId_turnIndex    : getKey( playParams.gameId, playParams.turnIndex ),
             playerIndex         : playerIndex,
@@ -256,7 +256,7 @@ var getPlaysForTurn = function( turnParams, context ) {
     iz.int( turnParams.turnIndex );
 
     var queryParams = {
-        TableName               : ENV.PlayTableName,
+        TableName               : ENV.TableName.Play,
         KeyConditionExpression  : "gameId_turnIndex = :v_Id",
         ExpressionAttributeValues : {
             ":v_Id" : getKey( turnParams.gameId, turnParams.turnIndex )
