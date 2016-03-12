@@ -58,7 +58,6 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 // @gameInfo - partial Game object defining gameInfo.playerList[0].playerId guid
 //  and (optionally, for dev), gameInfo.board
 // @context - lambda context
-// context - lambda
 var getGame = function( gameInfo, context ) {    
     log.info('getGame()');
     iz.anArray( gameInfo.playerList );
