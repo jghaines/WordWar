@@ -9,7 +9,7 @@
         "Play"     : "Play"
     },
 
-    "TILE_PLAY_BLOCK"   : 10,
+    "TILE_PLAY_BLOCK"   : 50,
     "MIN_VOWELS"        : 2, 
     "MAX_VOWELS"        : 6, 
 
