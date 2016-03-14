@@ -108,6 +108,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			return;
 		}
 
+        this._audio.selectTile();
+
 		this._lettersModel.select(index);
 		this._lettersView.updateSelection();
 		this._boardController.highlightPlaceablePositions( this.playerIndex );
@@ -128,6 +130,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 
 		// valid placement
+        this._audio.placeTile();
+        
 		this._boardModel.placeLetter( cell, this._lettersModel.getSelectedLetter() );
 		this._lettersModel.setPlaced( this._lettersModel.getSelectedIndex(), true );
 		this._lettersModel.unselect();
@@ -175,9 +179,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		var wordPlaced = this._boardModel.getPlayedWord( this.playerIndex );
 
 		if ( ! this.validWordPlaced (wordPlaced) ) {
+            this._audio.invalidWord();
 			this._boardView.flash('flash-error');
 			return;
 		}
+
+        this._audio.playWord();
 
 		var myPlay = new Play( {
 			gameId: 			this.gameId,
@@ -211,6 +218,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.resetWord = function() {
 		this.log.info( this.constructor.name + '.resetWord(.)');
+
+        this._audio.resetWord();
+
 		this._boardController.resetWord();
 
 		this._lettersModel.unplaceAll();
@@ -259,6 +269,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         var gameEnded = this.updateScore( playsForTurn );
 
+        // sort Plays into categories
         var movePlays = [];
         var attackPlays = [];
 		for (var p = playsForTurn.length - 1; p >= 0; p--) {
@@ -279,7 +290,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			for (var p = attackPlays.length - 1; p >= 0; p--) {
 				this.executeAttack( attackPlays[p] );
 			}
-			if ( movePlays.length > 0 ) { // move vs attack, shown next
+			if ( movePlays.length > 0 ) { // move vs attack, shown after a delay
 				setTimeout( (function() { 
 					for (var p = movePlays.length - 1; p >= 0; p--) {
 						this.executeMove( movePlays[p] );
@@ -319,8 +330,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 				this._scoreModel.setLost( i, true );
 
                 if ( i === this.playerIndex ) {
+                    this._audio.lose();
                     this.state = GameState.REMOTE_WIN;
                 } else {
+                    this._audio.win();
                     this.state = GameState.PLAYER_WIN;
                 }
                 return true;
