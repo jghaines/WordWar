@@ -101,3 +101,21 @@ describe('notNull', function() {
         expect( notNull( 42 )).toEqual( true );
     });
 });
+
+describe('cssTimeToMilliseconds', function() {
+    it('should return 1000 for 1 second', function () {
+        expect( cssTimeToMilliseconds("1s") ).toEqual( 1000 );
+    });
+    it('should return 800 for 0.8 second', function () {
+        expect( cssTimeToMilliseconds("0.8s") ).toEqual( 800 );
+    });
+    it('should return 800 for 800 millisecond', function () {
+        expect( cssTimeToMilliseconds("800ms") ).toEqual( 800 );
+    });
+    it('should throw an error for non s/ms strings', function () {
+        expect( function(){ cssTimeToMilliseconds("1m") } ).toThrow();
+    });
+    it('should throw an error for plain numbers', function () {
+        expect( function(){ cssTimeToMilliseconds("1000") } ).toThrow();
+    });
+});

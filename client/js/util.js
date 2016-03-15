@@ -75,6 +75,17 @@ function flash(element, flash_class) {
     }, 1000);
 }
 
+function cssTimeToMilliseconds( cssTime ) {
+    var match;
+    if ( ( match = cssTime.match( /^([\d\.]+)\s*ms$/ ) )) { // milliseconds
+        return Math.floor( parseFloat( match[0] ));
+    } else if ( ( match = cssTime.match( /^([\d\.]+)\s*s$/ ) )) { // seconds
+        return Math.floor( parseFloat( match[0] ) * 1000 );
+    } else {
+        throw new Error( "cssTimeToMilliseconds() couldn't parse: " + cssTime );
+    }
+}
+
 // http://stackoverflow.com/a/2117523/358224
 function guid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
