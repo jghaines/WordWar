@@ -27,7 +27,7 @@ window.onload = function(){
 					{ from:  9, to:  9, bonus: 9 },
 					{ from: 10, to: 99, bonus: 20 },
 				]),
-				new WinnerPenalisesLoserScoreStrategy(),
+				new WinnerBeatsLoserScoreStrategy(),
 				new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
 				new MinMaxAttackMultiplierScoreStrategy( 0, 5 ),
 				new KnockBackPlayScoreStrategy(),
