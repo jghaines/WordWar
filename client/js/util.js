@@ -70,9 +70,12 @@ String.prototype.toTitleCase = toTitleCase;
 
 function flash(element, flash_class) {
 	$(element).addClass(flash_class);
+    
+    // remove class once animation is complete
+    var animationDurcation = cssTimeToMilliseconds( $(element).css( 'animation-duration' ));
     setTimeout(function() {
           $(element).removeClass(flash_class);
-    }, 1000);
+    }, animationDurcation);
 }
 
 function cssTimeToMilliseconds( cssTime ) {
