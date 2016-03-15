@@ -8,7 +8,13 @@ function ButtonsView() {
 	this.enable = function( buttonName, isEnabled ) {
 		this.log.info( this.constructor.name + '.enable(' + buttonName + ', ' + isEnabled + ')' );
         var button = this._buttons[ buttonName ].ui;
-		button.prop('disabled', ! isEnabled );
+        
+        // if we are changing disabled -> enabled, flash button
+        if ( button.prop( 'disabled' ) && isEnabled ) {
+            flash( button, 'flash-button-enable' );
+        }
+
+		button.prop( 'disabled', ! isEnabled );
 	}
 
     // TODO: move to controller logic

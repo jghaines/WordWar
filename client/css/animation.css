@@ -13,6 +13,11 @@
 	animation-duration: 0.8s;
 }
 
+.flash-button-enable {
+	animation-name: pulse-animation;
+	animation-duration: 0.15s;
+}
+
 @keyframes flash-yellow-animation {  
 	from { background: yellow; }
 	to   { background: default; }
@@ -42,5 +47,17 @@
 	}
 	100% { 
 		background: default;
+	}
+}
+
+@keyframes pulse-animation {
+	0% {
+		transform: scale(1.05);
+    }
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
 	}
 }
