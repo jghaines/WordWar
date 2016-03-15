@@ -101,3 +101,10 @@ function guid() {
 function notNull( o ) {
     return ( o !== null && o !== undefined );
 }
+
+// simple string reverse function
+// http://stackoverflow.com/questions/958908/how-do-you-reverse-a-string-in-place-in-javascript
+// fine for us. won't work for complex utf-16
+function naiveReverse( string ) {
+    return string.split('').reverse().join('');
+}

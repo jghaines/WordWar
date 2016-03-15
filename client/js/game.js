@@ -176,7 +176,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	}
 
 	// Whether the given word is valid
-	this.validWordPlaced = function(word) {
+	this.validWord = function( word ) {
 		return ( sowpods.binaryIndexOf( word ) >= 0 );
 	}
 
@@ -185,10 +185,14 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
 		var wordPlaced = this._boardModel.getPlayedWord( this.playerIndex );
 
-		if ( ! this.validWordPlaced (wordPlaced) ) {
-            this._audio.invalidWord();
-			this._boardView.flash('flash-error');
-			return;
+		if ( ! this.validWord( wordPlaced ) ) {
+            // try reverse
+            wordPlaced = naiveReverse( wordPlaced );
+            if ( ! this.validWord( wordPlaced ) ) {
+                this._audio.invalidWord();
+                this._boardView.flash('flash-error');
+                return;
+            }
 		}
 
         this._audio.playWord();
@@ -198,7 +202,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			turnIndex: 			this.turnIndex,
 			playerIndex: 		this.playerIndex,
 			moveType: 			moveType,
-			word: 				this._boardModel.getPlayedWord( this.playerIndex ),
+			word: 				wordPlaced,
 			wordValue: 			this._boardController.getPlayedScore( this.playerIndex ),
 			playRange: 			this._boardModel.getPlacedRange(),
 			newPosition: 		this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
