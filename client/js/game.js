@@ -280,7 +280,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         var gameEnded = this.updateScore( playsForTurn );
 
-        // sort Plays into categories
+        // sort Plays into moves and attacks
         var movePlays = [];
         var attackPlays = [];
 		for (var p = playsForTurn.length - 1; p >= 0; p--) {
@@ -316,7 +316,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 
 		for (var p = playsForTurn.length - 1; p >= 0; p--) {
-			this.addPlayedItem( playsForTurn[p] );
+			this._boardView.addPlayedItem( playsForTurn[p] );
 		}
 
 		if ( gameEnded ) {
@@ -365,17 +365,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.info( this.constructor.name + '.executeAttack(play=.)' );
 		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 		this._boardView.flashAttackOnPlayer( 1 - play.playerIndex ); // TODO: this is hard-coded for 2-player, should be generic
-	}
-
-	this.addPlayedItem = function( play ) {
-		this.log.info( this.constructor.name + '.addPlayedItem(play=.)' );
-		this._boardView.addPlayedItem( play.playerIndex,
-			play.moveType.toTitleCase() + ': ' + play.word +
-			'(' + play.wordValue + ') ' +
-			( play.score > 0 ? '+' : '' ) +
-			play.score,
-			play.moveType
-		);
 	}
 
 	this.endGame = function() {

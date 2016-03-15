@@ -287,12 +287,22 @@ function BoardView( boardModel ) {
         this._body.addClass( "state_" + gameState.name );
     }
 
-	this.addPlayedItem = function ( playerIndex, text, styleClass ) {
-		var element = $('<li/>').text( text );
+	this.addPlayedItem = function( play ) {
+		this.log.info( this.constructor.name + '.addPlayedItem(play=.)' );
+        var line = 
+            play.moveType.toTitleCase() + 
+            ': ' + 
+            play.word + ' ' + 
+			( play.score > 0 ? '+' : '' ) +
+			play.score;
+        var mouseOver = '(' + play.wordValue + ')';
+
+		var element = $('<li/>').text( line );
 		if ( typeof styleClass !== 'undefined' ) {
-			element.addClass( 'move-' + styleClass );
+			element.addClass( 'move-' + play.moveType );
+            element.prop( 'title', mouseOver );
 		}
-        this._wordLists[playerIndex].append( element );
+        this._wordLists[play.playerIndex].append( element );
         element[0].scrollIntoView(false);
 	}
 
