@@ -300,6 +300,11 @@ function BoardView( boardModel ) {
 		flash( this._table, flash_class );
 	}
 
+	this.flashPlayer = function( playerIndex ) {
+		var cell = this._boardModel.getPlayerCell( playerIndex );
+		flash( cell, 'flash-player' );
+	}
+
 	this.flashAttackOnPlayer = function( playerIndex ) {
 		var cell = this._boardModel.getPlayerCell( playerIndex );
 		flash( cell, 'flash-attack' );

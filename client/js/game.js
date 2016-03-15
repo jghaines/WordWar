@@ -73,6 +73,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this.newTurn();
 
     	this._audio.newGame();
+	    this._boardView.flashPlayer( this.playerIndex );
 	    this._boardView.setStateMood( this.state );
     }            
 
