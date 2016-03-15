@@ -2,86 +2,54 @@
 
 function ButtonsView() {
 	this.log = log.getLogger( this.constructor.name );
-	this.log.setLevel( log.levels.SILENT );
+	this.log.setLevel( log.levels.DEBUG );
 
-	this.enableMoveButton = function(isEnabled) {
-		this.log.info( this.constructor.name + '.enablemoveButton(' + isEnabled + ')' );
-		this._moveButton.prop('disabled', ! isEnabled );
+    // en/dis-able button
+	this.enable = function( buttonName, isEnabled ) {
+		this.log.info( this.constructor.name + '.enable(' + buttonName + ', ' + isEnabled + ')' );
+        var button = this._buttons[ buttonName ].ui;
+		button.prop('disabled', ! isEnabled );
 	}
 
-	this.enableAttackButton = function(isEnabled) {
-		this.log.info( this.constructor.name + '.enableAttackButton(' + isEnabled + ')' );
-		this._attackButton.prop('disabled', ! isEnabled );
-	}
-
-	this.enableResetButton = function(isEnabled) {
-		this.log.info( this.constructor.name + '.enableResetButton(' + isEnabled + ')' );
-		this._resetButton.prop('disabled', ! isEnabled );
-	}
-
+    // TODO: move to controller logic
 	this.setPlayerModel = function( playerModel ) {
 		this._playerModel = playerModel;
 		this._playerModel.onUpdate( (function() {
 			this._updateData();
 		}).bind( this ));
 		this._updateData(); // get initial data
-	}
+	};
 
 	// called-back when player model is updated
+    // TODO: move to controller logic
 	this._updateData = function() {
-		this._attackButton.text( 'Attack (x' + this._playerModel.getAttackMultiplier() + ')' );
-	}
+		var attackButton = this._buttons.attack.ui;
+        attackButton.text( 'Attack (x' + this._playerModel.getAttackMultiplier() + ')' );
+	};
 
-	// register callbacks
-	this.onMoveClicked = function( callback ) {
-		this.log.info( this.constructor.name + '.onmoveClicked(callback)' );
-		this._onMoveClickedCallbacks.add( callback );
-	}
+  	// JQuery click callbacks
+    // emit event 
+    this._click = function( button ) {
+        this.emit( button.name );
+    };
 
-	this.onAttackClicked = function( callback ) {
-		this.log.info( this.constructor.name + '.onmoveClicked(callback)' );
-		this._onAttackClickedCallbacks.add( callback );
-	}
+    // our buttons
+    this._buttons = {
+	    move    : { name: 'move',   ui: $( 'button#move'   ) },
+	    attack  : { name: 'attack', ui: $( 'button#attack' ) },
+	    reset   : { name: 'reset',  ui: $( 'button#reset'  ) },
+    };
 
-	this.onResetClicked = function( callback ) {
-		this.log.info( this.constructor.name + '.onResetClicked(callback)' );
-		this._onResetClickedCallbacks.add( callback );
-	}
-
-	// fire callbacks 
-	this._moveClicked = function() {
-		this.log.info( this.constructor.name + '._moveClicked()' );
-		this._onMoveClickedCallbacks.fire();
-	}
-
-	this._attackClicked = function() {
-		this.log.info( this.constructor.name + '._attackClicked()' );
-		this._onAttackClickedCallbacks.fire();
-	}
-
-	this._resetClicked = function() {
-		this.log.info( this.constructor.name + '._resetClicked()' );
-		this._onResetClickedCallbacks.fire();
-	}
-
-
-	this._moveButton   = $( 'button#move'   );
-	this._attackButton = $( 'button#attack' );
-	this._resetButton  = $( 'button#reset'  );
-
-	this._onMoveClickedCallbacks   = $.Callbacks();
-	this._onAttackClickedCallbacks = $.Callbacks();
-	this._onResetClickedCallbacks  = $.Callbacks();
 
 	// register private callbacks
-	this._moveButton.click( ( function(){
-		this._moveClicked();
-	}).bind( this ) );
-	this._attackButton.click( ( function(){
-		this._attackClicked();
-	}).bind( this ) );
-	this._resetButton.click( ( function(){
-		this._resetClicked();
-	}).bind( this ) );
+    Object.keys(this._buttons).forEach( (function( buttonKey ) {
+        var button = this._buttons[buttonKey];   
+        button.ui.click( button, (function( eventObject ) {
+            this._click( eventObject.data );
+        }).bind( this ));
+    }).bind( this ));
 
 }
+
+// make the class an EventEmitter
+ButtonsView.prototype = Object.create(EventEmitter.prototype);

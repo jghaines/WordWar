@@ -170,4 +170,5 @@ function RemoteProxy( socket, restBaseUrl ) {
 
 }
 
+// make the class an EventEmitter
 RemoteProxy.prototype = Object.create(EventEmitter.prototype);

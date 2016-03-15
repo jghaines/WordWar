@@ -94,9 +94,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._lettersView.updateSelection();
 		this._lettersView.setEnabled( true );
 
-		this._buttonsView.enableMoveButton(   false );
-		this._buttonsView.enableAttackButton( false );
-		this._buttonsView.enableResetButton(  false );
+		this._buttonsView.enable( 'move',   false );
+		this._buttonsView.enable( 'attack', false );
+		this._buttonsView.enable( 'reset',  false );
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
@@ -138,12 +138,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._lettersView.updateSelection();
 		this._lettersView.updatePlaced();
 		this._boardController.unhighlightPlaceablePositions();
-		this._buttonsView.enableMoveButton(  true );
-		this._buttonsView.enableResetButton( true );
+		this._buttonsView.enable( 'move',  true );
+		this._buttonsView.enable( 'reset', true );
 
 		if ( this._scoreModel.getAttackMultiplier() > 0 && this.isAttackInRange() ) {
 
-			this._buttonsView.enableAttackButton( true );
+			this._buttonsView.enable( 'attack', true );
 
 			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this.playerIndex ))
 			var placedRange = this._boardModel.getPlacedRange();
@@ -152,7 +152,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 				return ( strategy.isAttackInRange( localPlayerCoords, coords, placedRange ));
 			});
 		} else {
-			this._buttonsView.enableAttackButton( false );
+			this._buttonsView.enable( 'attack', false );
 		}
 	}
 
@@ -207,9 +207,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this.state = GameState.REMOTE_MOVE;
 
         this._boardView.setStateMood( this.state );
- 		this._buttonsView.enableMoveButton(   false );
- 		this._buttonsView.enableAttackButton( false );
-		this._buttonsView.enableResetButton(  false );
+ 		this._buttonsView.enable( 'move',   false );
+ 		this._buttonsView.enable( 'attack', false );
+		this._buttonsView.enable( 'reset',  false );
 		this._lettersView.setEnabled( false );
 
 
@@ -228,9 +228,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._lettersView.updatePlaced();
 		this._lettersView.updateSelection();
 
-		this._buttonsView.enableMoveButton(   false );
-		this._buttonsView.enableAttackButton( false );
-		this._buttonsView.enableResetButton(  false );
+		this._buttonsView.enable( 'move',   false );
+		this._buttonsView.enable( 'attack', false );
+		this._buttonsView.enable( 'reset',  false );
     }
      
     this._receiveTurnList = function( turnList ) {
@@ -375,9 +375,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         
 		this._lettersView.setEnabled( false );
 
-		this._buttonsView.enableMoveButton(   false );
-		this._buttonsView.enableAttackButton( false );
-		this._buttonsView.enableResetButton(  false );		
+		this._buttonsView.enable( 'move',   false );
+		this._buttonsView.enable( 'attack', false );
+		this._buttonsView.enable( 'reset',  false );		
 	 }
 
     //
@@ -413,9 +413,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._boardView.setStatus( "Waiting for remote player" );
 
 	this._boardView.setStateMood( this.state );
-	this._buttonsView.enableMoveButton(   false );
-	this._buttonsView.enableAttackButton( false );
-	this._buttonsView.enableResetButton(  false );
+	this._buttonsView.enable( 'move',   false );
+	this._buttonsView.enable( 'attack', false );
+	this._buttonsView.enable( 'reset',  false );
 	this._buttonsView.setPlayerModel( this._scoreModel );
 
 	// bind all the things
@@ -446,15 +446,15 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.placeLetterOnBoard(cell);
 	}).bind(this) );
 
-	this._buttonsView.onMoveClicked( (function() {
+	this._buttonsView.on( 'move', (function() {
 		this.playWord('move');
 	}).bind(this) );
 
-	this._buttonsView.onAttackClicked( (function() {
+	this._buttonsView.on( 'attack', (function() {
 		this.playWord('attack');
 	}).bind(this) );
 
-	this._buttonsView.onResetClicked( (function() {
+	this._buttonsView.on( 'reset', (function() {
 		this.resetWord();
 	}).bind(this) );
 
