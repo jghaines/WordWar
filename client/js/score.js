@@ -4,24 +4,29 @@ function ScoreModel() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
-	this.setScore = function( playerIndex, score ) {
-		this._score[playerIndex].text( score );
-		this._updated();
-	}
+    this._scores = [];
 
-	this.getScore = function( playerIndex ) {
-		return parseInt( this._score[playerIndex].text() );
+	this.setScore = function( playerIndex, score ) {
+		this._scores[playerIndex] = score;
+		this._updated();
 	}
 
 	this.incrementScore = function( playerIndex, value ) {
 		this.log.debug( this.constructor.name, '.incrementScore( playerIndex=', playerIndex, 'value=', value, ')' );
-		this.setScore( playerIndex, this.getScore( playerIndex ) + value );
+
+        var score = this._scores[playerIndex] || 0;
+        score += value;
+        this._scores[playerIndex] = score;
+
 		this._updated();
 	}
 
-	this.setLost = function( playerIndex, hasLost ) {
-		this._score[playerIndex].toggleClass( 'lost', hasLost );
-		this._updated();
+	this.getScore = function( playerIndex ) {
+        return this._scores[playerIndex];
+	}
+
+	this.getAllScores = function() {
+        return this._scores;
 	}
 
 	this.setAttackMultiplier = function( attackMultiplier ) {
@@ -47,10 +52,29 @@ function ScoreModel() {
 	// constructor
 	this._onUpdateCallbacks = $.Callbacks();
 
-	this._score = [
-		$( 'span.score.player-0' ),
-		$( 'span.score.player-1' ),
-	];
-
 	this.setAttackMultiplier( 0 );
+}
+
+
+function ScoreView( scoreModel ) {
+
+    // called-back when ScoreModel is updates
+    this._update = function() {
+        this._scoreModel.getAllScores().forEach( (function( score, index ) {
+            var ui = this._getUiForPlayerIndex( index );
+            ui.text( score );
+        }).bind(this) );
+    }
+    
+    this._getUiForPlayerIndex = function( playerIndex ) {
+        return $( 'span.score.player-' + playerIndex );
+    }
+
+	this.setLost = function( playerIndex, hasLost ) {
+		this._getUiForPlayerIndex( playerIndex ).toggleClass( 'lost', hasLost );
+	}
+
+    this._scoreModel = scoreModel;
+    // bind callback
+    this._scoreModel.onUpdate( this._update.bind( this ));
 }

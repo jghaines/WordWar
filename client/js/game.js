@@ -37,7 +37,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
             for (var p = this.playerCount - 1; p >= 0; p--) {
                 this._scoreModel.setScore( p, gameInfo.startScore );
-                this._scoreModel.setLost( p, false );
+                this._scoreView.setLost( p, false );
             }
             this.checkForGameStart();
         }
@@ -328,7 +328,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		for (var i = plays.length - 1; i >= 0; i--) {
 			this._scoreModel.incrementScore( i, plays[i].score );
 			if ( this._scoreModel.getScore( i ) < 0 ) {
-				this._scoreModel.setLost( i, true );
+				this._scoreView.setLost( i, true );
 
                 if ( i === this.playerIndex ) {
                     this._audio.lose();
@@ -408,6 +408,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
 	this._scoreModel = new ScoreModel();
+	this._scoreView = new ScoreView( this._scoreModel );
 
 	this._buttonsView = new ButtonsView();
 
