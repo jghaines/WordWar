@@ -9,17 +9,17 @@
 }
 
 .flash-attack {
-	animation-name: pulse-red-animation;
+	animation-name: animation-red-pulse;
 	animation-duration: 0.8s;
 }
 
-.flash-player {
-	animation-name: pulse-large-animation;
+.flash-large-pulse {
+	animation-name: animation-large-pulse;
 	animation-duration: 0.5s;
 }
 
 .flash-button-enable {
-	animation-name: pulse-small-animation;
+	animation-name: animation-small-pulse;
 	animation-duration: 0.15s;
 }
 
@@ -33,7 +33,7 @@
 	to   { background: default; }
 }
 
-@keyframes pulse-red-animation {
+@keyframes animation-red-pulse {
 	0% {
 		transform: scale(1.1);
 		background: red;
@@ -55,7 +55,7 @@
 	}
 }
 
-@keyframes pulse-small-animation {
+@keyframes animation-small-pulse {
 	0% {
 		transform: scale(1.05);
     }
@@ -66,7 +66,8 @@
 		transform: scale(1);
 	}
 }
-@keyframes pulse-large-animation {
+
+@keyframes animation-large-pulse {
 	0% {
 		transform: scale(1.1);
     }
@@ -76,4 +77,4 @@
 	100% {
 		transform: scale(1);
 	}
-}}
+}

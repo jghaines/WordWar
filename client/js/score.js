@@ -70,6 +70,11 @@ function ScoreView( scoreModel ) {
         return $( 'span.score.player-' + playerIndex );
     }
 
+	this.flashScore = function( playerIndex ) {
+		flash( this._getUiForPlayerIndex( playerIndex ), 'flash-large-pulse' );
+	}
+
+    // TODO: should be in ScoreModel
 	this.setLost = function( playerIndex, hasLost ) {
 		this._getUiForPlayerIndex( playerIndex ).toggleClass( 'lost', hasLost );
 	}

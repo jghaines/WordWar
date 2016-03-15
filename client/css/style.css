@@ -29,9 +29,10 @@ body.state_REMOTE_WIN {
 }
 
 .score {
-	text-align:	center;	 
+	text-align:	center;
 	font-size: 24px;
 	font-weight: bold;
+	display: inline-block; /* required to support animation - http://stackoverflow.com/questions/6881045/css-animations-on-span */
 }
 
 .score.player-0 {

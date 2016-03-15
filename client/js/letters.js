@@ -10,7 +10,7 @@ function LettersModel() {
 
 	this.setLetterCount = function( letterCount ) {
 		this._letterCount = letterCount;
-		this._letters =  Array(this._letterCount);
+		this._letters =  Array.from(Array(this._letterCount)).map(() => '');
 		this._isPlaced = Array.from(Array(this._letterCount)).map(() => false);
 	}
 

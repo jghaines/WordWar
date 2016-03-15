@@ -70,11 +70,17 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         this.state = GameState.PLAYER_MOVE;
         this.turnIndex = 0;
-        this.newTurn();
 
-    	this._audio.newGame();
-	    this._boardView.flashPlayer( this.playerIndex );
-	    this._boardView.setStateMood( this.state );
+        // add delay so that board load can be rendered before start animations
+        setTimeout( (function() { 
+            this._audio.newGame();
+
+            this._boardView.setStateMood( this.state );
+            this._boardView.flashPlayer( this.playerIndex );
+            this._scoreView.flashScore( this.playerIndex );
+
+            this.newTurn();
+        }).bind( this ), 500 );
     }            
 
 	this.newTurn = function() {

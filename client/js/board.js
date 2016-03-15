@@ -302,7 +302,7 @@ function BoardView( boardModel ) {
 
 	this.flashPlayer = function( playerIndex ) {
 		var cell = this._boardModel.getPlayerCell( playerIndex );
-		flash( cell, 'flash-player' );
+		flash( cell, 'flash-large-pulse' );
 	}
 
 	this.flashAttackOnPlayer = function( playerIndex ) {
