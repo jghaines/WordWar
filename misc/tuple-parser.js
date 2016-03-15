@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // search through sowpods and count every (two-letter) tuple
 // print them from most to least common
 
@@ -7,24 +8,27 @@
 var fs = require('fs');
 
 var readable = fs.createReadStream( __dirname + '/sowpods.txt', {
-    encoding : 'utf8', // otherwise we get a binary Buffer
-    highWaterMark : 1}); // 1-byte chunks
+    encoding : 'utf8' // otherwise we get a binary Buffer
+});
 
 var previous = ' ';
 var tuple = {};
 var array = [];
 
 readable.on( 'data', ( data ) => {
-    var current = data[0].toLowerCase();
+    
+    data.split('').forEach( function(current) {
+        current = current.toLowerCase();
 
-    if ( previous && previous.match( /[a-z]/ ) &&
-         current  && current.match( /[a-z]/ )) {
-        tuple[previous] = tuple[previous] || {};
-        tuple[previous][current] = tuple[previous][current] || 0; 
+        if ( previous && previous.match( /[a-z]/ ) &&
+             current  && current.match( /[a-z]/ )) {
+            tuple[previous] = tuple[previous] || {};
+            tuple[previous][current] = tuple[previous][current] || 0; 
 
-        tuple[previous][current]++;
-    }
-    previous = current;
+            tuple[previous][current]++;
+        }
+        previous = current;
+    })
 });
 
 readable.on( 'end', ( data ) => {
