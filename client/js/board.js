@@ -292,7 +292,8 @@ function BoardView( boardModel ) {
 		if ( typeof styleClass !== 'undefined' ) {
 			element.addClass( 'move-' + styleClass );
 		}
-		this._wordLists[playerIndex].append( element );
+        this._wordLists[playerIndex].append( element );
+        element[0].scrollIntoView(false);
 	}
 
 

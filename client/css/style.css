@@ -51,6 +51,9 @@ body.state_REMOTE_WIN {
 .playedwords {
 	border: 4px;
 	border-style: solid;
+
+	overflow-y: scroll;
+	height: 100px;
 }
 
 .playedwords.player-0 {
