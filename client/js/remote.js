@@ -45,7 +45,13 @@ function RemoteProxy( socket, restBaseUrl ) {
     }
 
 	//
-	// server message receieve event handlers, fire callbacks
+    // called when we receive return data from the REST API or pushed from WebSocket
+    // parse the data, fire callbacks
+    //
+    // @source API or WEBSOCKET
+    // @data data bundle
+    // @textStatus for REST API HTTP callback
+    // @jqXHR for REST API HTTP callback
 	//
     this._receiveRemoteData = function( source, data, textStatus, jqXHR ) {
         this.log.info( this.constructor.name + '._receiveRemoteData()' );
@@ -78,6 +84,7 @@ function RemoteProxy( socket, restBaseUrl ) {
     this._gameInfoReceived = function( data ) {
         this.log.info( this.constructor.name + '._gameInfoReceived()' );
 
+        // when we first receive our gameId, store it and subscribe
         if ( this.gameId !== data.gameId ) {
             this.gameId = data.gameId;
             this._subscribeGameNotifications();
@@ -161,10 +168,16 @@ function RemoteProxy( socket, restBaseUrl ) {
 
 	// event bindings - connection management 
 	this._socket.on('gameEvent', (function( msg ) {
+        log.debug( "WS['gameEvent']" );
 		this._receiveRemoteData( this.source.WEBSOCKET, msg );
  	}).bind( this ));
 
+	this._socket.on('connect', (function( msg ) {
+        log.debug( "WS['connect'] - id=" + this._socket.io.engine.id );
+ 	}).bind( this ));
+     
 	this._socket.on('reconnect', (function( msg ) {
+        log.debug( "WS['reconnect'] - id=" + this._socket.io.engine.id );
 		this._reconnect( msg );
  	}).bind( this ));
 

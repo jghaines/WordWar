@@ -35,9 +35,9 @@ function Play( parameters ) {
 		};
 	}
 
-	// -1 if this beats     other
+	// +1 if this beats     other
 	//  0 if this ties with other
-	// +1 if this loses to  other
+	// -1 if this loses to  other
 	this.cmp = function( other ) {
 		if ( this.moveType != other.moveType ) { // attack vs move			
 			return ( this.moveType == 'attack' ? 1 : -1 ); // attack beats move
