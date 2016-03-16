@@ -330,8 +330,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             this.endGame();
             return true;
         } else { // next turn
-            ++this.turnIndex;
-            this.newTurn();
+			setTimeout( (function() { // add timed-delay so animations finish
+				++this.turnIndex;
+				this.newTurn();
+			}).bind( this ), 500 );
         }
 	}
 

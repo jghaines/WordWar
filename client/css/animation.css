@@ -19,6 +19,11 @@
 	animation-duration: 0.5s;
 }
 
+.flash-populate-tile {
+	animation-name: animation-large-pulse;
+	animation-duration: 0.2s;
+}
+
 .flash-button-enable {
 	animation-name: animation-small-pulse;
 	animation-duration: 0.15s;

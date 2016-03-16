@@ -80,7 +80,7 @@ function LettersView(lettersModel) {
 			this._lettersTable.find('tbody tr').remove();
 			var tr = $('<tr />');
 			this._lettersTable.find('tbody').append(tr);
-			for ( var i = this._lettersModel.getLetterCount(); i > 0; --i ) {
+			for ( var i = 0; i < this._lettersModel.getLetterCount(); ++i ) {
 				var td = $( '<td />' ).click( function(callback) {
 					var index = $(this).index();
 					var letter = $(this).text();
@@ -94,8 +94,14 @@ function LettersView(lettersModel) {
 			this.log.debug('  LettersView.updateLetters()callback(index='+index+',value='+value+')');
 			this.log.debug('    LettersView.updateLetters()callback() this=' + this._lettersModel.getLetter(index) );
 
-			$(value).text( index );
-			$(value).text( this._lettersModel.getLetter(index) );
+            setTimeout( (function() {
+            	var letter = this._lettersModel.getLetter(index);
+    			$(value).text( letter );
+    			if ( letter !== '' && letter !== ' ' ) {
+	                flash( value, 'flash-populate-tile' ); 
+    			}
+            }).bind( this ), index*20 ); // delay creates cascading strobe effect
+
 		}).bind(this) );
 	}
 
