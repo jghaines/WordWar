@@ -148,6 +148,13 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enable( 'move',  true );
 		this._buttonsView.enable( 'reset', true );
 
+        // if first cell is placed, hint the direction of play
+        var placedCells = this._boardModel.getPlacedCells();
+        if ( placedCells.length === 1 ) {
+            this._boardView.flashPlaceableRow( placedCells, this._boardModel.getPlacedDirection() );
+        }
+
+        // if we can attack
 		if ( this._scoreModel.getAttackMultiplier() > 0 && this.isAttackInRange() ) {
 
 			this._buttonsView.enable( 'attack', true );

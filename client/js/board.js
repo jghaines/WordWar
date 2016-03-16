@@ -306,7 +306,15 @@ function BoardView( boardModel ) {
         element[0].scrollIntoView(false);
 	}
 
+    this.flashPlaceableRow = function( fromCell, direction ) {
+        this._boardModel._getAllCellsInDirection( fromCell, direction ).forEach( function( cell, index ) {
+            setTimeout( function() {
+                flash( cell, 'flash-placeable' ); 
+            }, index*10 ); // delay creates cascading strobe effect
+        }); 
+    }
 
+    // flash entire board
 	this.flash = function( flash_class ) {
 		flash( this._table, flash_class );
 	}
@@ -453,7 +461,7 @@ function BoardController(boardModel, boardView) {
 			return ( false );			
 		});
 	}
-
+    
 	this.resetWord = function() {
 		var cells = this._boardModel.getPlacedCells();
 		this._boardModel.unplaceAll();

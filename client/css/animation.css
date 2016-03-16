@@ -1,5 +1,6 @@
-.flash-selection {
-	animation-name: flash-yellow-animation-animation;
+.flash-selection,
+.flash-placeable {
+	animation-name: flash-yellow-animation;
 	animation-duration: 0.8s;
 }
 
