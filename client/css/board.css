@@ -3,17 +3,14 @@ table.gameboard {
 }
 
 table.gameboard td {
-	text-align:	center;	 
+	text-align:	center;
 	vertical-align:	middle;
 	line-height: 1.0;
-
 	height: 25px;
 	width: 25px;
-
 	border-width: 1px;
 	border-style: solid;
 	border-color: grey;
-
 	background: grey;
 }
 
@@ -47,18 +44,11 @@ table.gameboard td.wildcard {
 
 
 /* order is extra !important - later rules override earlier ones */
-table.gameboard td.played-1 {
-	background: 	#00ccff !important;
-	border-color: 	#00ccff;
-	color: 			#00ccff !important;
+table.gameboard td.played  {
+    background: grey !important;
+    /* we leave border-color in place so that played bonuses can be seen */
+    color: grey !important;
 }
-
-table.gameboard td.played-0 {
-	background: 	magenta	!important;
-	border-color: 	magenta;
-	color: 			magenta !important;
-}
-
 
 table.gameboard td.block  {
 	background: 	black;

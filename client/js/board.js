@@ -380,10 +380,12 @@ function BoardController(boardModel, boardView) {
 	this.addPlayedRange = function( playerIndex, range ) {
 		range.foreach( ( function( coords ) {
 			var cell = this._boardModel.getCellAtCoordinates( coords );
-			cell.addClass( 'played-' + playerIndex );
 			if ( cell.hasClass('bonus') ) {
-				cell.attr( 'ww_value', 1 ); // bonus will only work on first play
+				cell.attr( 'ww_value', 1 ); // bonus will only work on first play, will be 'x1'/inactive after this
 			}
+
+            cell.addClass( 'played' );
+			flash( cell, 'flash-played-' + playerIndex );
 		}).bind( this ));
 	}
 

@@ -24,6 +24,43 @@
 	animation-duration: 0.15s;
 }
 
+
+table.gameboard td.flash-played-0 {
+    animation-name: flash-played-0-animation;
+    animation-duration: 1s;
+}
+
+table.gameboard td.flash-played-1 {
+    animation-name: flash-played-1-animation;
+    animation-duration : 1s;
+}
+
+@keyframes flash-played-0-animation {
+    from {
+        background: 	magenta;
+        border-color: 	magenta;
+        color: 			magenta;
+    }
+    to {
+        background: 	default;
+        border-color: 	default;
+        color: 			default;
+    }
+}
+
+@keyframes flash-played-1-animation {
+    from {
+        background: 	#00ccff;
+        border-color: 	#00ccff;
+        color: 			#00ccff;
+    }
+    to {
+        background: 	default;
+        border-color: 	default;
+        color: 			default;
+    }
+}
+
 @keyframes flash-yellow-animation {  
 	from { background: yellow; }
 	to   { background: default; }
