@@ -33,6 +33,10 @@ body.state_REMOTE_WIN {
 	display: inline-block; /* required to support animation - http://stackoverflow.com/questions/6881045/css-animations-on-span */
 }
 
+img.score {
+    float: right;
+}
+
 .score.player-0 {
 	color:	magenta;
 }
@@ -93,4 +97,9 @@ button#move {
 
 button#reset {
 	background-color: orange;
+}
+
+img.avatar {
+	width: 		25px;
+	height: 	25px;
 }

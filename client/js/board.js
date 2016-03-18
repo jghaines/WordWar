@@ -163,7 +163,7 @@ function BoardModel() {
 
 		var newCell = this.getCellAtCoordinates( coordinates );
 		newCell.addClass( cssClass );
-		newCell.html( '<img src="/images/player-' + playerIndex + '.png" />' );
+		newCell.html( '<img class="avatar" src="/images/player-' + playerIndex + '.png" />' );
 	}
 
 	this.isCellPlaceable = function(cell) {
@@ -255,14 +255,14 @@ function BoardView( boardModel ) {
 		cells.each( function() {
 			if ( $(this).hasClass( 'player-0' ) ) { // player
 				var playerIndex = 0;
-				$(this).html( '<img src="/images/player-' + playerIndex + '.png" />' );
+				$(this).html( '<img class="avatar" src="/images/player-' + playerIndex + '.png" />' );
 			} else if ( $(this).hasClass( 'player-1' ) ) { // player
 				var playerIndex = 1;
-				$(this).html( '<img src="/images/player-' + playerIndex + '.png" />' );
+				$(this).html( '<img class="avatar" src="/images/player-' + playerIndex + '.png" />' );
 			} else if ( $(this).hasClass( 'ai' ) ) { // ai
-				$(this).html( '<img src="/images/ai.gif" />' );
+				$(this).html( '<img class="avatar" src="/images/ai.gif" />' );
 			} else if ( $(this).hasClass( 'exit' ) ) { // exit
-				$(this).html( '<img src="/images/exit.png" />' );
+				$(this).html( '<img class="avatar" src="/images/exit.png" />' );
 			} else if ( $(this).hasClass( 'bonus' ) ) { // bonus
 				$(this).html(
 					'<div class="bonus">' + 'x' + $(this).attr( 'ww_value' ) + '<br />' +
