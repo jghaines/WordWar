@@ -296,6 +296,56 @@ function KnockBackPlayScoreStrategy() {
 	}
 }
 
+
+function SetEndTurnScoreStrategy() {
+	this.calculateScore = function( plays ) {
+ 		plays.forEach( (function( play ) {
+            if ( typeof play.startTurnScore === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startTurnScore undefined' );
+            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.turnPoints undefined' );
+            play.endTurnScore = play.startTurnScore + play.turnPoints;
+		}).bind( this ) );
+	}
+}
+
+// enforce minimum maximum total score
+function MinMaxEndTurnScoreStrategy( minValue, maxValue ) {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.DEBUG );
+
+	this.calculateScore = function( plays ) {
+        this.log.info( this.constructor.name + '.calculateScore()' );
+		plays.forEach( (function( play ) {
+            if ( typeof play.endTurnScore === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.endTurnScore undefined' );
+
+			if ( play.endTurnScore > this._maxValue ) {
+				play.endTurnScore = this._maxValue;
+			} else if ( play.endTurnScore < this._minValue ) {
+				play.endTurnScore = this._minValue;
+			}
+		}).bind( this ));
+	}
+
+	this._minValue = minValue;
+	this._maxValue = maxValue;
+}
+
+
+// if the endTurnScore drops below the given lowWaterMark, the player has lost
+function LowWaterMarkLoserScoreStrategy( lowWaterMark ) {
+	this.calculateScore = function( plays ) {
+ 		plays.forEach( (function( play ) {
+            play.lost = (
+                typeof play.endTurnScore === 'number' && 
+                play.endTurnScore < this._lowWaterMark
+            );
+		}).bind( this ));
+	}
+    
+    if ( typeof lowWaterMark === 'undefined' ) throw new Error( this.constructor.name + '() expected lowWaterMark parameter' );
+    this._lowWaterMark = lowWaterMark;
+}
+
+
 function CompositeScoreStrategy( scoreStrategyList ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
