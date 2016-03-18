@@ -135,7 +135,6 @@ describe('Play', function() {
         });
     });
 
-
 	describe("#cmp(.)", function () {
 		it('should let attack beat move', function () {
 			var playA = new Play(); playA.playType = 'attack';
@@ -173,14 +172,18 @@ describe('Play', function() {
 			expect( playA.cmp( playB )).toEqual( 0 );
 			expect( playB.cmp( playA )).toEqual( 0 ); // reverse order
 		});
-		});
 	});
 
 	describe("#toPlayDescription(.)", function () {
-		it('should describe the play', function () {
-			var playA = new Play( { playType : 'attack', word: 'SUGAR', turnPoints: 15 } );
-			expect( playA.toPlayDescription() ).toEqual( 'Attack: SUGAR +15' );
-	});
+		it('should describe a move', function () {
+			var playA = new Play( { playType : 'move', word: 'SUGAR', turnPoints: 15 } );
+			expect( playA.toPlayDescription() ).toEqual( 'Move: SUGAR +15' );
+	    });
+		it('should describe an attack', function () {
+			var playA = new Play( { playType : 'attack', word: 'SUGAR', attackMultiplier : 2, turnPoints: 0 } );
+			expect( playA.toPlayDescription() ).toEqual( 'Attack (x2): SUGAR 0' );
+	    });
+    });
 
 	describe("#toPlayPointsInfo(.)", function () {
 		it('should describe the points', function () {

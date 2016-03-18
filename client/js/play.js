@@ -124,6 +124,7 @@ function Play( parameters ) {
     this.toPlayDescription = function() {
         return '' +
             this.playType.toTitleCase() + 
+			( this.playType === 'attack' ? ' (x' + this.attackMultiplier + ')' : '' ) +
             ': ' + 
             this.word + ' ' + 
 			( this.turnPoints > 0 ? '+' : '' ) +
