@@ -1,97 +1,191 @@
 
 describe('Play', function() {
 	beforeEach( function(){
-		this.p = { // parameters
-			playerIndex: 		0,
-			moveType: 			'move',
-			word: 				'BEANS',
-			wordValue: 			10,
-			playRange: 			new CoordRange( new Coordinates(0, 1), new Coordinates(0, 5) ),
-			newPosition: 		new Coordinates(0, 5),
-			attackMultiplier: 	2,
-			score: 				0 // not in constructor 
+		this.jsonPlay = { // JSON version for constructor
+            gameId              : 'game-uuid',
+			playerIndex         : 1,
+            turnIndex           : 1,
+            lost                : false,
+
+            playComplete        : true,
+			playType            : 'move',
+			word                : 'BEANS',
+
+			wordPoints          : 10,
+			attackMultiplier    : 2,
+            turnPoints          : 10,
+
+			startTurnScore      : 100,
+			endTurnScore        : 150,
+            
+			playRange           : new CoordRange( new Coordinates(0, 1), new Coordinates(0, 5) ),
+			newPosition         : new Coordinates(0, 5),
 		}
 		this.objectKeys = [ 'playRange', 'newPosition' ]; // object attributes that need .equals() comparison
+        this.expectedProperties = [
+            'gameId',
+            'playerIndex',
+            'turnIndex',
+            'lost',
 
-		this.play = new Play( this.p );
+            'playComplete',
+            'playType',
+            'word',
+            
+            'wordPoints',
+            'attackMultiplier',
+            'turnPoints',
+
+            'startTurnScore',
+            'endTurnScore',
+            
+            'playRange',
+            'newPosition'
+        ];
+        this.legacyProperties = [
+            'score'                
+        ];
+
+		this.barePlay = new Play();
+		this.play = new Play( this.jsonPlay );
+    });
+
+	describe("properties", function () {
+		it('should have the expected properties', function () {
+            this.expectedProperties.forEach( ((property)=> {
+                expect( this.barePlay.hasOwnProperty( property ) ).toBe( true, `expeted object to have property ${ property }` );
+                expect( this.play.hasOwnProperty( property ) ).toBe( true, `expeted object to have property ${ property }` );
+            }).bind( this ));
+        });
+		it('should NOT have the legacy properties', function () {
+            this.legacyProperties.forEach( ((property)=> {
+                expect( this.barePlay.hasOwnProperty( property ) ).toBe( false, `expeted object to have property ${ property }` );
+                expect( this.play.hasOwnProperty( property ) ).toBe( false, `expeted object to have property ${ property }` );
+            }).bind( this ));
+        });
     });
 
 	describe("#constructor(..)", function () {
-		it('should set the properties', function () {
-			var play = this.play;
-			Object.keys( this.p ).forEach( (function (key) { 
+		it('should set the Play( { properties } ) passed', function () {
+			Object.keys( this.jsonPlay ).forEach( (function (key) { 
 				if ( this.objectKeys.indexOf( key ) >= 0 ) {
-					expect( play[key].equals( this.p[key] )).toBe( true );
+					expect( this.play[key].equals( this.jsonPlay[key] )).toBe( true );
 				} else {
-					expect( play[key] ).toEqual( this.p[key], 'for Play[' + key+ ']' );
+					expect( this.play[key] ).toEqual( this.jsonPlay[key], 'for Play[' + key+ ']' );
 				}
 			}).bind( this ));
 		});
 	});
 
-	describe("#loadFromJson(.)", function () {
-		it('should set the properties', function () {
-			var play = new Play();
-			var p = this.p;
+	describe("#createNextTurnPlay(..)", function () {
+		it('should set the previous Play( { properties } ) passed', function () {
+            var nextTurn = this.play.createNextTurnPlay();
+            expect( nextTurn.gameId ).toEqual( this.jsonPlay.gameId );
+            expect( nextTurn.turnIndex ).toEqual( this.jsonPlay.turnIndex + 1 );  // next turnIndex
+            expect( nextTurn.playerIndex ).toEqual( this.jsonPlay.playerIndex );
 
-			play.loadFromJson( JSON.parse(` {
-				"playerIndex": 		0,
-				"moveType": 		"move",
-				"word": 			"BEANS",
-				"wordValue": 		10,
-				"playRange": 		{	"min":{"row":0,"col":1},
-										"max":{"row":0,"col":5}	},
-				"newPosition": 		{	"row":0,"col":5	},
-				"attackMultiplier": 2,
-				"score": 			0
-				}`));
+            expect( nextTurn.playComplete ).toEqual( false );
 
-			Object.keys( this.p ).forEach( (function (key) { 
+            expect( nextTurn.startTurnScore ).toEqual( this.jsonPlay.endTurnScore ); // endTurnScore -> startTurnScore
+		});
+	});
+    
+	describe("#loadFromGameInfo(..)", function () {
+		it('should set the properties provided', function () {
+            var play = new Play();
+            play.loadFromGameInfo( 1, {
+                gameId : 'game-uuid', 
+                startGameScore : 50,
+            });
+
+            expect( play.gameId ).toEqual( 'game-uuid' );
+            expect( play.turnIndex ).toEqual( 0 );
+            expect( play.playerIndex ).toEqual( 1 );
+            expect( play.lost ).toBe( false );
+            
+            expect( play.attackMultiplier ).toEqual( 0 );
+            expect( play.startTurnScore ).toEqual( 50 );
+		});
+	});
+    
+	describe("#loadFromJson(..)", function () {
+		it('should set the properties provided', function () {
+            var play = new Play();
+            play.loadFromJson(  this.jsonPlay );
+			Object.keys( this.jsonPlay ).forEach( (function (key) { 
 				if ( this.objectKeys.indexOf( key ) >= 0 ) {
-					expect( play[key].equals( this.p[key] )).toBe( true );
+					expect( this.play[key].equals( this.jsonPlay[key] )).toBe( true );
 				} else {
-					expect( play[key] ).toEqual( this.p[key], 'for Play[' + key+ ']' );
+					expect( this.play[key] ).toEqual( this.jsonPlay[key], 'for Play[' + key+ ']' );
 				}
 			}).bind( this ));
 		});
 	});
+
+	describe("toJSON()", function () {
+		it('should have the expected properties', function () {
+            this.expectedProperties.forEach( ((property)=> {
+                expect( this.play.toJSON().hasOwnProperty( property ) ).toBe( true, `expeted object to have property ${ property }` );
+            }).bind( this ));
+        });
+		it('should NOT have the legacy properties', function () {
+            this.legacyProperties.forEach( ((property)=> {
+                expect( this.play.toJSON().hasOwnProperty( property ) ).toBe( false, `expeted object to have property ${ property }` );
+            }).bind( this ));
+        });
+    });
+
 
 	describe("#cmp(.)", function () {
 		it('should let attack beat move', function () {
-			var playA = new Play(); playA.moveType = 'attack';
-			var playB = new Play(); playB.moveType = 'move';
+			var playA = new Play(); playA.playType = 'attack';
+			var playB = new Play(); playB.playType = 'move';
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the longer score win for attack vs attack', function () {
-			var playA = new Play(); playA.moveType = 'attack'; playA.score = 8;
-			var playB = new Play(); playB.moveType = 'attack'; playB.score = 3;
+			var playA = new Play(); playA.playType = 'attack'; playA.wordPoints = 8;
+			var playB = new Play(); playB.playType = 'attack'; playB.wordPoints = 3;
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the longer score win for move vs move', function () {
-			var playA = new Play(); playA.moveType = 'move'; playA.score = 8;
-			var playB = new Play(); playB.moveType = 'move'; playB.score = 3;
+			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8;
+			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 3;
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
-		it('should let the longer word win for same moveType, score', function () {
-			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'LONGER';
-			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'SHORT';
+		it('should let the longer word win for same playType, score', function () {
+			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'LONGER';
+			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'SHORT';
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
-		it('should let the later word win for same moveType, score, wordLength', function () {
-			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'ZZZZ';
-			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'AAAA';
+		it('should let the later word win for same playType, score, wordLength', function () {
+			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'ZZZZ';
+			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'AAAA';
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should tie for same', function () {
-			var playA = new Play(); playA.moveType = 'move'; playA.score = 8; playA.word = 'WORD';
-			var playB = new Play(); playB.moveType = 'move'; playB.score = 8; playB.word = 'WORD';
+			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'WORD';
+			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'WORD';
 			expect( playA.cmp( playB )).toEqual( 0 );
 			expect( playB.cmp( playA )).toEqual( 0 ); // reverse order
 		});
+		});
+	});
+
+	describe("#toPlayDescription(.)", function () {
+		it('should describe the play', function () {
+			var playA = new Play( { playType : 'attack', word: 'SUGAR', turnPoints: 15 } );
+			expect( playA.toPlayDescription() ).toEqual( 'Attack: SUGAR +15' );
+	});
+
+	describe("#toPlayPointsInfo(.)", function () {
+		it('should describe the points', function () {
+			var playA = new Play( { playType : 'attack', word: 'SUGAR', startTurnScore: 5, wordPoints: 10, endTurnScore: 15 } );
+			expect( playA.toPlayPointsInfo() ).toEqual( '5 + 10 = 15' );
+    	});
 	});
 });

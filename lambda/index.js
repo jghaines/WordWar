@@ -162,13 +162,13 @@ var createNewGame = function( gameInfo, context ) {
     log.info('createNewGame(..)');
     var board =  gameInfo.board || ENV.defaultBoard || "/boards/4.html";
     var remoteData = {
-        gameId      : UUID(),
-        playerList  : gameInfo.playerList,
-        playerCount : 2,
-        board       : board,
-        letterCount : 10,
-        startScore  : 0,
-        turnInfo    : []        
+        gameId          : UUID(),
+        playerList      : gameInfo.playerList,
+        playerCount     : 2,
+        board           : board,
+        letterCount     : 10,
+        startGameScore  : 100,
+        turnInfo        : []        
     };
     
     for (var turnIndex = 0; turnIndex < ENV.TILE_PLAY_BLOCK; turnIndex++) {

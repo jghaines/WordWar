@@ -14,7 +14,7 @@ window.onload = function(){
 	]);
 
 	var scoreStrategy  = new CompositeScoreStrategy( [
-				new ScoreEqualsWordValueScoreStrategy(),
+				new TurnPointsEqualsWordPointsScoreStrategy(),
 				new WordLengthBonusScoreStrategy( [
 					{ from:  1, to:  1, bonus: 1 },
 					{ from:  2, to:  2, bonus: 2 },
