@@ -67,8 +67,14 @@ table.gameboard td.flash-played-1 {
 }
 
 @keyframes flash-yellow-animation {  
-	from { background: yellow; }
-	to   { background: default; }
+	from {
+        background: yellow;
+        color: yellow;
+    }
+	to {
+        background: default;
+        color: default;
+    }
 }
 
 @keyframes flash-red-animation {  
