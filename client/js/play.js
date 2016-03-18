@@ -66,6 +66,22 @@ function Play( parameters ) {
 
 	}
 
+    this.toPlayDescription = function() {
+        return '' +
+            this.playType.toTitleCase() + 
+            ': ' + 
+            this.word + ' ' + 
+			( this.turnPoints > 0 ? '+' : '' ) +
+			this.turnPoints;
+    }
+    
+    this.toPlayPointsInfo = function() {
+        return '' +
+            this.startTurnScore + ' + ' +
+            this.wordPoints + ' = ' + 
+			this.endTurnScore;
+    }
+    
 	// constructor code
 	if ( parameters !== undefined ) {
 		this.loadFromJson( parameters );

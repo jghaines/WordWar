@@ -289,18 +289,12 @@ function BoardView( boardModel ) {
 
 	this.addPlayedItem = function( play ) {
 		this.log.info( this.constructor.name + '.addPlayedItem(play=.)' );
-        var line = 
-            play.moveType.toTitleCase() + 
-            ': ' + 
-            play.word + ' ' + 
-			( play.score > 0 ? '+' : '' ) +
-			play.score;
-        var mouseOver = '(' + play.wordValue + ')';
+        var mouseOver = '(' + play.wordPoints + ')';
 
-		var element = $('<li/>').text( line );
+		var element = $('<li/>').text( play.toPlayDescription() );
+        element.prop( 'title', play.toPlayPointsInfo() ); // mouse-over text
 		if ( typeof styleClass !== 'undefined' ) {
-			element.addClass( 'move-' + play.moveType );
-            element.prop( 'title', mouseOver );
+			element.addClass( 'move-' + play.playType );
 		}
         this._wordLists[play.playerIndex].append( element );
         element[0].scrollIntoView(false);
