@@ -29,10 +29,12 @@ window.onload = function(){
 				]),
 				new WinnerBeatsLoserScoreStrategy(),
 				new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
-				new MinMaxAttackMultiplierScoreStrategy( 0, 5 ),
+				new MinMaxAttackMultiplierScoreStrategy( 0, 6 ),
+                new SetEndTurnScoreStrategy(),
+				new MinMaxEndTurnScoreStrategy( -10000, 500 ),
 				new KnockBackPlayScoreStrategy(),
+                new LowWaterMarkLoserScoreStrategy( 0 ),
 	]);
 
 	gc = new GameController( remote, scoreStrategy, attackRangeStrategy );
 }
-

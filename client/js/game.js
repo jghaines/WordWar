@@ -4,6 +4,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
+    // Play state for this player
+    this._getCurrentPlayForPlayer = function() {
+        return this._plays[this.turnIndex][this.playerIndex];
+    }
+
     // remote callback when we receive gameInfo from remote
     // will start the game when required
     this._receiveGameInfo = function( gameInfo ) {
@@ -12,35 +17,25 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             return; // ignore redundant updates
         }
         
-        this.gameId = gameInfo.gameId;
-        this.playerCount = gameInfo.playerCount;
-        var boardUrl = gameInfo.board;
-		this._boardModel.loadBoard(	boardUrl );
-
-        if ( this.playerCount === gameInfo.playerList.length ) { // game is full, we can start
-    		this.log.debug( this.constructor.name, '_receiveGameInfo() - game starting' );
-
-            this.playerIndex = null;
-            gameInfo.playerList.forEach( (function( playerInList, indexInList ) {
-                if ( playerInList.playerId === this._remote.playerId ) {
-                    this.playerIndex = indexInList;
-                }
-            }).bind(this));
-            if ( this.playerIndex === null ) {
-                throw new Error( "Received gameInfo for gameId=" + gameInfo.gameId + " which we (playerId=" + this._remote.playerId + ") are not a member" );
+        this._gameInfo = gameInfo;        
+        this.playerCount = this._gameInfo.playerCount;
+        gameInfo.playerList.forEach( (function( playerInList, indexInList ) {
+            if ( playerInList.playerId === this._remote.playerId ) {
+                this.playerIndex = indexInList;
             }
-            
-    		this.turnIndex = 0;
-
-            this._lettersModel.setLetterCount( gameInfo.letterCount );
-            this._lettersView.updateLetters();
-
-            for (var p = this.playerCount - 1; p >= 0; p--) {
-                this._scoreModel.setScore( p, gameInfo.startScore );
-                this._scoreView.setLost( p, false );
-            }
-            this.checkForGameStart();
+        }).bind(this));
+        if ( this.playerIndex === null ) {
+            throw new Error( "Received gameInfo for gameId=" + gameInfo.gameId + " which we (playerId=" + this._remote.playerId + ") are not a member" );
         }
+
+        if ( ! this._isBoardLoaded ) {
+    		this._boardModel.loadBoard(	this._gameInfo.board );
+        }
+        
+        this._lettersModel.setLetterCount( gameInfo.letterCount );
+        this._lettersView.updateLetters();
+        
+        this.checkForGameStart();
     }
 
 	// called back when board has loaded
@@ -60,6 +55,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         // return if we aren't ready
         if ( this.state !== GameState.NOT_STARTED ||
             ! this._isBoardLoaded ||
+            this._gameInfo.playerCount !== this._gameInfo.playerList.length ||
             this.playerIndex === null ||
             this._letterTiles.length < 1 
         ) {
@@ -86,6 +82,24 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.newTurn = function() {
 		this.log.info( this.constructor.name + '.newTurn(.)' );
 
+        // create Play objects for this turn
+        this._plays[this.turnIndex] = this._plays[this.turnIndex] || [];
+        for ( var p = this.playerCount - 1; p >= 0; p-- ) {
+			var play = this._plays[this.turnIndex][p];
+			if ( typeof play === 'undefined' ) { // don't override preloaded (allow us to replay mulitple turns)
+				if ( this.turnIndex === 0 ) { // bootstrap first turn
+					play = new Play();
+					play.loadFromGameInfo( p, this._gameInfo );
+				} else { // otherwise, from previous turn
+					play = this._plays[this.turnIndex - 1][p].createNextTurnPlay();            
+				}
+			}
+
+            this._plays[this.turnIndex][p] = play;
+            this._scoreView.setPlay( play );
+        }
+        this._buttonsView.setPlay( this._plays[this.turnIndex][this.playerIndex] );
+
 		for ( var i = this._letterTiles[ this.turnIndex ].length - 1; i >= 0; i-- ) {
 			this._lettersModel.setLetter(i, this._letterTiles[ this.turnIndex ][ i ] );
 			this._lettersModel.setPlaced(i, false);
@@ -96,14 +110,16 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this._boardView.setStatus( "Place your word" );
 
         this._boardView.setStateMood( this.state );
-		this._lettersView.updateLetters();
-		this._lettersView.updatePlaced();
-		this._lettersView.updateSelection();
-		this._lettersView.setEnabled( true );
-
 		this._buttonsView.enable( 'move',   false );
 		this._buttonsView.enable( 'attack', false );
 		this._buttonsView.enable( 'reset',  false );
+
+        setTimeout( (function() { // add timed-delay so animations finish
+            this._lettersView.updateLetters();
+            this._lettersView.updatePlaced();
+            this._lettersView.updateSelection();
+            this._lettersView.setEnabled( true );
+        }).bind( this ), 500 );
 	}
 
 	this.selectLetterToPlace = function(index, letter) {
@@ -155,7 +171,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         }
 
         // if we can attack
-		if ( this._scoreModel.getAttackMultiplier() > 0 && this.isAttackInRange() ) {
+		if ( this._getCurrentPlayForPlayer().attackMultiplier > 0 && this.isAttackInRange() ) {
 
 			this._buttonsView.enable( 'attack', true );
 
@@ -188,8 +204,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	}
 
 	// user has clicked Move or Attack
-	this.playWord = function( moveType ) {
-		this.log.info( this.constructor.name + '.playMove(' + moveType + ')');
+	this.playWord = function( playType ) {
+		this.log.info( this.constructor.name + '.playWord(' + playType + ')');
 		var wordPlaced = this._boardModel.getPlayedWord( this.playerIndex );
 
 		if ( ! this.validWord( wordPlaced ) ) {
@@ -204,17 +220,13 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         this._audio.playWord();
 
-		var myPlay = new Play( {
-			gameId: 			this.gameId,
-			turnIndex: 			this.turnIndex,
-			playerIndex: 		this.playerIndex,
-			moveType: 			moveType,
-			word: 				wordPlaced,
-			wordValue: 			this._boardController.getPlayedScore( this.playerIndex ),
-			playRange: 			this._boardModel.getPlacedRange(),
-			newPosition: 		this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
-			attackMultiplier: 	this._scoreModel.getAttackMultiplier()
-		});
+		var myPlay = this._getCurrentPlayForPlayer();
+		myPlay.playComplete = true,
+		myPlay.playType     = playType,
+        myPlay.word         = wordPlaced,
+		myPlay.wordPoints   = this._boardController.getPlayedScore( this.playerIndex ),
+		myPlay.playRange    = this._boardModel.getPlacedRange(),
+		myPlay.newPosition  = this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this.playerIndex ) ),
 
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
@@ -269,7 +281,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
          // have we receieved enough Plays to end this turn
          var playsForThisTurn = this._plays[ this.turnIndex ];
          if ( playsForThisTurn !== undefined ) {
-            var playsForThisTurnCount = playsForThisTurn.countWhere( notNull );
+            var playsForThisTurnCount = playsForThisTurn.countWhere( (play) => {
+                return notNull(play) && play.playComplete; 
+            });
 
             if ( playsForThisTurnCount >= this.playerCount ) {
                 this.endTurn();
@@ -291,7 +305,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         var movePlays = [];
         var attackPlays = [];
 		for (var p = playsForTurn.length - 1; p >= 0; p--) {
-			switch ( playsForTurn[p].moveType ) {
+			switch ( playsForTurn[p].playType ) {
 				case 'move':
 					movePlays.push( playsForTurn[p] );
 					break;
@@ -330,10 +344,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             this.endGame();
             return true;
         } else { // next turn
-			setTimeout( (function() { // add timed-delay so animations finish
-				++this.turnIndex;
-				this.newTurn();
-			}).bind( this ), 500 );
+            ++this.turnIndex;
+            this.newTurn();
         }
 	}
 
@@ -342,13 +354,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this.log.info( this.constructor.name + '.updateScore(.)');
 		this._scoreStrategy.calculateScore( plays );
 
-		this._scoreModel.setAttackMultiplier( plays[ this.playerIndex ].attackMultiplier );
-
 		for (var i = plays.length - 1; i >= 0; i--) {
-			this._scoreModel.incrementScore( i, plays[i].score );
-			if ( this._scoreModel.getScore( i ) < 0 ) {
-				this._scoreView.setLost( i, true );
+            this._scoreView.setPlay( plays[i] ); // notify score update
 
+            if ( plays[i].lost ) {                
                 if ( i === this.playerIndex ) {
                     this._audio.lose();
                     this.state = GameState.REMOTE_WIN;
@@ -359,6 +368,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
                 return true;
 			}
 		}
+        this._buttonsView.setPlay( plays[this.playerIndex] ); // notify attackMultiplier update
 
         return false;
     }
@@ -379,6 +389,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.endGame = function() {
 		this.log.info( this.constructor.name + '.endGame())' );
 
+        var statusMessage = 'End of Game - ' + 
+            ( this._getCurrentPlayForPlayer().lost ? 'you lost :-(' : 'you won! :-)' );
 		this._boardView.setStatus( 'End of Game' );
 		this._boardView.setStateMood( this.state );
         
@@ -394,8 +406,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     //
     this.state = GameState.NOT_STARTED;
     this._isBoardLoaded = false;
+    this.turnIndex = 0;
+    this.playerIndex = null; // which player we are
 
-    this.playerIndex = null;
     // 2 dimensional array of Play objects - plays[turnIndex][playerIndex]
     this._plays = [];
     // 2 dimensional array of letters - _letterTiles[turnIndex][letterIndex]
@@ -415,8 +428,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._boardView = new BoardView( this._boardModel );
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
-	this._scoreModel = new ScoreModel();
-	this._scoreView = new ScoreView( this._scoreModel );
+	this._scoreView = new ScoreView();
 
 	this._buttonsView = new ButtonsView();
 
@@ -426,7 +438,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._buttonsView.enable( 'move',   false );
 	this._buttonsView.enable( 'attack', false );
 	this._buttonsView.enable( 'reset',  false );
-	this._buttonsView.setPlayerModel( this._scoreModel );
 
 	// bind all the things
 
