@@ -46,6 +46,6 @@ function Coordinates( _row, _col ) {
 	}
 
 	// constructor code
-	this.row = _row;
-	this.col = _col;
+	this.row = _row || 0;
+	this.col = _col || 0;
 }

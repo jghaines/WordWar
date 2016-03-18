@@ -8,8 +8,8 @@ function CoordRange( _min, _max ) {
 		this.min = new Coordinates();
 		this.max = new Coordinates();
 
-		this.min.loadFromJson( json.min );
-		this.max.loadFromJson( json.max );
+		if ( json.min ) this.min.loadFromJson( json.min );
+		if ( json.max ) this.max.loadFromJson( json.max );
 	}
 
 	this.toJSON = function() {
@@ -41,16 +41,19 @@ function CoordRange( _min, _max ) {
 		}
 	}
 
-	if ( _min !== undefined ) {
+    this.min = null;
+    this.max = null;
+
+	if ( typeof _min !== 'undefined' ) {
 		if ( _min.constructor.name != 'Coordinates' ) {
 			throw new Error( this.constructor.name + '() expected Coordinates min parameter' );
 		}
 		this.min = _min;
-	}
-	if ( _max !== undefined ) {
+    }
+	if ( typeof _max !== 'undefined' ) {
 		if ( _max.constructor.name != 'Coordinates' ) {
 			throw new Error( this.constructor.name + '() expected Coordinates max parameter' );
 		}
 		this.max = _max;
-	}
+    }
 }
