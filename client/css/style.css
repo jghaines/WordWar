@@ -33,10 +33,6 @@ body.state_REMOTE_WIN {
 	display: inline-block; /* required to support animation - http://stackoverflow.com/questions/6881045/css-animations-on-span */
 }
 
-img.score {
-    float: right;
-}
-
 .score.player-0 {
 	color:	magenta;
 }
@@ -50,10 +46,14 @@ img.score {
 	background: red;
 }
 
+span.attackMultiplier {
+    color: red;
+}
+
 .playedwords {
 	border: 4px;
 	border-style: solid;
-
+	clear: both; /* for alignment with span above */
 	overflow-y: scroll;
 	height: 100px;
 }
