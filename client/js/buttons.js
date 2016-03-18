@@ -17,24 +17,13 @@ function ButtonsView() {
 		button.prop( 'disabled', ! isEnabled );
 	}
 
-    // TODO: move to controller logic
-	this.setPlayerModel = function( playerModel ) {
-		this._playerModel = playerModel;
-		this._playerModel.onUpdate( (function() {
-			this._updateData();
-		}).bind( this ));
-		this._updateData(); // get initial data
-	};
-
-	// called-back when player model is updated
-    // TODO: move to controller logic
-	this._updateData = function() {
+	this.setPlay = function( play ) {
 		var attackButton = this._buttons.attack.ui;
-        attackButton.text( 'Attack (x' + this._playerModel.getAttackMultiplier() + ')' );
+        attackButton.text( 'Attack (x' + play.attackMultiplier + ')' );
 	};
 
   	// JQuery click callbacks
-    // emit event 
+    // emit event for button 
     this._click = function( button ) {
         this.emit( button.name );
     };
@@ -45,7 +34,6 @@ function ButtonsView() {
 	    attack  : { name: 'attack', ui: $( 'button#attack' ) },
 	    reset   : { name: 'reset',  ui: $( 'button#reset'  ) },
     };
-
 
 	// register private callbacks
     Object.keys(this._buttons).forEach( (function( buttonKey ) {
