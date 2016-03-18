@@ -1,6 +1,6 @@
 'use strict';
 
-function ScoreEqualsWordValueScoreStrategy() {
+function TurnPointsEqualsWordPointsScoreStrategy() {
 	this.calculateScore = function( plays ) {
         plays.forEach( (function( play ) {
             if ( typeof play.wordPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.wordPoints undefined' );
@@ -68,9 +68,17 @@ function AttackBeatsMoveScoreStrategy(  ) {
 	}
 }
 
+
 function AttackPenalisesMoveScoreStrategy() {
 	this.calculateScore = function( plays ) {
-		if ( 'move' == plays[0].moveType && 'move' == plays[1].moveType ) { // move vs. move
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
+		plays.forEach( (function( play, i ) {
+            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
+            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
+            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
+		}).bind( this ));
+
+		if ( 'move' == plays[0].playType && 'move' == plays[1].playType ) { // move vs. move
 			// score unchanged
 
 		} else if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ) {
@@ -97,10 +105,18 @@ function AttackPenalisesMoveScoreStrategy() {
 	}
 }
 
+
 function WinnerBeatsLoserScoreStrategy() {
  	this.calculateScore = function( plays ) {
-		if ( 'attack' == plays[0].moveType && 'move' == plays[1].moveType ||
-			 'attack' == plays[0].moveType && 'attack' == plays[1].moveType && plays[0].score > plays[1].score ) {
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
+		plays.forEach( (function( play, i ) {
+            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
+            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
+            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
+		}).bind( this ));
+
+		if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ||
+			 'attack' == plays[0].playType && 'attack' == plays[1].playType && plays[0].turnPoints > plays[1].turnPoints ) {
 			// player 0 win
 			plays[1].turnPoints = plays[1].turnPoints - ( plays[0].attackMultiplier * plays[0].turnPoints );
 			plays[0].turnPoints = 0;
@@ -126,9 +142,17 @@ function WinnerBeatsLoserScoreStrategy() {
  	}
 }
 
+
 function WinnerPenalisesLoserScoreStrategy() {
 	this.calculateScore = function( plays ) {
-		if ( 'move' == plays[0].moveType && 'move' == plays[1].moveType ) { // move vs. move
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
+		plays.forEach( (function( play, i ) {
+            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
+            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
+            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
+		}).bind( this ));
+
+		if ( 'move' == plays[0].playType && 'move' == plays[1].playType ) { // move vs. move
 			// score unchanged
 
 		} else if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ) {
@@ -155,10 +179,13 @@ function WinnerPenalisesLoserScoreStrategy() {
 	}
 }
 
+
 // each play will use the same attackMultiplier
 function StaticAttackMultiplierScoreStrategy( attackMultiplier ) {
 	this.calculateScore = function( plays ) {
- 		plays.forEach( (function( play ) {
+ 		plays.forEach( (function( play, i ) {
+            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
+
 			play.attackMultiplier = this._attackMultiplier;
 		}).bind(this) );
 	}
@@ -197,6 +224,8 @@ function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
 
 	this.calculateScore = function( plays ) {
 		plays.forEach( (function( play ) {
+            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.playType undefined' );
+
 			if ( play.attackMultiplier > this._maxValue ) {
 				play.attackMultiplier = this._maxValue;
 			} else if ( play.attackMultiplier < this._minValue ) {
@@ -220,6 +249,7 @@ function KnockBackPlayScoreStrategy() {
 
 	this._knockBackPlayer = function( play ) {
 		this.log.info( this.constructor.name + '.knockBackPlayer(.)' );
+
 		if ( play.playRange.min.row == play.playRange.max.row ) { // horizontal move
 			if ( play.newPosition.col < play.playRange.max.col ) {
 				play.newPosition = play.newPosition.getIncrement( 0, 1 );
