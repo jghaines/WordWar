@@ -98,7 +98,13 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             this._plays[this.turnIndex][p] = play;
             this._scoreView.setPlay( play );
         }
-        this._buttonsView.setPlay( this._plays[this.turnIndex][this.playerIndex] );
+        var playsForThisTurn = this._plays[this.turnIndex];
+        this._buttonsView.setPlay( this._getCurrentPlayForPlayer() );
+
+        // check for game end after we update the Play and Views
+        if ( this.checkForGameEnd( playsForThisTurn ) ) {
+        	return;
+        }
 
 		for ( var i = this._letterTiles[ this.turnIndex ].length - 1; i >= 0; i-- ) {
 			this._lettersModel.setLetter(i, this._letterTiles[ this.turnIndex ][ i ] );
@@ -299,7 +305,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         var playsForTurn = this._plays[ this.turnIndex ];
 
-        var gameEnded = this.updateScore( playsForTurn );
+        // execute all the scoreStrategy logic
+		this._scoreStrategy.calculateScore( playsForTurn );
 
         // sort Plays into moves and attacks
         var movePlays = [];
@@ -340,38 +347,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this._boardView.addPlayedItem( playsForTurn[p] );
 		}
 
-		if ( gameEnded ) {
-            this.endGame();
-            return true;
-        } else { // next turn
-            ++this.turnIndex;
-            this.newTurn();
-        }
+        ++this.turnIndex;
+        this.newTurn();
 	}
-
-	// update score, return true if game has ended
- 	this.updateScore = function( plays ) {
-		this.log.info( this.constructor.name + '.updateScore(.)');
-		this._scoreStrategy.calculateScore( plays );
-
-		for (var i = plays.length - 1; i >= 0; i--) {
-            this._scoreView.setPlay( plays[i] ); // notify score update
-
-            if ( plays[i].lost ) {                
-                if ( i === this.playerIndex ) {
-                    this._audio.lose();
-                    this.state = GameState.REMOTE_WIN;
-                } else {
-                    this._audio.win();
-                    this.state = GameState.PLAYER_WIN;
-                }
-                return true;
-			}
-		}
-        this._buttonsView.setPlay( plays[this.playerIndex] ); // notify attackMultiplier update
-
-        return false;
-    }
 
 	this.executeMove = function( play ) {
 		this.log.info( this.constructor.name + '.executeMove(play=.)' );
@@ -385,20 +363,40 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 		this._boardView.flashAttackOnPlayer( 1 - play.playerIndex ); // TODO: this is hard-coded for 2-player, should be generic
 	}
+    
+ 	this.checkForGameEnd = function( plays ) {
+		this.log.info( this.constructor.name + '.checkForGameEnd(.)');
 
-	this.endGame = function() {
-		this.log.info( this.constructor.name + '.endGame())' );
+        var endGame = false;
+		for (var i = plays.length - 1; i >= 0; i--) {
+            if ( plays[i].lost ) {
+                endGame = true;              
+                if ( i === this.playerIndex ) { // if WE lost
+                    this._audio.lose();
+                    this.state = GameState.REMOTE_WIN;
+                } else { // must be the other guy
+                    this._audio.win();
+                    this.state = GameState.PLAYER_WIN;
+                }
+			}
+		}
+
+        if ( ! endGame ) {
+            return false;
+        }    
 
         var statusMessage = 'End of Game - ' + 
             ( this._getCurrentPlayForPlayer().lost ? 'you lost :-(' : 'you won! :-)' );
-		this._boardView.setStatus( 'End of Game' );
+		this._boardView.setStatus( statusMessage );
 		this._boardView.setStateMood( this.state );
         
 		this._lettersView.setEnabled( false );
 
 		this._buttonsView.enable( 'move',   false );
 		this._buttonsView.enable( 'attack', false );
-		this._buttonsView.enable( 'reset',  false );		
+		this._buttonsView.enable( 'reset',  false );	
+        
+        return true;	
 	 }
 
     //
