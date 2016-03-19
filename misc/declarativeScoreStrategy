@@ -1,0 +1,27 @@
+{
+    combination : [ 'move', 'move' ],
+    strategy : [
+        { play : score = play.wordScore }
+    ]
+},
+{
+    combination : [ 'attack', 'move' ],
+    strategy : [
+        { attack : () => { score = 0 }},
+        { move : () => { score = move.score - (attack.wordScore * attack.attackMultiplier) }}
+    ]
+},
+{
+    combination : [ 'attack', 'attack' ],
+    strategy : [
+        { play :   () => { score = play.score * play.attackMultiplier }},
+        { winner : () => { score = 0 }},
+        { loser :  () => { score = -1 * attack.wordScore * attack.attackMultiplier }}
+    ]
+},
+
+   
+When you can Attack
+turns increment AttackMultiplier
+high scoring words increment AttackMultiplier
+make AttackMultipliers collectable
