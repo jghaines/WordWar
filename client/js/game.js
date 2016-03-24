@@ -67,6 +67,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this.state = GameState.PLAYER_MOVE;
         this.turnIndex = 0;
 
+        this.emit( 'gameInfo', this.gameInfo );
+
         // add delay so that board load can be rendered before start animations
         setTimeout( (function() { 
             this._audio.newGame();
@@ -96,10 +98,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			}
 
             this._plays[this.turnIndex][p] = play;
-            this._scoreView.setPlay( play );
+            this.emit( 'play', play );
         }
         var playsForThisTurn = this._plays[this.turnIndex];
         this._buttonsView.setPlay( this._getCurrentPlayForPlayer() );
+
+        
 
         // check for game end after we update the Play and Views
         if ( this.checkForGameEnd( playsForThisTurn ) ) {
@@ -426,7 +430,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._boardView = new BoardView( this._boardModel );
 	this._boardController = new BoardController( this._boardModel, this._boardView );
 
-	this._scoreView = new ScoreView();
+	this._scoreView = new ScoreView( this );
 
 	this._buttonsView = new ButtonsView();
 
@@ -480,3 +484,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     // get ourselves a game
     this._remote.getGame();
 }
+
+// make the class an EventEmitter
+GameController.prototype = Object.create(EventEmitter.prototype);
