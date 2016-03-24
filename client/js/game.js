@@ -177,7 +177,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         }
 
         // if we can attack
-		if ( this._getCurrentPlayForPlayer().attackMultiplier > 0 && this.isAttackInRange() ) {
+		if ( this._getCurrentPlayForPlayer().startAttackMultiplier > 0 && this.isAttackInRange() ) {
 
 			this._buttonsView.enable( 'attack', true );
 

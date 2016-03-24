@@ -15,8 +15,10 @@ function Play( parameters ) {
 		this.word				= '';
 
 		this.wordPoints			= 0;
-		this.attackMultiplier 	= 0;
 		this.turnPoints	        = 0;
+
+		this.startAttackMultiplier 	= 0;
+		this.endAttackMultiplier 	= 0;
 
         this.startTurnScore     = gameInfo.startGameScore || 0;
 		this.endTurnScore	    = 0;
@@ -35,8 +37,9 @@ function Play( parameters ) {
 		next.word				= '';
 
 		next.wordPoints			= 0;
-		next.attackMultiplier 	= this.attackMultiplier;
 		next.turnPoints	        = 0;
+
+		next.startAttackMultiplier 	= this.endAttackMultiplier;
 
         next.startTurnScore     = this.endTurnScore; // endTurnScore -> startTurnScore
 		next.endTurnScore	    = 0;
@@ -55,8 +58,10 @@ function Play( parameters ) {
 		this.word				= json.word || '';
 
 		this.wordPoints			= json.wordPoints || 0;
-		this.attackMultiplier 	= json.attackMultiplier || 0;
 		this.turnPoints	        = json.turnPoints || 0;
+
+		this.startAttackMultiplier 	= json.startAttackMultiplier || 0;
+		this.endAttackMultiplier 	= json.endAttackMultiplier || 0;
 
 		this.startTurnScore	    = json.startTurnScore || 0;
 		this.endTurnScore	    = json.endTurnScore || 0;
@@ -80,8 +85,10 @@ function Play( parameters ) {
 			word                : this.word,
             
 			wordPoints          : this.wordPoints,
-			attackMultiplier    : this.attackMultiplier,
             turnPoints          : this.turnPoints,
+
+			startAttackMultiplier   : this.startAttackMultiplier,
+			endAttackMultiplier     : this.endAttackMultiplier,
 
             startTurnScore	    : this.startTurnScore,
             endTurnScore	    : this.endTurnScore,
@@ -124,10 +131,10 @@ function Play( parameters ) {
     this.toPlayDescription = function() {
         return '' +
             this.playType.toTitleCase() + 
-			( this.playType === 'attack' ? ' (x' + this.attackMultiplier + ')' : '' ) +
+			( this.playType === 'attack' ? ' (x' + this.startAttackMultiplier + ')' : '' ) +
             ': ' + 
             this.word + ' ' + 
-			( this.turnPoints > 0 ? '+' : '' ) +
+			( this.turnPoints >= 0 ? '+' : '' ) +
 			this.turnPoints;
     }
     

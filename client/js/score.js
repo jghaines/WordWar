@@ -11,7 +11,7 @@ function ScoreView() {
         this._scoreUi[play.playerIndex].text( play.startTurnScore );
         this._scoreUi[play.playerIndex].toggleClass( 'lost', play.lost );
         
-        this._attackMultiplierUi[play.playerIndex].text( 'x' + play.attackMultiplier );
+        this._attackMultiplierUi[play.playerIndex].text( 'x' + play.startAttackMultiplier );
     }
 
     this._plays = [];

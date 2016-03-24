@@ -11,9 +11,11 @@ describe('Play', function() {
 			playType            : 'move',
 			word                : 'BEANS',
 
-			wordPoints          : 10,
-			attackMultiplier    : 2,
-            turnPoints          : 10,
+			wordPoints              : 10,
+            turnPoints              : 10,
+
+			startAttackMultiplier   : 2,
+			endAttackMultiplier     : 3,
 
 			startTurnScore      : 100,
 			endTurnScore        : 150,
@@ -33,8 +35,10 @@ describe('Play', function() {
             'word',
             
             'wordPoints',
-            'attackMultiplier',
             'turnPoints',
+
+            'startAttackMultiplier',
+			'endAttackMultiplier',
 
             'startTurnScore',
             'endTurnScore',
@@ -103,7 +107,7 @@ describe('Play', function() {
             expect( play.playerIndex ).toEqual( 1 );
             expect( play.lost ).toBe( false );
             
-            expect( play.attackMultiplier ).toEqual( 0 );
+            expect( play.startAttackMultiplier ).toEqual( 0 );
             expect( play.startTurnScore ).toEqual( 50 );
 		});
 	});
@@ -180,8 +184,8 @@ describe('Play', function() {
 			expect( playA.toPlayDescription() ).toEqual( 'Move: SUGAR +15' );
 	    });
 		it('should describe an attack', function () {
-			var playA = new Play( { playType : 'attack', word: 'SUGAR', attackMultiplier : 2, turnPoints: 0 } );
-			expect( playA.toPlayDescription() ).toEqual( 'Attack (x2): SUGAR 0' );
+			var playA = new Play( { playType : 'attack', word: 'SUGAR', startAttackMultiplier : 2, turnPoints: 0 } );
+			expect( playA.toPlayDescription() ).toEqual( 'Attack (x2): SUGAR +0' );
 	    });
     });
 

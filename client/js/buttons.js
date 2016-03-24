@@ -19,7 +19,7 @@ function ButtonsView() {
 
 	this.setPlay = function( play ) {
 		var attackButton = this._buttons.attack.ui;
-        attackButton.text( 'Attack (x' + play.attackMultiplier + ')' );
+        attackButton.text( 'Attack (x' + play.startAttackMultiplier + ')' );
 	};
 
   	// JQuery click callbacks
