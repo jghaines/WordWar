@@ -1,6 +1,6 @@
 'use strict';
 
-function ScoreView( playEmmitter ) {
+function ScoreView( playEmitter ) {
 	this.flashScore = function( playerIndex ) {
 		flash( this._scoreUi[playerIndex], 'flash-large-pulse' );
 	}
@@ -14,7 +14,7 @@ function ScoreView( playEmmitter ) {
         this._attackMultiplierUi[play.playerIndex].text( 'x' + play.startAttackMultiplier );
     }
 
-    playEmmitter.on( 'play', this._receievePlay.bind(this) );
+    playEmitter.on( 'play', this._receievePlay.bind(this) );
     
     this._plays = [];
     this._scoreUi = [

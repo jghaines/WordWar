@@ -1,6 +1,6 @@
 'use strict';
 
-function ButtonsView() {
+function ButtonsView( playEmitter ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
@@ -17,12 +17,18 @@ function ButtonsView() {
 		button.prop( 'disabled', ! isEnabled );
 	}
 
-	this.setPlay = function( play ) {
-		var attackButton = this._buttons.attack.ui;
-        attackButton.text( 'Attack (x' + play.startAttackMultiplier + ')' );
-	};
+    this._receiveGameInfo = function( gameInfo ) {
+        this._playerIndex = gameInfo.playerIndex;
+    }
 
-  	// JQuery click callbacks
+	this._receivePlay = function( play ) {
+        if ( play.playerIndex === this._playerIndex ) {
+            var attackButton = this._buttons.attack.ui;
+            attackButton.text( 'Attack (x' + play.startAttackMultiplier + ')' );
+        }
+	};
+    
+  	// called by JQuery click callbacks
     // emit event for button 
     this._click = function( button ) {
         this.emit( button.name );
@@ -35,7 +41,10 @@ function ButtonsView() {
 	    reset   : { name: 'reset',  ui: $( 'button#reset'  ) },
     };
 
-	// register private callbacks
+    playEmitter.on( 'gameInfo', this._receiveGameInfo.bind( this ));
+    playEmitter.on( 'play', this._receivePlay.bind( this ));
+
+	// register callbacks from UI objects
     Object.keys(this._buttons).forEach( (function( buttonKey ) {
         var button = this._buttons[buttonKey];   
         button.ui.click( button, (function( eventObject ) {
