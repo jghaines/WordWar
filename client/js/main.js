@@ -27,11 +27,32 @@ window.onload = function(){
 					{ from:  9, to:  9, bonus: 9 },
 					{ from: 10, to: 99, bonus: 20 },
 				]),
-				new WinnerBeatsLoserScoreStrategy(),
+                new ApplyAttackMulitiplierScoreStrategy(),
+
+                // turn victory conditions
+                new IfThenStrategy( {
+                    ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                    thenDo : [] }),
+                new IfThenStrategy( { 
+                    ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                    thenDo : [
+                        new AttackWinsMetaStrategy( {
+                            winner : _ => { return 0 },
+                            loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
+                        })
+                    ]}),
+                new IfThenStrategy( { 
+                    ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                    thenDo : [ 
+                        new HighScoreWinsMetaStrategy( {
+                            winner : _ => { return 0 },
+                            loser  : _ => { return -1 * _.winner.turnPoints },
+                        }),
+                    ]}),                    
 				new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
 				new MinMaxAttackMultiplierScoreStrategy( 0, 6 ),
                 new SetEndTurnScoreStrategy(),
-				new MinMaxEndTurnScoreStrategy( -10000, 500 ),
+				new MinMaxEndTurnScoreStrategy( -99999, 500 ),
 				new KnockBackPlayScoreStrategy(),
                 new LowWaterMarkLoserScoreStrategy( 0 ),
 	]);

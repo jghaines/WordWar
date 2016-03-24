@@ -33,76 +33,154 @@ function WordLengthBonusScoreStrategy( bonuses ) {
 }
 
 
-function AttackBeatsMoveScoreStrategy(  ) {
+// apply each ConditionalMetaStrategy rule
+//  if all the 'ifTrue' evaluate to true then execute every 'thenDo' strateg(ies)
+// @if 
+// @then   
+// new IfThenStrategy( 
+//    { ifTrue : [ new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ) ], thenDo : [ new OtherStrategy(), ... ] }, ...
+// )
+function IfThenStrategy( parameters ) {
 	this.calculateScore = function( plays ) {
-        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
-		plays.forEach( (function( play, i ) {
-            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
-            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
-            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
-		}).bind( this ));
+        if ( this._ifTrue.calculateScore( plays )) {
+            return this._thenDo.calculateScore( plays );
+        }
+    }
 
-		if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ||
-			 'attack' == plays[0].playType && 'attack' == plays[1].playType && plays[0].turnPoints > plays[1].turnPoints ) {
-			// player 0 win
-			plays[1].turnPoints = -1 * plays[0].attackMultiplier * plays[0].turnPoints;
-			plays[0].turnPoints = 0;
+    if ( typeof parameters.ifTrue === 'undefined' ) throw new Error( this.constructor.name + '() expected ifTrue parameter' );
+    if ( typeof parameters.thenDo === 'undefined' ) throw new Error( this.constructor.name + '() expected thenDo parameter' );
+    
+    this._ifTrue = ( Array.isArray( parameters.ifTrue ) ? new CompositeScoreStrategy( parameters.ifTrue ) : parameters.ifTrue );
+    this._thenDo = ( Array.isArray( parameters.thenDo ) ? new CompositeScoreStrategy( parameters.thenDo ) : parameters.thenDo );
+}
 
-		} else if ( 'move' == plays[0].playType && 'attack' == plays[1].playType ||
-					'attack' == plays[0].playType && 'attack' == plays[1].playType && plays[0].turnPoints < plays[1].turnPoints ) {
-			// player 1 win
-			plays[0].turnPoints = -1 * plays[1].attackMultiplier * plays[1].turnPoints;
-			plays[1].turnPoints = 0;
+// calculateScore(plays) returns whether the plays match the given specified playType combination 
+// new PlayCombination( [ 'attack', 'move' ] )
+function PlayTypeCombinationConditionalStrategy( playTypeList ) {
+	this.calculateScore = function( plays ) {
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore() expected an array length 2 for plays' );
+        return ( 
+            plays[0].playType + '.' + plays[1].playType === this._playCombination ||
+            plays[1].playType + '.' + plays[0].playType === this._playCombination );
+    }
 
-		} else if ( 'move' == plays[0].playType && 'move' == plays[1].playType ) {
-			// scores unchanged
-
-		} else if ( 'attack' == plays[0].playType && 'attack' == plays[1].playType && plays[0].turnPoints == plays[1].turnPoints ) {
-			// attack with draw
-			plays[0].turnPoints = 0;
-			plays[1].turnPoints = 0;
-
-		} else { // draw: either move-move or equal score attacks
-			throw new Error( this.constructor.name + '.calculateScore() - unhandled case' )	;
-		}
-	}
+    if ( ! Array.isArray( playTypeList )) throw new Error( this.constructor.name + '() expected an array for playTypeList' );
+    if ( playTypeList.length !== 2 ) throw new Error( this.constructor.name + '() expected an array length 2 for playTypeList' );
+                    
+    this._playCombination = playTypeList.join( '.' ); 
 }
 
 
-function AttackPenalisesMoveScoreStrategy() {
+// Evalute the given functions and set the turnPoints
+// The Attacker will be the winner, the Mover will be the loser
+// new AttackWinsMetaStrategy( { 
+//     winner : _  => { return 0 },
+//     loser  : _ => { return _.loser.turnPoints -1 * _.winner.turnPoints }
+// })
+function AttackWinsMetaStrategy( parameters ) {
+    this._getPlaysByOutcome = function( plays ) {
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '() expected an array length 2 for plays' );
+
+        var playsByOutcome = { _winners : [], _losers : [] };
+        if ( plays[0].playType === 'attack' && plays[1].playType === 'move' ) {
+            playsByOutcome._winners[0] = playsByOutcome.winner = plays[0];
+            playsByOutcome._losers[0]  = playsByOutcome.loser  = plays[1];
+        } else if ( plays[0].playType === 'move' && plays[1].playType === 'attack' ) {
+            playsByOutcome._losers[0]  = playsByOutcome.loser  = plays[0];
+            playsByOutcome._winners[0] = playsByOutcome.winner = plays[1];
+        } else {
+            throw new Error(this.constructor.name + '.calculateScore() - expected exactly 1 Attack and 1 Move'); 
+        }
+        return playsByOutcome;
+    }
+
+    // TODO - refactor AttackWinsMetaStrategy, HighScoreWinsMetaStrategy to common base class
+    this.calculateScore = function( plays ) {
+        var playsByOutcome = this._getPlaysByOutcome( plays );
+        
+        // set .turnPoints after parallel evaluation
+        playsByOutcome._winners.forEach( (function(play) {
+            play.___tempTurnPoints = this._winnerFunction( playsByOutcome );
+        }).bind( this ));
+        playsByOutcome._losers.forEach( (function(play) {
+            play.___tempTurnPoints = this._loserFunction( playsByOutcome );
+        }).bind( this ));
+        
+        plays.forEach( (function(play) {
+            play.turnPoints = play.___tempTurnPoints;
+            delete play.___tempTurnPoints;
+        }).bind( this ));
+    }
+    
+    if ( typeof parameters.winner !== 'function' )  throw new Error( this.constructor.name + '() expected parameter.winner function' );  
+    if ( typeof parameters.loser  !== 'function' )  throw new Error( this.constructor.name + '() expected parameter.loser function' );  
+    this._winnerFunction = parameters.winner;
+    this._loserFunction = parameters.loser;
+}
+
+// Evalute the given functions and set the turnPoints
+// The higher score will be the winner.
+// Equal score evaluates as a win for both
+// new HighScoreWinsMetaStrategy( {
+//     winner : _ => { return 0 },
+//     loser  : _ => { return -1 * _.winner.turnPoints }
+// })
+function HighScoreWinsMetaStrategy( parameters ) {
+    this._getPlaysByOutcome = function( plays ) {
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '() expected an array length 2 for plays' );
+
+        var playsByOutcome = { _winners : [], _losers : [] };
+        if ( plays[0].turnPoints > plays[1].turnPoints ) {
+            playsByOutcome._winners[0] = playsByOutcome.winner = plays[0];
+            playsByOutcome._losers[0]  = playsByOutcome.loser  = plays[1];
+        } else if ( plays[0].turnPoints < plays[1].turnPoints ) {
+            playsByOutcome._losers[0]  = playsByOutcome.loser  = plays[0];
+            playsByOutcome._winners[0] = playsByOutcome.winner = plays[1];
+        } else if ( plays[0].turnPoints === plays[1].turnPoints ) { // draw - everyone is a winner
+            playsByOutcome._winners = plays;
+            playsByOutcome._losers  = [];
+            playsByOutcome.winner = playsByOutcome.loser = plays[0];
+        }
+        return playsByOutcome;
+    }
+
+    // TODO - refactor AttackWinsMetaStrategy, HighScoreWinsMetaStrategy to common base class
+    this.calculateScore = function( plays ) {
+        var playsByOutcome = this._getPlaysByOutcome( plays );
+        
+        // set .turnPoints after parallel evaluation
+        playsByOutcome._winners.forEach( (function(play) {
+            play.___tempTurnPoints = this._winnerFunction( playsByOutcome );
+        }).bind( this ));
+        playsByOutcome._losers.forEach( (function(play) {
+            play.___tempTurnPoints = this._loserFunction( playsByOutcome );
+        }).bind( this ));
+        
+        plays.forEach( (function(play) {
+            play.turnPoints = play.___tempTurnPoints;
+            delete play.___tempTurnPoints;
+        }).bind( this ));
+    }
+
+    if ( typeof parameters.winner !== 'function' )  throw new Error( this.constructor.name + '() expected parameter.winner function' );  
+    if ( typeof parameters.loser  !== 'function' )  throw new Error( this.constructor.name + '() expected parameter.loser function' );  
+    
+    this._winnerFunction = parameters.winner;
+    this._loserFunction = parameters.loser;
+}
+
+function ApplyAttackMulitiplierScoreStrategy() {
 	this.calculateScore = function( plays ) {
-        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
-		plays.forEach( (function( play, i ) {
+		plays.forEach( (function( play ) {
             if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
             if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
             if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
+
+            if ( play.playType === 'attack' ) {
+			    play.turnPoints *= play.attackMultiplier;
+            }
 		}).bind( this ));
-
-		if ( 'move' == plays[0].playType && 'move' == plays[1].playType ) { // move vs. move
-			// score unchanged
-
-		} else if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ) {
-			plays[1].turnPoints = plays[1].turnPoints - ( plays[0].attackMultiplier * plays[0].turnPoints );
-			plays[0].turnPoints = 0;
-
-		} else if ( 'move' == plays[0].playType && 'attack' == plays[1].playType ) {
-			plays[0].turnPoints = plays[0].turnPoints - ( plays[1].attackMultiplier * plays[1].turnPoints );
-			plays[1].turnPoints = 0;
-
-		} else if ( 'attack' == plays[0].playType && 'attack' == plays[1].playType ) {
-			var highestScore = Math.max( plays[0].turnPoints, plays[1].turnPoints );
-			if ( plays[0].turnPoints == plays[1].turnPoints ) {
-				plays[0].turnPoints = 0;
-				plays[1].turnPoints = 0;
-			} else if ( plays[0].turnPoints < plays[1].turnPoints ) {
-				plays[0].turnPoints = -1 * plays[1].attackMultiplier * plays[1].turnPoints;
-				plays[1].turnPoints = 0;
-			} else if ( plays[0].turnPoints > plays[1].turnPoints ) {
-				plays[1].turnPoints = -1 * plays[0].attackMultiplier * plays[0].turnPoints;
-				plays[0].turnPoints = 0;
-			}
-		}
-	}
+    }
 }
 
 
@@ -140,43 +218,6 @@ function WinnerBeatsLoserScoreStrategy() {
 		}
 
  	}
-}
-
-
-function WinnerPenalisesLoserScoreStrategy() {
-	this.calculateScore = function( plays ) {
-        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
-		plays.forEach( (function( play, i ) {
-            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].playType undefined' );
-            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].turnPoints undefined' );
-            if ( typeof play.attackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play[' + i + '].attackMultiplier undefined' );
-		}).bind( this ));
-
-		if ( 'move' == plays[0].playType && 'move' == plays[1].playType ) { // move vs. move
-			// score unchanged
-
-		} else if ( 'attack' == plays[0].playType && 'move' == plays[1].playType ) {
-			plays[1].turnPoints = plays[1].turnPoints - ( plays[0].attackMultiplier * plays[0].turnPoints );
-			plays[0].turnPoints = 0;
-
-		} else if ( 'move' == plays[0].playType && 'attack' == plays[1].playType ) {
-			plays[0].turnPoints = plays[0].turnPoints - ( plays[1].attackMultiplier * plays[1].turnPoints );
-			plays[1].turnPoints = 0;
-
-		} else if ( 'attack' == plays[0].playType && 'attack' == plays[1].playType ) {
-			var highestScore = Math.max( plays[0].turnPoints, plays[1].turnPoints );
-			if ( plays[0].turnPoints == plays[1].turnPoints ) {
-				plays[0].turnPoints = 0;
-				plays[1].turnPoints = 0;
-			} else if ( plays[0].turnPoints < plays[1].turnPoints ) {
-				plays[0].turnPoints = ( plays[0].attackMultiplier * plays[0].turnPoints ) - ( plays[1].attackMultiplier * plays[1].turnPoints );
-				plays[1].turnPoints = 0;
-			} else if ( plays[0].turnPoints > plays[1].turnPoints ) {
-				plays[1].turnPoints = ( plays[1].attackMultiplier * plays[1].turnPoints ) - ( plays[0].attackMultiplier * plays[0].turnPoints );
-				plays[0].turnPoints = 0;
-			}
-		}
-	}
 }
 
 
@@ -351,10 +392,12 @@ function CompositeScoreStrategy( scoreStrategyList ) {
 	this.log.setLevel( log.levels.SILENT );
 
 	this.calculateScore = function( plays ) {
+        var allTrue = true;
 		this._scoreStrategyList.forEach( (function( scoreStrategy ) {
 	 		this.log.debug( this.constructor.name, '.calculateScore (', plays, ') - strategy:', scoreStrategy.constructor.name );
-			scoreStrategy.calculateScore( plays );
+			allTrue = scoreStrategy.calculateScore( plays ) && allTrue;
 		}).bind( this ) );
+        return allTrue;
  	}
  
  	this._scoreStrategyList = scoreStrategyList;

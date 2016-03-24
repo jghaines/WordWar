@@ -87,13 +87,106 @@ describe('WordLengthBonusScoreStrategy', function() {
 	});
 });
 
-describe('AttackBeatsMoveScoreStrategy', function() {
+describe('PlayTypeCombinationConditionalStrategy', function() {
+    beforeEach( function() {
+        this.playAttack = { playType : 'attack' };
+        this.playMove   = { playType : 'move'   };
+    });
+	describe('attack vs move', function () {
+        beforeEach( function() {
+            this.scoreStrategy = new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] );
+        });
+		it('should match on attack vs move', function () { 
+            var plays = [ this.playAttack, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+		});
+		it('should match on move vs attack', function () { 
+            var plays = [ this.playMove, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+		});
+		it('should NOT match on move vs move', function () { 
+            var plays = [ this.playMove, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should NOT match on attack vs attack', function () { 
+            var plays = [ this.playAttack, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+	});
+	describe('attack vs attack', function () {
+        beforeEach( function() {
+            this.scoreStrategy = new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] );
+        });
+		it('should NOT match on attack vs move', function () { 
+            var plays = [ this.playAttack, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should NOT match on move vs attack', function () { 
+            var plays = [ this.playMove, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should NOT match on move vs move', function () { 
+            var plays = [ this.playMove, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should match on attack vs attack', function () { 
+            var plays = [ this.playAttack, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+		});
+	});
+	describe('move vs move', function () {
+        beforeEach( function() {
+            this.scoreStrategy = new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ]);
+        });
+		it('should NOT match on attack vs move', function () { 
+            var plays = [ this.playAttack, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should NOT match on move vs attack', function () { 
+            var plays = [ this.playMove, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+		it('should match on move vs move', function () { 
+            var plays = [ this.playMove, this.playMove ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+		});
+		it('should NOT match on attack vs attack', function () { 
+            var plays = [ this.playAttack, this.playAttack ];
+			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+		});
+	});
+});
+
+
+describe('complicated composite victory scoring - refactored AttackBeatsMoveScoreStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new AttackBeatsMoveScoreStrategy( 2 );
+		this.scoreStrategy = new CompositeScoreStrategy( [
+            new IfThenStrategy( {
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                thenDo : [] }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                thenDo : [
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new AttackWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return -1 * _.winner.turnPoints }
+                    })
+                ]}),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                thenDo : [ 
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new HighScoreWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return -1 * _.winner.turnPoints },
+                    }),
+                ]}),
+        ]);
 	});
 
 	describe('#calculateScore()', function () {
-		it('should set the score to the word value for Move vs Move', function () {
+		it('should leave turnPoints unchanged for Move vs Move', function () {
 			var playA = { playType : 'move',   turnPoints : 15, attackMultiplier : 2 };
 			var playB = { playType : 'move',   turnPoints : 12, attackMultiplier : 2 };
 			this.scoreStrategy.calculateScore([ playA, playB ]);
@@ -138,9 +231,31 @@ describe('AttackBeatsMoveScoreStrategy', function() {
 	});
 });
 
-describe('AttackPenalisesMoveScoreStrategy', function() {
+describe('complicated composite victory scoring - refactored AttackPenalisesMoveScoreStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new AttackPenalisesMoveScoreStrategy( 2 );
+		this.scoreStrategy = new CompositeScoreStrategy( [
+            new IfThenStrategy( {
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                thenDo : [] }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                thenDo : [
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new AttackWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
+                    })
+                ]}),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                thenDo : [ 
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new HighScoreWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return -1 * _.winner.turnPoints },
+                    }),
+                ]}),
+        ]);
 	});
 
 	describe('#calculateScore()', function () {
@@ -189,9 +304,30 @@ describe('AttackPenalisesMoveScoreStrategy', function() {
 	});
 });
 
-describe('WinnerBeatsLoserScoreStrategy', function() {
+describe('complicated composite victory scoring - refactored WinnerBeatsLoserScoreStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new WinnerBeatsLoserScoreStrategy();
+		this.scoreStrategy = new CompositeScoreStrategy( [
+            new IfThenStrategy( {
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                thenDo : [] }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                thenDo : [
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new AttackWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
+                    })
+                ]}),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                thenDo : [ 
+                    new HighScoreWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return _.loser.turnPoints - ( _.winner.attackMultiplier * _.winner.turnPoints ) },
+                    }),
+                ]}),
+        ]);
 	});
 
 	describe('#calculateScore()', function () {
@@ -240,9 +376,31 @@ describe('WinnerBeatsLoserScoreStrategy', function() {
 	});
 });
 
-describe('WinnerPenalisesLoserScoreStrategy', function() {
+describe('complicated composite victory scoring - refactored WinnerPenalisesLoserScoreStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new WinnerPenalisesLoserScoreStrategy( 2 );
+		this.scoreStrategy = new CompositeScoreStrategy( [
+            new IfThenStrategy( {
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                thenDo : [] }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                thenDo : [
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new AttackWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
+                    })
+                ]}),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                thenDo : [ 
+                    new ApplyAttackMulitiplierScoreStrategy(),
+                    new HighScoreWinsMetaStrategy( {
+                        winner : _ => { return 0 },
+                        loser  : _ => { return _.loser.turnPoints -  _.winner.turnPoints },
+                    }),
+                ]}),
+        ]);
 	});
 
 	describe('#calculateScore()', function () {
