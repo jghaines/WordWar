@@ -22,6 +22,11 @@ function Play( parameters ) {
 
         this.startTurnScore     = gameInfo.startGameScore || 0;
 		this.endTurnScore	    = 0;
+
+		this.endWordPosition = null;
+
+		this.startPosition = null;
+		this.endPosition  = null;
     }
     
 	this.createNextTurnPlay = function( previousPlay ) {
@@ -32,9 +37,9 @@ function Play( parameters ) {
         next.playerIndex      = this.playerIndex;
         next.lost             = this.lost;
 
-        next.playComplete     = false;
-		next.playType	      = null;
-		next.word				= '';
+        next.playComplete   = false;
+		next.playType	    = null;
+		next.word		    = '';
 
 		next.wordPoints			= 0;
 		next.turnPoints	        = 0;
@@ -44,6 +49,9 @@ function Play( parameters ) {
         next.startTurnScore     = this.endTurnScore; // endTurnScore -> startTurnScore
 		next.endTurnScore	    = 0;
 
+        next.startPosition      = this.endPosition; // endPosition -> startPosition
+        next.endPosition        = null;
+        
         return next;
     }
     
@@ -66,15 +74,17 @@ function Play( parameters ) {
 		this.startTurnScore	    = json.startTurnScore || 0;
 		this.endTurnScore	    = json.endTurnScore || 0;
 
-		this.playRange			= new CoordRange();
-		if ( typeof json.playRange !== 'undefined' ) this.playRange.loadFromJson( json.playRange );
+		this.endWordPosition	= new Coordinates();
+		if ( typeof json.endWordPosition !== 'undefined' ) this.endWordPosition.loadFromJson( json.endWordPosition );
 
-		this.newPosition 		= new Coordinates();
-		if ( typeof json.newPosition !== 'undefined' ) this.newPosition.loadFromJson( json.newPosition );
+		this.startPosition 		= new Coordinates();
+		if ( typeof json.startPosition !== 'undefined' ) this.startPosition.loadFromJson( json.startPosition );
+		this.endPosition 		= new Coordinates();
+		if ( typeof json.endPosition !== 'undefined' ) this.endPosition.loadFromJson( json.endPosition );
 	}
 
 	this.toJSON = function() {
-		return {
+		var json = {
 			gameId              : this.gameId,
 			turnIndex           : this.turnIndex,
 			playerIndex         : this.playerIndex,
@@ -92,10 +102,12 @@ function Play( parameters ) {
 
             startTurnScore	    : this.startTurnScore,
             endTurnScore	    : this.endTurnScore,
-
-			playRange           : this.playRange.toJSON(),
-			newPosition         : this.newPosition.toJSON(),
 		};
+		if ( this.endWordPosition ) 	json.endWordPosition = this.endWordPosition.toJSON();
+		if ( this.startPosition   ) 	json.startPosition   = this.startPosition.toJSON();
+		if ( this.endPosition )		    json.endPosition     = this.endPosition.toJSON();
+
+		return json;
 	}
 
 	// +1 if this beats     other

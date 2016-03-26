@@ -28,6 +28,7 @@ window.onload = function(){
             { from: 10, to: 99, bonus: 20 },
         ]),
         new ApplyAttackMulitiplierScoreStrategy(),
+        
         // turn victory conditions
         new IfThenStrategy( {
             ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
@@ -45,14 +46,17 @@ window.onload = function(){
             thenDo : new HighScoreWinsMetaStrategy( {
                 winner : _ => { return 0 },
                 loser  : _ => { return -1 * _.winner.turnPoints },
-                })
+            })
         }),                    
-        new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
-        new MinMaxAttackMultiplierScoreStrategy( 0, 6 ),
         new SetEndTurnScoreStrategy(),
         new MinMaxEndTurnScoreStrategy( -99999, 500 ),
-        new KnockBackPlayScoreStrategy(),
         new LowWaterMarkLoserScoreStrategy( 0 ),
+
+        new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
+        new MinMaxAttackMultiplierScoreStrategy( 0, 6 ),
+
+        new UpdatePositionScoreStrategy(),
+        new KnockBackPlayScoreStrategy(),
 	]);
 
 	gc = new GameController( remote, scoreStrategy, attackRangeStrategy );

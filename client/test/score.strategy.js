@@ -580,47 +580,47 @@ describe('KnockBackPlayScoreStrategy', function() {
 	});
 
 	describe('#_arePlayersOnSameCell()', function () {
-		it('should return true for same newPosition Coordinates', function () {
-			this.plays[0].newPosition = this.coord00;
-			this.plays[1].newPosition = this.coord00;
+		it('should return true for same endPosition Coordinates', function () {
+			this.plays[0].endPosition = this.coord00;
+			this.plays[1].endPosition = this.coord00;
 			expect( this.scoreStrategy._arePlayersOnSameCell( this.plays )).toBe( true );
 		});
-		it('should return false for different newPosition Coordinates', function () {
-			this.plays[0].newPosition = this.coord00;
-			this.plays[1].newPosition = this.coord11;
+		it('should return false for different endPosition Coordinates', function () {
+			this.plays[0].endPosition = this.coord00;
+			this.plays[1].endPosition = this.coord11;
 			expect( this.scoreStrategy._arePlayersOnSameCell( this.plays )).toBe( false );
 		});
 	});
 
 	describe('#calculateScore()', function () {
 		it('should leave the players if they are on different cells', function () {
-			this.plays[0].newPosition = this.coord00;
-			this.plays[1].newPosition = this.coord11;
+			this.plays[0].endPosition = this.coord00;
+			this.plays[1].endPosition = this.coord11;
 			this.scoreStrategy.calculateScore( this.plays );
-			expect( this.plays[0].newPosition.equals( this.coord00 )).toBe( true );
-			expect( this.plays[1].newPosition.equals( this.coord11 )).toBe( true );
+			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
+			expect( this.plays[1].endPosition.equals( this.coord11 )).toBe( true );
 		});
 		it('should knockback losing player, down, when they land on the same cell', function () {
-			this.plays[0].newPosition = this.coord00;
-			this.plays[0].playRange   = this.range00to50; // vertical
+			this.plays[0].endPosition = this.coord00;
+			this.plays[0].startPosition = this.coord50; // vertical
 			this.plays[0].playType    = 'attack';
-			this.plays[1].newPosition = this.coord00;
-			this.plays[1].playRange   = this.range00to05; // horizontal
+			this.plays[1].endPosition = this.coord00;
+			this.plays[1].startPosition = this.coord05; // horizontal
 			this.plays[1].playType    = 'move';
 			this.scoreStrategy.calculateScore( this.plays );
-			expect( this.plays[0].newPosition.equals( this.coord00 )).toBe( true );
-			expect( this.plays[1].newPosition.equals( this.coord01 )).toBe( true );
+			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
+			expect( this.plays[1].endPosition.equals( this.coord01 )).toBe( true );
 		});
 		it('should knockback losing player, right, when they land on the same cell', function () {
-			this.plays[0].newPosition = this.coord00;
-			this.plays[0].playRange   = this.range00to05; // horizontal
-			this.plays[0].playType    = 'attack';
-			this.plays[1].newPosition = this.coord00;
-			this.plays[1].playRange   = this.range00to50; // vertical
-			this.plays[1].playType    = 'move';
+			this.plays[0].endPosition       = this.coord00;
+			this.plays[0].startPosition   = this.coord05; // horizontal
+			this.plays[0].playType          = 'attack';
+			this.plays[1].endPosition       = this.coord00;
+			this.plays[1].startPosition   = this.coord50; // vertical
+			this.plays[1].playType          = 'move';
 			this.scoreStrategy.calculateScore( this.plays );
-			expect( this.plays[0].newPosition.equals( this.coord00 )).toBe( true );
-			expect( this.plays[1].newPosition.equals( this.coord10 )).toBe( true );
+			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
+			expect( this.plays[1].endPosition.equals( this.coord10 )).toBe( true );
 		});
 	});
 });

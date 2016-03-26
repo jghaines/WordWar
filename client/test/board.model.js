@@ -113,7 +113,8 @@ describe('BoardModel wordcandidate - right', function() {
 	beforeEach(	function() {
 		this._boardModel = new BoardModel();
 		this._boardView = new BoardView(this._boardModel);
-		this._boardController = new BoardController(this._boardModel, this._boardView);
+        this._playEmitter = jasmine.createSpyObj('playEmitter', ['on']);
+		this._boardController = new BoardController(this._boardModel, this._boardView, this._playEmitter);
 
 		this._boardModel._placedDirection = 'right';
 		this.testTables = {

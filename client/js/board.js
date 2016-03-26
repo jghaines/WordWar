@@ -154,16 +154,22 @@ function BoardModel() {
 		}
 	}
 
-	this.setPlayerCell = function(playerIndex, coordinates) {
-		this.log.info('BoardModel.setPlayerCell(playerIndex =' + playerIndex +', coordinates)');
-		var cssClass = 'player-' + playerIndex;
-		var prevCell = this.getPlayerCell( playerIndex );
+    this.getCoordinatesForPlayer = function( playerIndex ) {
+        return this.getCoordinatesForCell( this.getPlayerCell( playerIndex ));
+    }
+
+	this.setPlayerCell = function( play ) {
+		this.log.info('BoardModel.setPlayerCell(.)');
+		var cssClass = 'player-' + play.playerIndex;
+		var prevCell = this.getPlayerCell( play.playerIndex );
 		prevCell.html( '' ); // empty previous cell
 		prevCell.removeClass( cssClass );
 
+        var coordinates = play.startPosition;
+
 		var newCell = this.getCellAtCoordinates( coordinates );
 		newCell.addClass( cssClass );
-		newCell.html( '<img class="avatar" src="/images/player-' + playerIndex + '.png" />' );
+		newCell.html( '<img class="avatar" src="/images/player-' + play.playerIndex + '.png" />' );
 	}
 
 	this.isCellPlaceable = function(cell) {
@@ -363,7 +369,7 @@ function BoardView( boardModel ) {
 }
 
 
-function BoardController(boardModel, boardView) {
+function BoardController( boardModel, boardView, playEmitter ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
@@ -371,16 +377,29 @@ function BoardController(boardModel, boardView) {
 		this.log.info( this.constructor.name + '._boardLoaded()' );
 	}
 
-	this.addPlayedRange = function( playerIndex, range ) {
-		range.foreach( ( function( coords ) {
-			var cell = this._boardModel.getCellAtCoordinates( coords );
-			if ( cell.hasClass('bonus') ) {
-				cell.attr( 'ww_value', 1 ); // bonus will only work on first play, will be 'x1'/inactive after this
-			}
+    this._startTurnPlayReceived = function( play ) {
+        this._boardModel.setPlayerCell( play );
+    }
 
-            cell.addClass( 'played' );
-			flash( cell, 'flash-played-' + playerIndex );
-		}).bind( this ));
+    this._endTurnPlayReceived = function( play ) {
+        this._addPlayedRange( play ); 
+    }
+
+	this._addPlayedRange = function( play ) {
+        var range;
+        if ( play.startPosition && play.endWordPosition ) {
+            range = new CoordRange( play.startPosition, play.endWordPosition );
+
+            range.foreach( ( function( coords ) {
+                var cell = this._boardModel.getCellAtCoordinates( coords );
+                if ( cell.hasClass('bonus') ) {
+                    cell.attr( 'ww_value', 1 ); // bonus will only work on first play, will be 'x1'/inactive after this
+                }
+
+                cell.addClass( 'played' );
+                flash( cell, 'flash-played-' + play.playerIndex );
+            }).bind( this ));
+        }
 	}
 
 	this.unhighlightPlaceablePositions = function() {
@@ -506,6 +525,9 @@ function BoardController(boardModel, boardView) {
 	// constructor code
 	this._boardModel = boardModel;
 	this._boardView = boardView;
+
+    playEmitter.on( 'play',     this._startTurnPlayReceived.bind(this) );
+    playEmitter.on( 'endTurn',  this._endTurnPlayReceived.bind(this) );
 
 	this._boardModel.onBoardLoaded(( function() { 
 		this._boardLoaded();

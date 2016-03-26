@@ -242,31 +242,52 @@ function MinMaxAttackMultiplierScoreStrategy( minValue, maxValue ) {
 }
 
 
+function UpdatePositionScoreStrategy() {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.INFO );
+
+	this.calculateScore = function( plays ) {
+		plays.forEach( (function( play ) {
+            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startPosition undefined' );
+
+            switch ( play.playType ) {
+                case 'move':
+                    play.endPosition = play.endWordPosition;
+                    break;
+                case 'attack':
+                    play.endPosition = play.startPosition;
+                    break;
+            }
+        }).bind( this ));    
+    }
+}
+
+
 function KnockBackPlayScoreStrategy() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
 	this._arePlayersOnSameCell = function( plays ) {
- 		return ( plays[0].newPosition.equals( plays[1].newPosition ));
+ 		return ( plays[0].endPosition.equals( plays[1].endPosition ));
 	}
 
 	this._knockBackPlayer = function( play ) {
 		this.log.info( this.constructor.name + '.knockBackPlayer(.)' );
 
-		if ( play.playRange.min.row == play.playRange.max.row ) { // horizontal move
-			if ( play.newPosition.col < play.playRange.max.col ) {
-				play.newPosition = play.newPosition.getIncrement( 0, 1 );
-			} else if ( play.playRange.min.col < play.newPosition.col ) {
-				play.newPosition = play.newPosition.getIncrement( 0, -1 );
+		if ( play.startPosition.row === play.endPosition.row ) { // horizontal move
+			if ( play.startPosition.col < play.endPosition.col ) { // left-to-right
+				play.endPosition = play.endPosition.getIncrement( 0, -1 );
+			} else if ( play.startPosition.col > play.endPosition.col ) { // right-to-left
+				play.endPosition = play.endPosition.getIncrement( 0, 1 );
 			} else {
 				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled horizontal retreat');
 			}
 
-		} else if ( play.playRange.min.col == play.playRange.max.col ) { // vertical move
-			if ( play.newPosition.row < play.playRange.max.row ) {
-				play.newPosition = play.newPosition.getIncrement( 1, 0 );
-			} else if ( play.playRange.min.row < play.newPosition.row ) {
-				play.newPosition = play.newPosition.getIncrement( -1, 0 );
+		} else if ( play.startPosition.col === play.endPosition.col ) { // vertical move
+			if ( play.startPosition.row < play.startPosition.row ) { // top-to-bottom
+				play.endPosition = play.endPosition.getIncrement( -1, 0 );
+			} else if ( play.startPosition.row > play.endPosition.row ) { // bottom-to-top 
+				play.endPosition = play.endPosition.getIncrement( 1, 0 );
 			} else {
 				throw new Error ( this.constructor.name + '.retreatPlayer() uhnhandled vertical retreat');
 			}
@@ -279,9 +300,8 @@ function KnockBackPlayScoreStrategy() {
 	this.calculateScore = function( plays ) {
         if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
 		plays.forEach( (function( play ) {
-            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.playType undefined' );
-            if ( typeof play.playRange === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.playRange undefined' );
-            if ( typeof play.newPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.newPosition undefined' );
+            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startPosition undefined' );
+            if ( typeof play.endPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.endPosition undefined' );
         }).bind( this ));
         
 		// if players have landed on same cell, retreat both players

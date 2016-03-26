@@ -40,10 +40,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	// called back when board has loaded
 	this._boardLoaded = function() {
-		// mark starting position as played for cosmetics
-		for (var p = this._gameInfo.playerCount - 1; p >= 0; p--) {
-			this._boardController.addPlayedRange( p, this._boardModel.getCellRange( this._boardModel.getPlayerCell( p ) ));
-		}
         this._isBoardLoaded = true;
         this.checkForGameStart();
 	}
@@ -92,6 +88,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 				if ( this.turnIndex === 0 ) { // bootstrap first turn
 					play = new Play();
 					play.loadFromGameInfo( p, this._gameInfo );
+                    play.startPosition = this._boardModel.getCoordinatesForPlayer( play.playerIndex );
 				} else { // otherwise, from previous turn
 					play = this._plays[this.turnIndex - 1][p].createNextTurnPlay();            
 				}
@@ -228,12 +225,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this._audio.playWord();
 
 		var myPlay = this._getCurrentPlayForPlayer();
-		myPlay.playComplete = true,
-		myPlay.playType     = playType,
-        myPlay.word         = wordPlaced,
-		myPlay.wordPoints   = this._boardController.getPlayedScore( this._gameInfo.playerIndex ),
-		myPlay.playRange    = this._boardModel.getPlacedRange(),
-		myPlay.newPosition  = this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this._gameInfo.playerIndex ) ),
+		myPlay.playComplete     = true,
+		myPlay.playType         = playType,
+        myPlay.word             = wordPlaced,
+		myPlay.wordPoints       = this._boardController.getPlayedScore( this._gameInfo.playerIndex ),
+		myPlay.endWordPosition  = this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this._gameInfo.playerIndex ) ),
 
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
@@ -344,9 +340,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			}
 		}
 
-		for (var p = playsForTurn.length - 1; p >= 0; p--) {
-			this._boardView.addPlayedItem( playsForTurn[p] );
-		}
+        playsForTurn.forEach(( play => {
+			this._boardView.addPlayedItem( play );
+            this.emit( 'endTurn', play );            
+        } ).bind( this ));
 
         ++this.turnIndex;
         this.newTurn();
@@ -354,14 +351,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.executeMove = function( play ) {
 		this.log.info( this.constructor.name + '.executeMove(play=.)' );
-		this._boardController.setPlayerCell( play.playerIndex, play.newPosition );
-		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 	}
 
 	// execute attack initiated by giver play(-er)
 	this.executeAttack = function( play ) {
 		this.log.info( this.constructor.name + '.executeAttack(play=.)' );
-		this._boardController.addPlayedRange( play.playerIndex, play.playRange );
 		this._boardView.flashAttackOnPlayer( 1 - play.playerIndex ); // TODO: this is hard-coded for 2-player, should be generic
 	}
     
@@ -424,7 +418,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this._boardModel = new BoardModel();
 	this._boardView = new BoardView( this._boardModel );
-	this._boardController = new BoardController( this._boardModel, this._boardView );
+	this._boardController = new BoardController( this._boardModel, this._boardView, this );
 
 	this._scoreView = new ScoreView( this );
 

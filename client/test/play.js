@@ -20,10 +20,12 @@ describe('Play', function() {
 			startTurnScore      : 100,
 			endTurnScore        : 150,
             
-			playRange           : new CoordRange( new Coordinates(0, 1), new Coordinates(0, 5) ),
-			newPosition         : new Coordinates(0, 5),
+			endWordPosition : new Coordinates(0, 5),
+
+			startPosition   : new Coordinates(0, 0),
+			endPosition     : new Coordinates(0, 5),
 		}
-		this.objectKeys = [ 'playRange', 'newPosition' ]; // object attributes that need .equals() comparison
+		this.objectKeys = [ 'endWordPosition', 'startPosition', 'endPosition' ]; // object attributes that need .equals() comparison
         this.expectedProperties = [
             'gameId',
             'playerIndex',
@@ -43,11 +45,13 @@ describe('Play', function() {
             'startTurnScore',
             'endTurnScore',
             
-            'playRange',
-            'newPosition'
+            'startPosition',
+            'endPosition',
         ];
         this.legacyProperties = [
-            'score'                
+            'score',
+            'newPosition',                
+            'playRange',
         ];
 
 		this.barePlay = new Play();
@@ -91,6 +95,7 @@ describe('Play', function() {
             expect( nextTurn.playComplete ).toEqual( false );
 
             expect( nextTurn.startTurnScore ).toEqual( this.jsonPlay.endTurnScore ); // endTurnScore -> startTurnScore
+            expect( nextTurn.startPosition.equals( this.jsonPlay.endPosition )).toBe( true ); // startPosition -> endPosition
 		});
 	});
     
