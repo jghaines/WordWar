@@ -15,5 +15,7 @@ function isUUID(str, version) {
 }
 
 module.exports = function addUuidForIz(iz) {
-    iz.addValidator('uuid', isUUID);
+    if ( ! iz.hasOwnProperty( 'uuid' )) {
+        iz.addValidator('uuid', isUUID);
+    }
 }
