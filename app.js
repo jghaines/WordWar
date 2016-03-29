@@ -92,12 +92,13 @@ app.post(SNS_ENDPOINT, function(req, res){
 app.use('/js/env.js', function(req, res, next) {
     log.info( '/js/env.js' );
     res.send(
-`// development config generated from node:app.js
-var ENV = {
-    webSocketUrl    : null, // default to localhost
-    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod",
-    requestedBoard  : "/boards/2.html"
-}`);
+'// development config generated from node:app.js' + '\n' +
+'var ENV = {' + '\n' +
+'    webSocketUrl    : null, // default to localhost' + '\n' +
+'    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod",' + '\n' +
+'    requestedBoard  : "/boards/2.html"' + '\n' +
+'}' + '\n'
+);
     res.end();
     // we are overriding express.static(..) below; we don't call next()
 });
