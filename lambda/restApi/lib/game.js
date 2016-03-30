@@ -71,33 +71,36 @@ var getPendingGame = function( err, gameInfo, sqsData, callback ) {
     if ( sqsData.Messages !== undefined && sqsData.Messages.length == 1 ) { // found a game on the queue
         var sqsHandle = sqsData.Messages[0].ReceiptHandle;
         var body = JSON.parse( sqsData.Messages[0].Body );
-        var gameId = body.gameId;
+        gameInfo.gameId = body.gameId;
 
-        // register player for game
-        var updateParams = {
-            TableName           : ENV.TableName.Game,
-            Key                 : { gameId : gameId },
-            UpdateExpression    : "SET #playerList = list_append( #playerList, :newPlayerList )",
-            ConditionExpression : "NOT contains( #playerList, :newPlayer )",
-            ExpressionAttributeNames : {
-                "#playerList" : "playerList"
-            },
-            ExpressionAttributeValues : {
-                ":newPlayer" : gameInfo.playerList[0],
-                ":newPlayerList" : gameInfo.playerList
-            },
-            ReturnValues        : "ALL_NEW"
-        };
-
-        dynamo.update(updateParams, function( err, dbData ) {
-            playerAddedToGameDb( err, gameInfo, dbData, sqsHandle, callback )
-        });
-
+        addPlayerToExistingGame( gameInfo, sqsHandle, callback );
     } else if ( sqsData.Messages === undefined ) { // no game found, request one
         createNewGame( gameInfo, callback );
     } else {
         callback( "getPendingGame() - unexpected SQS data' structure: " + JSON.stringify( sqsData ), null );
     }
+}
+
+var addPlayerToExistingGame = function( gameInfo, sqsHandle, callback ) {
+    // register player for game
+    var updateParams = {
+        TableName           : ENV.TableName.Game,
+        Key                 : { gameId : gameInfo.gameId },
+        UpdateExpression    : "SET #playerList = list_append( #playerList, :newPlayerList )",
+        ConditionExpression : "NOT contains( #playerList, :newPlayer )",
+        ExpressionAttributeNames : {
+            "#playerList" : "playerList"
+        },
+        ExpressionAttributeValues : {
+            ":newPlayer" : gameInfo.playerList[0],
+            ":newPlayerList" : gameInfo.playerList
+        },
+        ReturnValues        : "ALL_NEW"
+    };
+
+    dynamo.update(updateParams, function( err, dbData ) {
+        playerAddedToGameDb( err, gameInfo, dbData, sqsHandle, callback )
+    });
 }
 
 // player has been added to game from queue
@@ -179,7 +182,7 @@ var createNewGame = function( gameInfo, callback ) {
     });
 }
 
-var gameAddedToDb = function( err, remoteData, dbData, callback) {
+var gameAddedToDb = function( err, remoteData, dbData, callback ) {
     log.info('gameAddedToDb()');
     if ( null !== err ) {
         callback( err, null );
