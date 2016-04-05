@@ -3,15 +3,15 @@
 'use strict';
 
 
-function RemoteProxy( socket, restBaseUrl ) {
+function RemoteProxy( idToken, socket, restBaseUrl ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
     this.swaggerUrl = '/js/swagger.json';
 
     // enum for remote source
     this.source = {
-        WEBSOCKET   : { id:1, name:"WEBSOCKET" },
-        API         : { id:2, name:"API" }
+        WEBSOCKET   : { id:1, name: "WEBSOCKET" },
+        API         : { id:2, name: "API" }
     };
     
     // enum for EventEmitter types
@@ -32,8 +32,11 @@ function RemoteProxy( socket, restBaseUrl ) {
             gameInfo.board = ENV.requestedBoard;
         }
         jQuery.ajax({
-            url:     this._getGameUrl,
             type:    'POST',
+            url:     this._getGameUrl,
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken
+            },
             data: 	 JSON.stringify( gameInfo ),
                 success: (function( jqXHR, textStatus, errorThrown ) {
                     this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
@@ -144,14 +147,17 @@ function RemoteProxy( socket, restBaseUrl ) {
 		this._socket.emit('play message', JSON.stringify( localPlay ));
 
 		jQuery.ajax({
-			url:     this._executePlayUrl,
 			type:    'POST',
+			url:     this._executePlayUrl,
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken
+            },
 			data: 	 JSON.stringify( localPlay ),
 			success: (function( jqXHR, textStatus, errorThrown ) {
                 this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
             }).bind( this ),
 			error: 	 function( jqXHR, textStatus, errorThrown ) {
-                        throw new Error ( errorThrown );
+                throw new Error ( errorThrown );
 			}
 		});
 	}
@@ -161,6 +167,7 @@ function RemoteProxy( socket, restBaseUrl ) {
     this.playerId = guid();
     this.gameId = null;
     
+    this._idToken = idToken;
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
     this._getGameUrl = this._restBaseUrl + '/Game';

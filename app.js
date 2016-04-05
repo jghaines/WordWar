@@ -96,6 +96,10 @@ app.use('/js/env.js', function(req, res, next) {
 'var ENV = {' + '\n' +
 '    webSocketUrl    : null, // default to localhost' + '\n' +
 '    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod",' + '\n' +
+'    auth0 : {' + '\n' +
+'            clientID    : "M69Mp6BBlK2CYo4MrUkBhiDKUpsg81vn",' + '\n' +
+'            domain      : "jghaines.auth0.com"' + '\n' +
+'    },' + '\n' +
 '    requestedBoard  : "/boards/2.html"' + '\n' +
 '}' + '\n'
 );

@@ -1,10 +1,11 @@
 'use strict';
 
 var gc = {};
+var lock;
 
-window.onload = function(){
-	var socket = io(ENV.webSocketUrl);
-	var remote = new RemoteProxy( socket, ENV.restBaseUrl );
+function createGame( idToken, webSocketUrl, restBaseUrl ) {
+	var socket = io( webSocketUrl );
+	var remote = new RemoteProxy( idToken, socket, restBaseUrl );
 
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
@@ -60,4 +61,39 @@ window.onload = function(){
 	]);
 
 	gc = new GameController( remote, scoreStrategy, attackRangeStrategy );
+}
+
+
+function showLogin() {
+	localStorage.removeItem('idToken');
+	var lock = new Auth0Lock( ENV.auth0.clientID, ENV.auth0.domain );
+	lock.show({ authParams: { scope: 'openid' } });
+}
+
+window.onload = function() {
+	var idToken = localStorage.getItem('idToken');
+	var windowHash = window.location.hash;
+
+	if ( windowHash === '#logout' ) {
+		showLogin();
+	} else if ( idToken ) {
+		createGame( idToken, ENV.webSocketUrl, ENV.restBaseUrl )
+	} else { // no token ; need to log in
+		var lock = new Auth0Lock( ENV.auth0.clientID, ENV.auth0.domain );
+		var hash = lock.parseHash( windowHash );
+		if ( hash ) { // callback from authentication
+			if ( hash.error ) {
+				console.log("There was an error logging in", hash.error);
+				alert('There was an error: ' + hash.error + '\n' + hash.error_description);
+				return;
+			} else {
+				idToken = hash.id_token;
+				localStorage.setItem( 'idToken', idToken );
+                window.location.replace("#");
+                window.onload();
+			}
+		} else { 
+			showLogin();
+		}
+	}
 }
