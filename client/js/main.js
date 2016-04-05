@@ -53,8 +53,8 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
         new MinMaxEndTurnScoreStrategy( -99999, 500 ),
         new LowWaterMarkLoserScoreStrategy( 0 ),
 
-        new IncrementAttackMultiplierScoreStrategy( 1, -99 ),
-        new MinMaxAttackMultiplierScoreStrategy( 0, 6 ),
+        new IncrementAttackMultiplierScoreStrategy( 2, -99 ),
+        new MinMaxAttackMultiplierScoreStrategy( 0, 8 ),
 
         new UpdatePositionScoreStrategy(),
         new KnockBackPlayScoreStrategy(),
