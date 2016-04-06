@@ -1,7 +1,11 @@
 'use strict';
 
 var gc = {};
-var lock;
+var auth0 = new Auth0({
+    domain:       ENV.auth0.domain,
+    clientID:     ENV.auth0.clientID,
+    callbackOnLocationHash: true
+});
 
 function createGame( idToken, webSocketUrl, restBaseUrl ) {
 	var socket = io( webSocketUrl );
@@ -66,8 +70,9 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
 
 function showLogin() {
 	localStorage.removeItem('idToken');
-	var lock = new Auth0Lock( ENV.auth0.clientID, ENV.auth0.domain );
-	lock.show({ authParams: { scope: 'openid' } });
+    auth0.login({
+      connection: 'facebook'
+    });
 }
 
 window.onload = function() {
@@ -79,8 +84,7 @@ window.onload = function() {
 	} else if ( idToken ) {
 		createGame( idToken, ENV.webSocketUrl, ENV.restBaseUrl )
 	} else { // no token ; need to log in
-		var lock = new Auth0Lock( ENV.auth0.clientID, ENV.auth0.domain );
-		var hash = lock.parseHash( windowHash );
+		var hash = auth0.parseHash( windowHash );
 		if ( hash ) { // callback from authentication
 			if ( hash.error ) {
 				console.log("There was an error logging in", hash.error);
