@@ -4,6 +4,8 @@ log.setLevel( log.levels.INFO );
 
 var ENV = require('./lambda-config.json');
 
+var Promise = require("bluebird");
+
 var vowelCountChecker = require('./wordy-letters').vowelCountChecker;
 var letterGenerator = require('./wordy-letters').letterGenerator;
 var UUID = require('node-uuid');
@@ -33,6 +35,9 @@ var dynamodb = new AWS.DynamoDB( {
 var dynamo = new AWS.DynamoDB.DocumentClient( { service: dynamodb });
 var sqs = new AWS.SQS();
 var sns = new AWS.SNS();
+Promise.promisifyAll( Object.getPrototypeOf( dynamo ));
+Promise.promisifyAll( Object.getPrototypeOf( sqs ));
+Promise.promisifyAll( Object.getPrototypeOf( sns ));
 
 var createTurnInfo = function( turnIndex, letterCount ) {
     return {
@@ -208,5 +213,6 @@ var gameSentToQueue = function( err, remoteData, sqsData, callback ) {
 }
 
 module.exports = {
-    getGame             : getGame,
+    getGame         : getGame,
+    getGameAsync    : Promise.promisify( getGame )
 }
