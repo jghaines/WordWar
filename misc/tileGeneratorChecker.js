@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node 
 
 'use strict';
 
@@ -79,8 +79,29 @@ var algorithms = {
     // sowpodsLettersTuples2Bag13 : (word) => {
     //     return sowpodsLettersTuples.letterGenerator( 10, 2, 13, () => { return true } );
     // },
+    sowpodsLettersTuples1Bag15 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 1, 15, () => { return true } );
+    },
     sowpodsLettersTuples2Bag15 : (word) => {
-        return sowpodsLettersTuples.letterGenerator( 10, 2, () => { return true } );
+        return sowpodsLettersTuples.letterGenerator( 10, 2, 15, () => { return true } );
+    },
+    sowpodsLettersTuples2Bag16 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 2, 16, () => { return true } );
+    },
+    sowpodsLettersTuples2Bag17 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 2, 17, () => { return true } );
+    },
+    sowpodsLettersTuples2Bag20 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 2, 20, () => { return true } );
+    },
+    sowpodsLettersTuples3Bag15 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 3, 15, () => { return true } );
+    },
+    sowpodsLettersTuples3Bag20 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 3, 20, () => { return true } );
+    },
+    sowpods12LettersTuples2Bag15 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 12, 2, 15, () => { return true } );
     },
     // sowpodsLettersTuples2Bag16 : (word) => {
     //     return sowpodsLettersTuples.letterGenerator( 10, 2, 16, () => { return true } );
@@ -144,7 +165,6 @@ function outputResults( result ) {
     console.log(JSON.stringify(result, 
         (key, value) => {
             if ( key === 'distribution' ) { // sort the distribution map
-                return null;
                 return Object.keys( value ).sort().reduce( (map, key) => {
                     map[key] = value[key];
                     return map;
