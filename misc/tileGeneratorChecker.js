@@ -6,44 +6,94 @@
 var Anagram = require('./lib/anagrammer');
 var WordyLetters = require('../lambda/restApi/lib/wordy-letters');
 var wordyLettersTuples = require('../lambda/restApi/lib/wordy-letters-with-tuples');
+var sowpodsLettersTuples = require('../lambda/restApi/lib/sowpods-letters-with-tuples');
 
 var algorithms = {
-    wordyLetters : (word) => {
-        return WordyLetters.letterGenerator( 10, word => {
-            return WordyLetters.vowelCountChecker( word, 2, 8 );
-        });
+//     wordyLettersTruncated : (word) => {
+//         return WordyLetters.letterGenerator( 10, word => {
+//             return WordyLetters.vowelCountChecker( word, 2, 8 );
+//         });
+//     },
+//     wordyLettersTuples1 : (word) => {
+//         return wordyLettersTuples.letterGenerator( 10, 1, () => { return true } );
+//     },
+//     wordyLettersTuples2 : (word) => {
+//         return wordyLettersTuples.letterGenerator( 10, 2, () => { return true } );
+//     },
+//     wordyLettersTuples3 : (word) => {
+//         return wordyLettersTuples.letterGenerator( 10, 3, () => { return true } );
+//     },
+//     wordyLettersTuples4 : (word) => {
+//         return wordyLettersTuples.letterGenerator( 10, 4, () => { return true } );
+//     },
+//     sowpodsLettersTuples0 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 0, word => {
+//             return WordyLetters.vowelCountChecker( word, 2, 8 );
+//         });
+//     },
+//     sowpodsLettersTuples1 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 1, () => { return true } );
+//     },
+//     sowpodsLettersTuples2 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 2, () => { return true } );
+//     },
+//     sowpodsLettersTuples3 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 3, () => { return true } );
+//     },
+//     sowpodsLettersTuples4 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 4, () => { return true } );
+//     },
+//     sowpodsLettersTuples5 : (word) => {
+//         return sowpodsLettersTuples.letterGenerator( 10, 5, () => { return true } );
+//     },
+    // sowpodsLettersTuples2Bag1 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 1, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag2 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 2, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag10 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 10, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag20 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 20, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag30 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 30, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag40 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 40, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag50 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 50, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag60 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 60, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag70 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 70, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag12 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 12, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag13 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 13, () => { return true } );
+    // },
+    sowpodsLettersTuples2Bag15 : (word) => {
+        return sowpodsLettersTuples.letterGenerator( 10, 2, () => { return true } );
     },
-    wordyLettersTuples1 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 1, word => {
-            return wordyLettersTuples.vowelCountChecker( word, 2, 8 );
-        });
-    },
-    wordyLettersTuples2 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 2, word => {
-            return wordyLettersTuples.vowelCountChecker( word, 2, 8 );
-        });
-    },
-    wordyLettersTuples3 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 3, word => {
-            return wordyLettersTuples.vowelCountChecker( word, 2, 8 );
-        });
-    },
-    wordyLettersTuples4 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 4, word => {
-            return wordyLettersTuples.vowelCountChecker( word, 2, 8 );
-        });
-    },
-    wordyLettersTuples5 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 5, () => { return true; } );
-    },
-    wordyLettersTuples6 : (word) => {
-        return wordyLettersTuples.letterGenerator( 10, 6, () => { return true; } );
-    },
-/*   wordyLettersNoVowelCheck : (word) => {
-        return WordyLetters.letterGenerator( 10, word => {
-            return true;
-        });
-    },*/
+    // sowpodsLettersTuples2Bag16 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 16, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag17 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 17, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag20 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 20, () => { return true } );
+    // },
+    // sowpodsLettersTuples2Bag25 : (word) => {
+    //     return sowpodsLettersTuples.letterGenerator( 10, 2, 25, () => { return true } );
+    // },
 }
 
 function runAlgorithms() {
@@ -94,6 +144,7 @@ function outputResults( result ) {
     console.log(JSON.stringify(result, 
         (key, value) => {
             if ( key === 'distribution' ) { // sort the distribution map
+                return null;
                 return Object.keys( value ).sort().reduce( (map, key) => {
                     map[key] = value[key];
                     return map;
