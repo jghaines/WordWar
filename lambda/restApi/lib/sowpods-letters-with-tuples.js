@@ -1,32 +1,34 @@
 'use strict';
 
-var _letterDistribution = [].concat(
-   Array.from( { length :  79 }, () => 'A' ),
-   Array.from( { length :  18 }, () => 'B' ),
-   Array.from( { length :  41 }, () => 'C' ),
-   Array.from( { length :  34 }, () => 'D' ),
-   Array.from( { length : 115 }, () => 'E' ),
-   Array.from( { length :  12 }, () => 'F' ),
-   Array.from( { length :  28 }, () => 'G' ),
-   Array.from( { length :  25 }, () => 'H' ),
-   Array.from( { length :  92 }, () => 'I' ),
-   Array.from( { length :   1 }, () => 'J' ),
-   Array.from( { length :   9 }, () => 'K' ),
-   Array.from( { length :  53 }, () => 'L' ),
-   Array.from( { length :  29 }, () => 'M' ),
-   Array.from( { length :  68 }, () => 'N' ),
-   Array.from( { length :  67 }, () => 'O' ),
-   Array.from( { length :  30 }, () => 'P' ),
-   Array.from( { length :   1 }, () => 'Q' ),
-   Array.from( { length :  71 }, () => 'R' ),
-   Array.from( { length :  98 }, () => 'S' ),
-   Array.from( { length :  66 }, () => 'T' ),
-   Array.from( { length :  33 }, () => 'U' ),
-   Array.from( { length :   9 }, () => 'V' ),
-   Array.from( { length :   7 }, () => 'W' ),
-   Array.from( { length :   2 }, () => 'X' ),
-   Array.from( { length :  16 }, () => 'Y' ),
-   Array.from( { length :   4 }, () => 'Z' )
+require('../util/Array.from.polyfill')
+
+var _letterDistribution = [].concat( // distribution-parser.js 1000
+   Array.from( { length :  79 }, function() { return 'A' } ),
+   Array.from( { length :  18 }, function() { return 'B' } ),
+   Array.from( { length :  41 }, function() { return 'C' } ),
+   Array.from( { length :  34 }, function() { return 'D' } ),
+   Array.from( { length : 115 }, function() { return 'E' } ),
+   Array.from( { length :  12 }, function() { return 'F' } ),
+   Array.from( { length :  28 }, function() { return 'G' } ),
+   Array.from( { length :  25 }, function() { return 'H' } ),
+   Array.from( { length :  92 }, function() { return 'I' } ),
+   Array.from( { length :   1 }, function() { return 'J' } ),
+   Array.from( { length :   9 }, function() { return 'K' } ),
+   Array.from( { length :  53 }, function() { return 'L' } ),
+   Array.from( { length :  29 }, function() { return 'M' } ),
+   Array.from( { length :  68 }, function() { return 'N' } ),
+   Array.from( { length :  67 }, function() { return 'O' } ),
+   Array.from( { length :  30 }, function() { return 'P' } ),
+   Array.from( { length :   1 }, function() { return 'Q' } ),
+   Array.from( { length :  71 }, function() { return 'R' } ),
+   Array.from( { length :  98 }, function() { return 'S' } ),
+   Array.from( { length :  66 }, function() { return 'T' } ),
+   Array.from( { length :  33 }, function() { return 'U' } ),
+   Array.from( { length :   9 }, function() { return 'V' } ),
+   Array.from( { length :   7 }, function() { return 'W' } ),
+   Array.from( { length :   2 }, function() { return 'X' } ),
+   Array.from( { length :  16 }, function() { return 'Y' } ),
+   Array.from( { length :   4 }, function() { return 'Z' } )
 );
 
 var _getLetter = function() {
@@ -95,7 +97,7 @@ var vowelCountChecker = function( letters, minVowels, maxVowels ) {
 	return ( vowelCount >= minVowels && vowelCount <= maxVowels );
 }
 
-
+// var getTileGenerator = function()
 
 module.exports = {
     vowelCountChecker : vowelCountChecker,
