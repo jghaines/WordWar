@@ -1,27 +1,27 @@
 'use strict';
 
 var _letterDistribution = [].concat(
-   Array.from( { length : 79 }, () => 'A' ),
+   Array.from( { length : 79-2 }, () => 'A' ), // **
    Array.from( { length : 18 }, () => 'B' ),
    Array.from( { length : 41 }, () => 'C' ),
-   Array.from( { length : 34 }, () => 'D' ),
-   Array.from( { length : 115 }, () => 'E' ),
+   Array.from( { length : 34-1 }, () => 'D' ), // *
+   Array.from( { length : 115-6 }, () => 'E' ), // ******
    Array.from( { length : 12 }, () => 'F' ),
-   Array.from( { length : 28 }, () => 'G' ),
+   Array.from( { length : 28-1 }, () => 'G' ), // *
    Array.from( { length : 25 }, () => 'H' ),
-   Array.from( { length : 92 }, () => 'I' ),
+   Array.from( { length : 92-4 }, () => 'I' ), // ****
    Array.from( { length : 1 }, () => 'J' ),
    Array.from( { length : 9 }, () => 'K' ),
-   Array.from( { length : 53 }, () => 'L' ),
+   Array.from( { length : 53-1 }, () => 'L' ), // *
    Array.from( { length : 29 }, () => 'M' ),
-   Array.from( { length : 68 }, () => 'N' ),
-   Array.from( { length : 67 }, () => 'O' ),
+   Array.from( { length : 68-4 }, () => 'N' ), // ****
+   Array.from( { length : 67-1 }, () => 'O' ), // *
    Array.from( { length : 30 }, () => 'P' ),
-   Array.from( { length : 1 }, () => 'Q' ),
-   Array.from( { length : 71 }, () => 'R' ),
-   Array.from( { length : 98 }, () => 'S' ),
-   Array.from( { length : 66 }, () => 'T' ),
-   Array.from( { length : 33 }, () => 'U' ),
+   Array.from( { length : 1-1 }, () => 'Q' ), // +
+   Array.from( { length : 71-3 }, () => 'R' ), // ***
+   Array.from( { length : 98-3 }, () => 'S' ), // ***
+   Array.from( { length : 66-4 }, () => 'T' ), // ****
+   Array.from( { length : 33-1 }, () => 'U' ), // +
    Array.from( { length : 9 }, () => 'V' ),
    Array.from( { length : 7 }, () => 'W' ),
    Array.from( { length : 2 }, () => 'X' ),
@@ -35,6 +35,7 @@ var _getLetter = function() {
 
 
 var _tupleDistribution = [ // tuple-parser.js 300 0 // without weighting
+   ["Q","U"],
    ["E","S"],
    ["I","N"],
    ["E","R"],
