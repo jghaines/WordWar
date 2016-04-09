@@ -17,11 +17,11 @@ var _letterDistribution = [].concat(
    Array.from( { length : 68-4 }, () => 'N' ), // ****
    Array.from( { length : 67-1 }, () => 'O' ), // *
    Array.from( { length : 30 }, () => 'P' ),
-   Array.from( { length : 1-1 }, () => 'Q' ), // +
+   Array.from( { length : 1 }, () => 'Q' ), // +
    Array.from( { length : 71-3 }, () => 'R' ), // ***
    Array.from( { length : 98-3 }, () => 'S' ), // ***
    Array.from( { length : 66-4 }, () => 'T' ), // ****
-   Array.from( { length : 33-1 }, () => 'U' ), // +
+   Array.from( { length : 33 }, () => 'U' ), // +
    Array.from( { length : 9 }, () => 'V' ),
    Array.from( { length : 7 }, () => 'W' ),
    Array.from( { length : 2 }, () => 'X' ),
@@ -35,7 +35,6 @@ var _getLetter = function() {
 
 
 var _tupleDistribution = [ // tuple-parser.js 300 0 // without weighting
-   ["Q","U"],
    ["E","S"],
    ["I","N"],
    ["E","R"],
