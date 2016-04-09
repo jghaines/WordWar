@@ -18,10 +18,10 @@ var array = [];
 readable.on( 'data', ( data ) => {
     
     data.split('').forEach( function(current) {
-        current = current.toLowerCase();
+        current = current.toUpperCase();
 
-        if ( previous && previous.match( /[a-z]/ ) &&
-             current  && current.match( /[a-z]/ )) {
+        if ( previous && previous.match( /[A-Za-z]/ ) &&
+             current  && current.match( /[A-Za-z]/ )) {
             tuple[previous] = tuple[previous] || {};
             tuple[previous][current] = tuple[previous][current] || 0; 
 
@@ -34,7 +34,7 @@ readable.on( 'data', ( data ) => {
 readable.on( 'end', ( data ) => {
     Object.keys(tuple).sort().forEach( function( first ) {
         Object.keys(tuple[first]).sort().forEach( function( second ) {
-            array.push( { tuple : first+second, count : tuple[first][second] } );
+            array.push( { tuple : first+second, count : tuple[first][second], array : [ first, second ] } );
         });
     });
     
@@ -44,9 +44,29 @@ readable.on( 'end', ( data ) => {
        return 0; 
     });
     
-    array.forEach( function(el) {
-       console.log( JSON.stringify(el) ); 
-    });
+    
+    var headCount = process.argv[2] || 99999;
+    headCount = Math.min( array.length, headCount );
+    var totalBagCount = process.argv[3]; // optional - generate a 'bag' of this many tuples
+
+    var totalCount = 0; 
+    for ( var i = 0; i < headCount; ++i ) {
+       totalCount += array[i].count;         
+    }
+
+    for ( var i = 0; i < headCount; ++i ) {
+        if ( totalBagCount ) {
+            if ( totalBagCount > 0 ) { // with weighting
+                var bagCount = Math.floor( totalBagCount * array[i].count / totalCount );
+                console.log(`   Array.from( { length : ${ bagCount } }, () => ${ JSON.stringify( array[i].array ) } ),`); 
+            } else { // without weighting
+                console.log(`   ${ JSON.stringify( array[i].array ) },`); 
+            }
+        } else {
+            console.log( JSON.stringify( array[i] ) );         
+        }
+    }
+    
     
     process.exit();
 });
