@@ -152,32 +152,32 @@ describe('Play', function() {
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the longer score win for attack vs attack', function () {
-			var playA = new Play(); playA.playType = 'attack'; playA.wordPoints = 8;
-			var playB = new Play(); playB.playType = 'attack'; playB.wordPoints = 3;
+			var playA = new Play(); playA.playType = 'attack'; playA.turnPoints = 8;
+			var playB = new Play(); playB.playType = 'attack'; playB.turnPoints = 3;
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the longer score win for move vs move', function () {
-			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8;
-			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 3;
+			var playA = new Play(); playA.playType = 'move'; playA.turnPoints = 8;
+			var playB = new Play(); playB.playType = 'move'; playB.turnPoints = 3;
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the longer word win for same playType, score', function () {
-			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'LONGER';
-			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'SHORT';
+			var playA = new Play(); playA.playType = 'move'; playA.turnPoints = 8; playA.word = 'LONGER';
+			var playB = new Play(); playB.playType = 'move'; playB.turnPoints = 8; playB.word = 'SHORT';
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should let the later word win for same playType, score, wordLength', function () {
-			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'ZZZZ';
-			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'AAAA';
+			var playA = new Play(); playA.playType = 'move'; playA.turnPoints = 8; playA.word = 'ZZZZ';
+			var playB = new Play(); playB.playType = 'move'; playB.turnPoints = 8; playB.word = 'AAAA';
 			expect( playA.cmp( playB )).toEqual( 1 );
 			expect( playB.cmp( playA )).toEqual( -1 ); // reverse order
 		});
 		it('should tie for same', function () {
-			var playA = new Play(); playA.playType = 'move'; playA.wordPoints = 8; playA.word = 'WORD';
-			var playB = new Play(); playB.playType = 'move'; playB.wordPoints = 8; playB.word = 'WORD';
+			var playA = new Play(); playA.playType = 'move'; playA.turnPoints = 8; playA.word = 'WORD';
+			var playB = new Play(); playB.playType = 'move'; playB.turnPoints = 8; playB.word = 'WORD';
 			expect( playA.cmp( playB )).toEqual( 0 );
 			expect( playB.cmp( playA )).toEqual( 0 ); // reverse order
 		});
@@ -196,7 +196,7 @@ describe('Play', function() {
 
 	describe("#toPlayPointsInfo(.)", function () {
 		it('should describe the points', function () {
-			var playA = new Play( { playType : 'attack', word: 'SUGAR', startTurnScore: 5, wordPoints: 10, endTurnScore: 15 } );
+			var playA = new Play( { playType : 'attack', word: 'SUGAR', startTurnScore: 5, turnPoints: 10, endTurnScore: 15 } );
 			expect( playA.toPlayPointsInfo() ).toEqual( '5 + 10 = 15' );
     	});
 	});

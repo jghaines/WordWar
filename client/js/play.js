@@ -117,10 +117,10 @@ function Play( parameters ) {
 		if ( this.playType != other.playType ) { // attack vs move			
 			return ( this.playType == 'attack' ? 1 : -1 ); // attack beats move
 
-		} else if ( this.wordPoints > other.wordPoints ) { // higher wordPoints wins
+		} else if ( this.turnPoints > other.turnPoints ) { // higher turnPoints wins
 			return 1;
 
-		} else if ( other.wordPoints > this.wordPoints ) {
+		} else if ( other.turnPoints > this.turnPoints ) {
 			return -1;
 
 		} else if ( this.word.length > other.word.length ) { // longer word wins
@@ -153,7 +153,7 @@ function Play( parameters ) {
     this.toPlayPointsInfo = function() {
         return '' +
             this.startTurnScore + ' + ' +
-            this.wordPoints + ' = ' + 
+            this.turnPoints + ' = ' + 
 			this.endTurnScore;
     }
     
