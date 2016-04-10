@@ -284,7 +284,7 @@ function KnockBackPlayScoreStrategy() {
 			}
 
 		} else if ( play.startPosition.col === play.endPosition.col ) { // vertical move
-			if ( play.startPosition.row < play.startPosition.row ) { // top-to-bottom
+			if ( play.startPosition.row < play.endPosition.row ) { // top-to-bottom
 				play.endPosition = play.endPosition.getIncrement( -1, 0 );
 			} else if ( play.startPosition.row > play.endPosition.row ) { // bottom-to-top 
 				play.endPosition = play.endPosition.getIncrement( 1, 0 );
