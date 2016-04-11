@@ -463,7 +463,11 @@ function BoardController( boardModel, boardView, playEmitter ) {
 				! placeableCell.hasClass( 'block' ) && // stop at a block
 				( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )) // iterate over placed and static
 				);
-        return placeableCell;
+        if ( placeableCell && ! placeableCell.hasClass( 'block' )) {
+            return placeableCell;
+		} else {
+            return null;
+        }
 	}
 
 	this.highlightPlaceableCells = function( cells ) {
