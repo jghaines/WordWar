@@ -28,7 +28,7 @@ describe('Coordinates', function() {
 			this.outerRange = new CoordRange( this.coordsA, this.coordsB );
 			this.coordsRotated = this.coordsA.getRotated( this.outerRange );
 
-			expect( this.coordsRotated.equals( this.coordsB ) ).toEqual( true );
+			expect( this.coordsRotated.equals( this.coordsB ) ).to.Be( true );
 		});
 		it('should rotate from far corner to near corner', function () {
 			this.coordsA = new Coordinates( 0, 0 );
@@ -36,7 +36,7 @@ describe('Coordinates', function() {
 			this.outerRange = new CoordRange( this.coordsA, this.coordsB );
 			this.coordsRotated = this.coordsB.getRotated( this.outerRange ); // note: B
 
-			expect( this.coordsRotated.equals( this.coordsA ) ).toEqual( true );
+			expect( this.coordsRotated.equals( this.coordsA ) ).to.Be( true );
 		});
 		it('should rotate around the middle', function () {
 			this.coordsA = new Coordinates( 0, 0 );
@@ -46,7 +46,7 @@ describe('Coordinates', function() {
 			this.outerRange = new CoordRange( this.coordsA, this.coordsB );
 			this.coordsRotated = this.coordsC.getRotated( this.outerRange );
 
-			expect( this.coordsRotated.equals( this.coordsD ) ).toEqual( true );
+			expect( this.coordsRotated.equals( this.coordsD ) ).to.Be( true );
 		});
 		it('should rotate around offset outerRanges', function () {
 			this.coordsA = new Coordinates( 10, 10 );
@@ -56,7 +56,7 @@ describe('Coordinates', function() {
 			this.outerRange = new CoordRange( this.coordsA, this.coordsB );
 			this.coordsRotated = this.coordsC.getRotated( this.outerRange );
 
-			expect( this.coordsRotated.equals( this.coordsD ) ).toEqual( true );
+			expect( this.coordsRotated.equals( this.coordsD ) ).to.Be( true );
 		});
 	});
 
@@ -66,28 +66,28 @@ describe('Coordinates', function() {
 			this.coordsB = new Coordinates( 5, 4 );
 			this.coordsIncr = this.coordsA.getIncrement( 0, -1 );
 
-			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+			expect( this.coordsIncr.equals( this.coordsB ) ).to.Be( true );
 		});
 		it('should shift down', function () {
 			this.coordsA = new Coordinates( 5, 5 );
 			this.coordsB = new Coordinates( 5, 6 );
 			this.coordsIncr = this.coordsA.getIncrement( 0, 1 );
 
-			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+			expect( this.coordsIncr.equals( this.coordsB ) ).to.Be( true );
 		});
 		it('should shift left', function () {
 			this.coordsA = new Coordinates( 5, 5 );
 			this.coordsB = new Coordinates( 4, 5 );
 			this.coordsIncr = this.coordsA.getIncrement( -1, 0 );
 
-			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+			expect( this.coordsIncr.equals( this.coordsB ) ).to.Be( true );
 		});
 		it('should shift right', function () {
 			this.coordsA = new Coordinates( 5, 5 );
 			this.coordsB = new Coordinates( 6, 5 );
 			this.coordsIncr = this.coordsA.getIncrement( 1, 0 );
 
-			expect( this.coordsIncr.equals( this.coordsB ) ).toEqual( true );
+			expect( this.coordsIncr.equals( this.coordsB ) ).to.Be( true );
 		});
 	});
 });

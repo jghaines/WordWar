@@ -83,8 +83,8 @@ describe('notNull', function() {
         var sparseArray = [];
         sparseArray[1] =  1;
         sparseArray[3] = 3;
-        expect( notNull( sparseArray[1] )).toEqual( true );
-        expect( notNull( sparseArray[3] )).toEqual( true );
+        expect( notNull( sparseArray[1] )).to.Be( true );
+        expect( notNull( sparseArray[3] )).to.Be( true );
     });
     it('return false for non-existent elements in sparseArray', function () {
         var sparseArray = [];
@@ -95,10 +95,10 @@ describe('notNull', function() {
         expect( notNull( sparseArray[4] )).toEqual( false );
     });
     it('return true for {} object', function () {
-        expect( notNull( {} )).toEqual( true );
+        expect( notNull( {} )).to.Be( true );
     });
     it('return true for 42 integer', function () {
-        expect( notNull( 42 )).toEqual( true );
+        expect( notNull( 42 )).to.Be( true );
     });
 });
 
