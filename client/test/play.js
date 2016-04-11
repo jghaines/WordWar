@@ -92,7 +92,7 @@ describe('Play', function() {
             expect( nextTurn.turnIndex ).toEqual( this.jsonPlay.turnIndex + 1 );  // next turnIndex
             expect( nextTurn.playerIndex ).toEqual( this.jsonPlay.playerIndex );
 
-            expect( nextTurn.playComplete ).toEqual( false );
+            expect( nextTurn.playComplete ).toBe( false );
 
             expect( nextTurn.startTurnScore ).toEqual( this.jsonPlay.endTurnScore ); // endTurnScore -> startTurnScore
             expect( nextTurn.startPosition.equals( this.jsonPlay.endPosition )).toBe( true ); // startPosition -> endPosition

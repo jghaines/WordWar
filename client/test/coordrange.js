@@ -33,19 +33,19 @@ describe('CoordRange', function() {
 	describe("#getRotated()", function () {
 		it('should rotate from left to right', function () {
 			this.rotated = this.rangeLeft.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeRight ) ).toEqual( true );
+			expect( this.rotated.equals( this.rangeRight ) ).toBe( true );
 		});
 		it('should rotate from right to left ', function () {
 			this.rotated = this.rangeRight.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeLeft ) ).toEqual( true );
+			expect( this.rotated.equals( this.rangeLeft ) ).toBe( true );
 		});
 		it('should rotate from top to bottom', function () {
 			this.rotated = this.rangeTop.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeBottom ) ).toEqual( true );
+			expect( this.rotated.equals( this.rangeBottom ) ).toBe( true );
 		});
 		it('should rotate from bottom to top', function () {
 			this.rotated = this.rangeBottom.getRotated( this.outerRange );
-			expect( this.rotated.equals( this.rangeTop ) ).toEqual( true );
+			expect( this.rotated.equals( this.rangeTop ) ).toBe( true );
 		});
 	});
 });

@@ -43,7 +43,7 @@ describe('BoardModel', function() {
 	describe('#getCellAtCoordinates()', function () {
 		it('should return correct cell', function () {
 			var cell = this._boardModel.getCellAtCoordinates( new Coordinates( 2, 2 ));
-			expect( cell.hasClass('test-middle') ).to.Be( true );
+			expect( cell.hasClass('test-middle') ).toBe( true );
 		});
 	});
 
@@ -58,7 +58,7 @@ describe('BoardModel', function() {
 	describe('#getPlayerCell( 0 )', function () {
 		it('should return correct cell', function () {
 			var cell = this._boardModel.getPlayerCell( 0 );
-			expect( cell.hasClass( 'player-0' ) ).to.Be( true );
+			expect( cell.hasClass( 'player-0' ) ).toBe( true );
 			expect( cell.length ).toEqual( 1 );
 		});
 	});
@@ -103,7 +103,7 @@ describe('BoardModel', function() {
 			expect( this.cells.indexOf( this.fromCell ) ).toEqual( -1 );
 		});
 		it('should end in the top left', function () {
-			expect( this.cells[4].hasClass('test-top-left') ).to.Be( true );
+			expect( this.cells[4].hasClass('test-top-left') ).toBe( true );
 		});
 	});
 });

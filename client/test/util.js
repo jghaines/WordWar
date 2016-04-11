@@ -77,28 +77,28 @@ describe('String', function() {
 
 describe('notNull', function() {
     it('return false for null', function () {
-        expect( notNull( null ) ).toEqual( false );
+        expect( notNull( null ) ).toBe( false );
     });
     it('return true for existent element in sparseArray', function () {
         var sparseArray = [];
         sparseArray[1] =  1;
         sparseArray[3] = 3;
-        expect( notNull( sparseArray[1] )).to.Be( true );
-        expect( notNull( sparseArray[3] )).to.Be( true );
+        expect( notNull( sparseArray[1] )).toBe( true );
+        expect( notNull( sparseArray[3] )).toBe( true );
     });
     it('return false for non-existent elements in sparseArray', function () {
         var sparseArray = [];
         sparseArray[1] =  1;
         sparseArray[3] = 3;
-        expect( notNull( sparseArray[0] )).toEqual( false );
-        expect( notNull( sparseArray[2] )).toEqual( false );
-        expect( notNull( sparseArray[4] )).toEqual( false );
+        expect( notNull( sparseArray[0] )).toBe( false );
+        expect( notNull( sparseArray[2] )).toBe( false );
+        expect( notNull( sparseArray[4] )).toBe( false );
     });
     it('return true for {} object', function () {
-        expect( notNull( {} )).to.Be( true );
+        expect( notNull( {} )).toBe( true );
     });
     it('return true for 42 integer', function () {
-        expect( notNull( 42 )).to.Be( true );
+        expect( notNull( 42 )).toBe( true );
     });
 });
 
