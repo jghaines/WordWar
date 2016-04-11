@@ -303,7 +303,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         var playsForTurn = this._plays[ this.turnIndex ];
 
         // execute all the scoreStrategy logic
-		this._scoreStrategy.calculateScore( playsForTurn );
+		this._scoreStrategy.execute( playsForTurn );
 
         // sort Plays into moves and attacks
         var movePlays = [];
