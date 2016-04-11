@@ -55,7 +55,7 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
         }),                    
         new SetEndTurnStrategy(),
         new MinMaxEndTurnStrategy( -99999, 500 ),
-        new LowWaterMarkLoserStrategy( 0 ),
+        new EndGameLowWaterMarkLoserStrategy( 0 ),
 
         new IncrementAttackMultiplierStrategy( 2, -99 ),
         new MinMaxAttackMultiplierStrategy( 0, 8 ),

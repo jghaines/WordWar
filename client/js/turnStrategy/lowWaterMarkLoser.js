@@ -1,7 +1,7 @@
 'use strict';
 
 // if the endTurnScore drops below the given lowWaterMark, the player has lost
-function LowWaterMarkLoserStrategy( lowWaterMark ) {
+function EndGameLowWaterMarkLoserStrategy( lowWaterMark ) {
 	this.execute = function( plays ) {
  		plays.forEach( (function( play ) {
             play.lost = (

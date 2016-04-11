@@ -1,7 +1,7 @@
-describe('LowWaterMarkLoserStrategy', function() {
+describe('EndGameLowWaterMarkLoserStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new LowWaterMarkLoserStrategy( 0 );
-		this.scoreStrategyNegative = new LowWaterMarkLoserStrategy( -100 );
+		this.scoreStrategy = new EndGameLowWaterMarkLoserStrategy( 0 );
+		this.scoreStrategyNegative = new EndGameLowWaterMarkLoserStrategy( -100 );
 	});
 
 	describe('#execute()', function () {
