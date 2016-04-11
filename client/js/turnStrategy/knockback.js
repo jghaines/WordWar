@@ -34,11 +34,11 @@ function KnockBackPlayStrategy() {
 		}
 	}
 
-	this.calculateScore = function( plays ) {
-        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.calculateScore(plays) expects two players' );
+	this.execute = function( plays ) {
+        if ( plays.length !== 2 ) throw new Error( this.constructor.name + '.execute(plays) expects two players' );
 		plays.forEach( (function( play ) {
-            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startPosition undefined' );
-            if ( typeof play.endPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.endPosition undefined' );
+            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.startPosition undefined' );
+            if ( typeof play.endPosition === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.endPosition undefined' );
         }).bind( this ));
         
 		// if players have landed on same cell, retreat both players

@@ -4,11 +4,11 @@ function CompositeStrategy( StrategyList ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.SILENT );
 
-	this.calculateScore = function( plays ) {
+	this.execute = function( plays ) {
         var allTrue = true;
 		this._StrategyList.forEach( (function( Strategy ) {
-	 		this.log.debug( this.constructor.name, '.calculateScore (', plays, ') - strategy:', Strategy.constructor.name );
-			allTrue = Strategy.calculateScore( plays ) && allTrue;
+	 		this.log.debug( this.constructor.name, '.execute (', plays, ') - strategy:', Strategy.constructor.name );
+			allTrue = Strategy.execute( plays ) && allTrue;
 		}).bind( this ) );
         return allTrue;
  	}

@@ -3,10 +3,10 @@ describe('StaticAttackMultiplierStrategy', function() {
 		this.scoreStrategy = new StaticAttackMultiplierStrategy( 2 );
 		this.playA = { startAttackMultiplier : 2 };
 		this.playB = { startAttackMultiplier : 10 };
-		this.scoreStrategy.calculateScore([ this.playA, this.playB ]);
+		this.scoreStrategy.execute([ this.playA, this.playB ]);
 	});
 
-	describe('#calculateScore()', function () {
+	describe('#execute()', function () {
 		it('should set startAttackMultiplier to 2 if it has that value', function () {
 			expect( this.playA.startAttackMultiplier ).toEqual( 2 );
 			expect( this.playA.endAttackMultiplier ).toEqual( 2 );

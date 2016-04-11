@@ -5,10 +5,10 @@ describe('TurnPointsEqualsWordPointsStrategy', function() {
 		this.scoreStrategy = new TurnPointsEqualsWordPointsStrategy();
 		this.playA = { wordPoints : 15 };
 		this.playB = { wordPoints : 12 };
-		this.scoreStrategy.calculateScore([ this.playA, this.playB ]);
+		this.scoreStrategy.execute([ this.playA, this.playB ]);
 	});
 
-	describe('#calculateScore()', function () {
+	describe('#execute()', function () {
 		it('should set the score to the word value', function () {
 			expect( this.playA.turnPoints ).toEqual( 15 );
 			expect( this.playB.turnPoints ).toEqual( 12 );

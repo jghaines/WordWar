@@ -2,10 +2,10 @@
 
 // updates the attackMultiplier based on playType and increment settings
 function IncrementAttackMultiplierStrategy( incrementAfterMove, incrementAfterAttack ) {
-	this.calculateScore = function( plays ) {
+	this.execute = function( plays ) {
 		plays.forEach( (function( play ) {
-            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.playType undefined' );
-            if ( typeof play.startAttackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startAttackMultiplier undefined' );
+            if ( typeof play.playType === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.playType undefined' );
+            if ( typeof play.startAttackMultiplier === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.startAttackMultiplier undefined' );
 
 			if ( 'attack' === play.playType) {
 				play.endAttackMultiplier = play.startAttackMultiplier + this._incrementAfterAttack;

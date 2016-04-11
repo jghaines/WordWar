@@ -29,11 +29,11 @@ describe('KnockBackPlayStrategy', function() {
 		});
 	});
 
-	describe('#calculateScore()', function () {
+	describe('#execute()', function () {
 		it('should leave the players if they are on different cells', function () {
 			this.plays[0].endPosition = this.coord00;
 			this.plays[1].endPosition = this.coord11;
-			this.scoreStrategy.calculateScore( this.plays );
+			this.scoreStrategy.execute( this.plays );
 			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
 			expect( this.plays[1].endPosition.equals( this.coord11 )).toBe( true );
 		});
@@ -44,7 +44,7 @@ describe('KnockBackPlayStrategy', function() {
 			this.plays[1].endPosition = this.coord00;
 			this.plays[1].startPosition = this.coord05; // horizontal
 			this.plays[1].playType    = 'move';
-			this.scoreStrategy.calculateScore( this.plays );
+			this.scoreStrategy.execute( this.plays );
 			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
 			expect( this.plays[1].endPosition.equals( this.coord01 )).toBe( true );
 		});
@@ -60,7 +60,7 @@ describe('KnockBackPlayStrategy', function() {
 			this.plays[1].endPosition   = this.coord50; // left
 			this.plays[1].turnPoints    = 10;
 
-			this.scoreStrategy.calculateScore( this.plays );
+			this.scoreStrategy.execute( this.plays );
 			expect( this.plays[0].endPosition.equals( this.coord40 )).toBe( true, "loser knocked back" );
 			expect( this.plays[1].endPosition.equals( this.coord50 )).toBe( true, "winner keeps place" );
 		});
@@ -76,7 +76,7 @@ describe('KnockBackPlayStrategy', function() {
 			this.plays[1].endPosition   = this.coord50; // left
 			this.plays[1].turnPoints    = 5;
 
-			this.scoreStrategy.calculateScore( this.plays );
+			this.scoreStrategy.execute( this.plays );
 			expect( this.plays[0].endPosition.equals( this.coord50 )).toBe( true, "winner keeps place" );
 			expect( this.plays[1].endPosition.equals( this.coord51 )).toBe( true, "loser knocked back" );
 		});
@@ -87,7 +87,7 @@ describe('KnockBackPlayStrategy', function() {
 			this.plays[1].endPosition       = this.coord00;
 			this.plays[1].startPosition   = this.coord50; // vertical
 			this.plays[1].playType          = 'move';
-			this.scoreStrategy.calculateScore( this.plays );
+			this.scoreStrategy.execute( this.plays );
 			expect( this.plays[0].endPosition.equals( this.coord00 )).toBe( true );
 			expect( this.plays[1].endPosition.equals( this.coord10 )).toBe( true );
 		});

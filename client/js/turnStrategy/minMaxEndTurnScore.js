@@ -5,10 +5,10 @@ function MinMaxEndTurnStrategy( minValue, maxValue ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
 
-	this.calculateScore = function( plays ) {
-        this.log.info( this.constructor.name + '.calculateScore()' );
+	this.execute = function( plays ) {
+        this.log.info( this.constructor.name + '.execute()' );
 		plays.forEach( (function( play ) {
-            if ( typeof play.endTurnScore === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.endTurnScore undefined' );
+            if ( typeof play.endTurnScore === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.endTurnScore undefined' );
 
 			if ( play.endTurnScore > this._maxValue ) {
 				play.endTurnScore = this._maxValue;

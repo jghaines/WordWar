@@ -27,7 +27,7 @@ function HighScoreWinsMetaStrategy( parameters ) {
     }
 
     // TODO - refactor AttackWinsMetaStrategy, HighScoreWinsMetaStrategy to common base class
-    this.calculateScore = function( plays ) {
+    this.execute = function( plays ) {
         var playsByOutcome = this._getPlaysByOutcome( plays );
         
         // set .turnPoints after parallel evaluation

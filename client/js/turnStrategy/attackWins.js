@@ -18,13 +18,13 @@ function AttackWinsMetaStrategy( parameters ) {
             playsByOutcome._losers[0]  = playsByOutcome.loser  = plays[0];
             playsByOutcome._winners[0] = playsByOutcome.winner = plays[1];
         } else {
-            throw new Error(this.constructor.name + '.calculateScore() - expected exactly 1 Attack and 1 Move'); 
+            throw new Error(this.constructor.name + '.execute() - expected exactly 1 Attack and 1 Move'); 
         }
         return playsByOutcome;
     }
 
     // TODO - refactor AttackWinsMetaStrategy, HighScoreWinsMetaStrategy to common base class
-    this.calculateScore = function( plays ) {
+    this.execute = function( plays ) {
         var playsByOutcome = this._getPlaysByOutcome( plays );
         
         // set .turnPoints after parallel evaluation

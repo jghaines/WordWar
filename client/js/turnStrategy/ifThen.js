@@ -8,9 +8,9 @@
 //    { ifTrue : [ new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ) ], thenDo : [ new OtherStrategy(), ... ] }, ...
 // )
 function IfThenStrategy( parameters ) {
-	this.calculateScore = function( plays ) {
-        if ( this._ifTrue.calculateScore( plays )) {
-            return this._thenDo.calculateScore( plays );
+	this.execute = function( plays ) {
+        if ( this._ifTrue.execute( plays )) {
+            return this._thenDo.execute( plays );
         }
     }
 

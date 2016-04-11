@@ -9,19 +9,19 @@ describe('PlayTypeCombinationConditionalStrategy', function() {
         });
 		it('should match on attack vs move', function () { 
             var plays = [ this.playAttack, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( true );
 		});
 		it('should match on move vs attack', function () { 
             var plays = [ this.playMove, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( true );
 		});
 		it('should NOT match on move vs move', function () { 
             var plays = [ this.playMove, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should NOT match on attack vs attack', function () { 
             var plays = [ this.playAttack, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 	});
 	describe('attack vs attack', function () {
@@ -30,19 +30,19 @@ describe('PlayTypeCombinationConditionalStrategy', function() {
         });
 		it('should NOT match on attack vs move', function () { 
             var plays = [ this.playAttack, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should NOT match on move vs attack', function () { 
             var plays = [ this.playMove, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should NOT match on move vs move', function () { 
             var plays = [ this.playMove, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should match on attack vs attack', function () { 
             var plays = [ this.playAttack, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( true );
 		});
 	});
 	describe('move vs move', function () {
@@ -51,19 +51,19 @@ describe('PlayTypeCombinationConditionalStrategy', function() {
         });
 		it('should NOT match on attack vs move', function () { 
             var plays = [ this.playAttack, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should NOT match on move vs attack', function () { 
             var plays = [ this.playMove, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 		it('should match on move vs move', function () { 
             var plays = [ this.playMove, this.playMove ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( true );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( true );
 		});
 		it('should NOT match on attack vs attack', function () { 
             var plays = [ this.playAttack, this.playAttack ];
-			expect( this.scoreStrategy.calculateScore( plays ) ).toBe( false );
+			expect( this.scoreStrategy.execute( plays ) ).toBe( false );
 		});
 	});
 });

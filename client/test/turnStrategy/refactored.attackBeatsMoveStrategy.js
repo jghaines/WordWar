@@ -25,46 +25,46 @@ describe('complicated composite victory scoring - refactored AttackBeatsMoveStra
         ]);
 	});
 
-	describe('#calculateScore()', function () {
+	describe('#execute()', function () {
 		it('should leave turnPoints unchanged for Move vs Move', function () {
 			var playA = { playType : 'move',   turnPoints : 15, startAttackMultiplier : 2 };
 			var playB = { playType : 'move',   turnPoints : 12, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playA, playB ]);
+			this.scoreStrategy.execute([ playA, playB ]);
 			expect( playA.turnPoints ).toEqual( 15 );
 			expect( playB.turnPoints ).toEqual( 12 );
 		});
 		it('should penalise a Move player against an Attack', function () {
 			var playA = { playType : 'move',   turnPoints : 15, startAttackMultiplier : 2 };
 			var playB = { playType : 'attack', turnPoints : 12, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playA, playB ]);
+			this.scoreStrategy.execute([ playA, playB ]);
 			expect( playA.turnPoints ).toEqual( -2 * 12 );
 			expect( playB.turnPoints ).toEqual( 0 );
 		});
 		it('should penalise a Move player against an Attack - when players are swapped', function () {
 			var playA = { playType : 'move',   turnPoints : 15, startAttackMultiplier : 2 };
 			var playB = { playType : 'attack', turnPoints : 12, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playB, playA ]); // note order
+			this.scoreStrategy.execute([ playB, playA ]); // note order
 			expect( playA.turnPoints ).toEqual( -2 * 12 );
 			expect( playB.turnPoints ).toEqual( 0 );
 		});
 		it('should result in a 0-0 draw when two Attacks are equal value', function () {
 			var playA = { playType : 'attack', turnPoints : 15, startAttackMultiplier : 2 };
 			var playB = { playType : 'attack', turnPoints : 15, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playA, playB ]);
+			this.scoreStrategy.execute([ playA, playB ]);
 			expect( playA.turnPoints ).toEqual( 0 );
 			expect( playB.turnPoints ).toEqual( 0 );
 		});
 		it('should penalise the lower-scored player in an attack', function () {
 			var playA = { playType : 'attack', turnPoints : 12, startAttackMultiplier : 2 };
 			var playB = { playType : 'attack', turnPoints : 15, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playA, playB ]);
+			this.scoreStrategy.execute([ playA, playB ]);
 			expect( playA.turnPoints ).toEqual( -2 * 15 );
 			expect( playB.turnPoints ).toEqual( 0 );
 		});
 		it('should penalise the lower-scored player in an attack - when players are swapped', function () {
 			var playA = { playType : 'attack', turnPoints : 12, startAttackMultiplier : 2 };
 			var playB = { playType : 'attack', turnPoints : 15, startAttackMultiplier : 2 };
-			this.scoreStrategy.calculateScore([ playB, playA ]); // note order
+			this.scoreStrategy.execute([ playB, playA ]); // note order
 			expect( playA.turnPoints ).toEqual( -2 * 15 );
 			expect( playB.turnPoints ).toEqual( 0 );
 		});

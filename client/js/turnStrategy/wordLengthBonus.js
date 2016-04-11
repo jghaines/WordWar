@@ -10,10 +10,10 @@ function WordLengthBonusStrategy( bonuses ) {
 		return 0;
 	}
 
-	this.calculateScore = function( plays ) {
+	this.execute = function( plays ) {
 		plays.forEach( (function( play ) {
-            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.turnPoints undefined' );
-            if ( typeof play.word === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.word undefined' );
+            if ( typeof play.turnPoints === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.turnPoints undefined' );
+            if ( typeof play.word === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.word undefined' );
 
 			play.turnPoints += this._bonusForWordLength( play.word.length );
 		}).bind( this ));

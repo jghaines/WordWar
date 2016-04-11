@@ -4,9 +4,9 @@ function UpdatePositionStrategy() {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
-	this.calculateScore = function( plays ) {
+	this.execute = function( plays ) {
 		plays.forEach( (function( play ) {
-            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.calculateScore(play) play.startPosition undefined' );
+            if ( typeof play.startPosition === 'undefined' ) throw new Error( this.constructor.name + '.execute(play) play.startPosition undefined' );
 
             switch ( play.playType ) {
                 case 'move':

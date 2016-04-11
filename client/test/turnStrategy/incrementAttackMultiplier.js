@@ -3,10 +3,10 @@ describe('IncrementAttackMultiplierStrategy', function() {
 		this.Strategy = new IncrementAttackMultiplierStrategy( 1, -2 );
 		this.playA = { playType : 'move',   startAttackMultiplier : 2 };
 		this.playB = { playType : 'attack', startAttackMultiplier : 10 };
-		this.Strategy.calculateScore([ this.playA, this.playB ]);
+		this.Strategy.execute([ this.playA, this.playB ]);
 	});
 
-	describe('#calculateScore()', function () {
+	describe('#execute()', function () {
 		it('should increment my moveIncrement after a move', function () {
 			expect( this.playA.endAttackMultiplier ).toEqual( 2 + 1 );
 		});
