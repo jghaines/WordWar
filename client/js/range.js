@@ -56,4 +56,13 @@ function CoordRange( _min, _max ) {
 		}
 		this.max = _max;
     }
+    
+    if ( this.min && this.max ) {
+        // ensure min is closest to origin
+        if ( this.max.distanceToOrigin() < this.min.distanceToOrigin() ) {
+            var tmp = this.min;
+            this.min = this.max;
+            this.max = tmp;
+        }
+    }
 }

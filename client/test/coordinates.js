@@ -21,6 +21,21 @@ describe('Coordinates', function() {
 		});
 	});
 
+	describe("#distanceToOrigin()", function () {
+		it('return the exact horizontal distance', function () {
+			this.coords = new Coordinates( 0, 4 );
+			expect( this.coords.distanceToOrigin() ).toEqual( 4 );
+		});
+		it('return the exact vertical distance', function () {
+			this.coords = new Coordinates( 4, 0 );
+			expect( this.coords.distanceToOrigin() ).toEqual( 4 );
+		});
+		it('return the approximate diagonal', function () {
+			this.coords = new Coordinates( 2, 3 );
+			expect( this.coords.distanceToOrigin() ).toBeCloseTo( 3.6, 0.1 );
+		});
+	});
+
 	describe("#getRotated()", function () {
 		it('should rotate from near corner to far corner', function () {
 			this.coordsA = new Coordinates( 0, 0 );

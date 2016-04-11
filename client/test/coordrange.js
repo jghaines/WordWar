@@ -12,6 +12,25 @@ describe('CoordRange', function() {
 		this.rangeBottom = new CoordRange( this.coordsSW, this.coordsSE );
 	});
 
+	describe("#constructor", function () {
+		it('should accept coordinates in the left, right natural order', function () {
+            var range = new CoordRange( this.coordsNW, this.coordsNE );
+			expect( range.equals( this.rangeTop )).toBe( true );
+		});
+		it('should accept coordinates in the right, left reverse order', function () {
+            var range = new CoordRange( this.coordsNE, this.coordsNW );
+			expect( range.equals( this.rangeTop )).toBe( true );
+		});
+		it('should accept coordinates in the top, bottom natural order', function () {
+            var range = new CoordRange( this.coordsNW, this.coordsSW );
+			expect( range.equals( this.rangeLeft )).toBe( true );
+		});
+		it('should accept coordinates in the bottom, top reverse order', function () {
+            var range = new CoordRange( this.coordsSW, this.coordsNW );
+			expect( range.equals( this.rangeLeft )).toBe( true );
+		});
+	});
+
 	describe("#count()", function () {
 		it('should return 5 for the top', function () {
 			expect( this.rangeTop.count() ).toEqual( 5 );

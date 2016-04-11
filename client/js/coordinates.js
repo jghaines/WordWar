@@ -21,7 +21,7 @@ function Coordinates( _row, _col ) {
 	}
 
 	this.getRotated = function( outerRange ) {
-		if ( outerRange === undefined ) {
+		if ( ! outerRange ) {
 			throw new Error( this.constructor.name + ".getRotated() Expected outerRange parameter" );
 		} else if ( outerRange.constructor.name != 'CoordRange' ) {
 			throw new Error( this.constructor.name + ".getRotated() Expected outerRange of type CoordRange" );
@@ -34,7 +34,7 @@ function Coordinates( _row, _col ) {
 	}
 
 	this.equals = function( other ) {
-		return ( this.row == other.row && this.col == other.col );
+		return ( this.row === other.row && this.col === other.col );
 	}
 
 	// return the distance from this coordinate to other
@@ -43,6 +43,11 @@ function Coordinates( _row, _col ) {
 		return	Math.sqrt(
 					Math.pow( this.row - other.row, 2 ) + 
 					Math.pow( this.col - other.col, 2 ) );
+	}
+
+	this.distanceToOrigin = function() {
+		this.log.info( this.constructor.name + '.distanceToOrigin(.)' );
+		return this.distanceTo( new Coordinates( 0, 0 ));
 	}
 
 	// constructor code
