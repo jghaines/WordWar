@@ -1,6 +1,6 @@
-describe('KnockBackPlayScoreStrategy', function() {
+describe('KnockBackPlayStrategy', function() {
 	beforeEach(	function() {
-		this.scoreStrategy = new KnockBackPlayScoreStrategy();
+		this.scoreStrategy = new KnockBackPlayStrategy();
 		this.plays = [ new Play(), new Play() ];
 		this.coord00 = new Coordinates( 0, 0 );
 		this.coord01 = new Coordinates( 0, 1 );

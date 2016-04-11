@@ -7,15 +7,17 @@
 		<link rel="shortcut icon" type="image/png" href="lib/jasmine-2.4.1/jasmine_favicon.png">
 		<link rel="stylesheet" href="lib/jasmine-2.4.1/jasmine.css">
 
+		<!-- test harness  -->
 		<script src="lib/jasmine-2.4.1/jasmine.js"></script>
 		<script src="lib/jasmine-2.4.1/jasmine-html.js"></script>
 		<script src="lib/jasmine-2.4.1/boot.js"></script>
 
+		<!-- 3rd party libraries  -->
 		<script type="text/javascript" src="../lib/event-emitter.js"></script>
 		<script type="text/javascript" src="../lib/jquery.js"></script>
 		<script type="text/javascript" src="../lib/loglevel.js"></script>
 
-		<!-- include source files here... -->
+		<!-- include source files  -->
 		<script type="text/javascript" src="../js/attack.range.strategy.js"></script>
 		<script type="text/javascript" src="../js/audio.js"></script>
 		<script type="text/javascript" src="../js/board.js"></script>
@@ -25,8 +27,23 @@
 		<script type="text/javascript" src="../js/letters.js"></script>
 		<script type="text/javascript" src="../js/play.js"></script>
 		<script type="text/javascript" src="../js/range.js"></script>
-		<script type="text/javascript" src="../js/score.strategy.js"></script>
 		<script type="text/javascript" src="../js/util.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/applyAttackMultiplier.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/attackWins.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/composite.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/highScoreWins.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/ifThen.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/incrementAttackMultiplier.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/knockback.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/lowWaterMarkLoser.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/minMaxAttackMultiplier.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/minMaxEndTurnScore.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/playType.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/setEndTurnScore.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/staticAttackMultiplier.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/turnPointsEqualsWordPoints.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/updatePosition.js"></script>
+        <script type="text/javascript" src="../js/turnStrategy/wordLengthBonus.js"></script>
 
 		<!-- include spec files -->
 		<script type="text/javascript" src="attack.range.strategy.js"></script>
@@ -36,10 +53,28 @@
 		<script type="text/javascript" src="coordrange.js"></script>
 		<script type="text/javascript" src="game.js"></script>
 		<script type="text/javascript" src="play.js"></script>
-		<script type="text/javascript" src="score.strategy.js"></script>
 		<script type="text/javascript" src="util.js"></script>
 
-		<script type="text/javascript" src="turnStrategy/knockback.strategy.js"></script>
+		<script type="text/javascript" src="turnStrategy/applyAttackMultiplier.js"></script>
+		<script type="text/javascript" src="turnStrategy/attackWins.js"></script>
+		<script type="text/javascript" src="turnStrategy/composite.js"></script>
+		<script type="text/javascript" src="turnStrategy/highScoreWins.js"></script>
+		<script type="text/javascript" src="turnStrategy/ifThen.js"></script>
+		<script type="text/javascript" src="turnStrategy/incrementAttackMultiplier.js"></script>
+		<script type="text/javascript" src="turnStrategy/knockback.js"></script>
+		<script type="text/javascript" src="turnStrategy/lowWaterMarkLoser.js"></script>
+		<script type="text/javascript" src="turnStrategy/minMaxAttackMultiplier.js"></script>
+		<script type="text/javascript" src="turnStrategy/minMaxEndTurnScore.js"></script>
+		<script type="text/javascript" src="turnStrategy/playType.js"></script>
+		<script type="text/javascript" src="turnStrategy/refactored.attackBeatsMoveStrategy.js"></script>
+		<script type="text/javascript" src="turnStrategy/refactored.attackPenalisesMoveStrategy.js"></script>
+		<script type="text/javascript" src="turnStrategy/refactored.winnerBeatsLoserStrategy.js"></script>
+		<script type="text/javascript" src="turnStrategy/refactored.winnerPenalisesLoserStrategy.js"></script>
+		<script type="text/javascript" src="turnStrategy/setEndTurnScore.js"></script>
+		<script type="text/javascript" src="turnStrategy/staticAttackMultiplier.js"></script>
+		<script type="text/javascript" src="turnStrategy/turnPointsEqualsWordPoints.js"></script>
+		<script type="text/javascript" src="turnStrategy/updatePosition.js"></script>
+		<script type="text/javascript" src="turnStrategy/wordLengthBonus.js"></script>
 	</head>
 
 	<body>
