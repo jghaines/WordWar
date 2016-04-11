@@ -179,7 +179,9 @@ function BoardModel() {
 	this.placeLetter = function(cell, letter) {
 		cell.text(letter);
 		cell.addClass('placed');
-		this._placedDirection = cell.attr('ww:direction');
+		if ( cell.attr('ww:direction') ) {
+			this._placedDirection = cell.attr('ww:direction');
+		}
 	}
 
 	this.setUnplaceableAll = function() {
@@ -402,29 +404,55 @@ function BoardController( boardModel, boardView, playEmitter ) {
         }
 	}
 
-	this.unhighlightPlaceablePositions = function() {
+	this.unhighlightPlaceableCells = function() {
 		this.log.info("BoardController.unhighlightPlaceablePositions()");
 		this._boardModel.setUnplaceableAll();
 	}
 
-	this._highlightNextPlaceable = function( fromCell, direction ) {
-		this.log.info( this.constructor.name + '._highlightNextPlaceable(., direction=' + direction + ')');
+    this.getPlaceableCells = function( playerIndex ) {
+		this.log.info( this.constructor.name + '.getPlaceableCells())');
+        var placeableCells = [];
+
+		var playerCell =  this._boardModel.getPlayerCell( playerIndex );
+
+		var placedCells =  this._boardModel.getPlacedCells();
+        if ( placedCells.length === 0 ) {
+			// no placed cells - all directions
+            [ 'up', 'down', 'left', 'right' ].forEach( dir => {
+               var cell = this._getNextPlaceable( playerCell, dir );
+               if ( cell ) {
+                   cell.direction = dir;
+                   placeableCells.push( cell );
+               }  
+            });
+		} else {
+            var cell = this._getNextPlaceable( playerCell, this._boardModel.getPlacedDirection() );
+            if ( cell ) {
+	            placeableCells.push( cell );
+            }
+		}
+        
+        return placeableCells;
+    }
+
+	this._getNextPlaceable = function( fromCell, direction ) {
+		this.log.info( this.constructor.name + '._getNextPlaceable(., direction=' + direction + ')');
 		var coords = this._boardModel.getCoordinatesForCell( fromCell );
 
 		var placeableCell;
 		do {
 			switch(direction) {
 				case 'left':
-		    		coords.col--;
+		    		coords = coords.getIncrement(0, -1);
 					break;
 	    		case 'right':
-		    		coords.col++;
+		    		coords = coords.getIncrement(0, 1);
 					break;
 	    		case 'up':
-	    			coords.row--;
+		    		coords = coords.getIncrement(-1, 0);
 		        	break;
 	    		case 'down':
-	    			coords.row++;
+		    		coords = coords.getIncrement(1, 0);
 		        	break;
 		        default:
 		        	throw this.constructor.name + '._highlightNextPlaceable() - invalid direction=' + direction;
@@ -435,31 +463,18 @@ function BoardController( boardModel, boardView, playEmitter ) {
 				! placeableCell.hasClass( 'block' ) && // stop at a block
 				( placeableCell.hasClass( 'placed' ) || placeableCell.hasClass( 'static' )) // iterate over placed and static
 				);
-
-		if ( placeableCell && ! placeableCell.hasClass( 'block' )) {
-			placeableCell.addClass( 'placeable' );
-			placeableCell.attr( 'ww:direction', direction );
-		}
+        return placeableCell;
 	}
 
-	this.highlightPlaceablePositions = function( playerIndex ) {
+	this.highlightPlaceableCells = function( cells ) {
 		this.log.info("BoardController.highlightPlaceablePositions()");
-		var placedCells =  this._boardModel.getPlacedCells();
-		var playerCell =  this._boardModel.getPlayerCell( playerIndex );
 
-		this.unhighlightPlaceablePositions();
+		this.unhighlightPlaceableCells();
 
-		if ( placedCells.length == 0 ) {
-			this.log.debug("  BoardController.highlightPlaceablePositions() - direction == any");
-			// no placed cells - all directions
-			this._highlightNextPlaceable(playerCell, 'up');
-			this._highlightNextPlaceable(playerCell, 'down');
-			this._highlightNextPlaceable(playerCell, 'left');
-			this._highlightNextPlaceable(playerCell, 'right');
-		} else {
-			var direction = this._boardModel.getPlacedDirection();
-			this._highlightNextPlaceable(playerCell, direction);
-		}
+        cells.forEach( cell => {
+            cell.addClass( 'placeable' );
+            cell.attr( 'ww:direction', cell.direction );
+        });
 	}
 
 	// invoke callback( cell, coords ) for each cells, set Attackable where it returns true
@@ -481,7 +496,7 @@ function BoardController( boardModel, boardView, playEmitter ) {
 		var cells = this._boardModel.getPlacedCells();
 		this._boardModel.unplaceAll();
 		this._boardView._fillSpecials( cells );
-		this.unhighlightPlaceablePositions();
+		this.unhighlightPlaceableCells();
 		this.unhighlightAttackable();
 	}
 

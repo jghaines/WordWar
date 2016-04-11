@@ -135,17 +135,26 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			return;
 		}
 
-        this._audio.selectTile();
+		
+        var placeableCells = this._boardController.getPlaceableCells( this._gameInfo.playerIndex ); 
+		this._boardController.highlightPlaceableCells( placeableCells );
 
-		this._lettersModel.select(index);
-		this._lettersView.updateSelection();
-		this._boardController.highlightPlaceablePositions( this._gameInfo.playerIndex );
+		// if we have started placing, just auto-place next tile in the direction
+        if ( placeableCells.length === 1 ) {
+			this._lettersModel.select(index);
+            this.placeLetterOnBoard( placeableCells[0] );
+        } else if ( placeableCells.length > 1 ) {
+            this._audio.selectTile();
+			this._lettersModel.select(index);
+            this._lettersView.updateSelection();
+        }
+
 	}
 
 	this.placeLetterOnBoard = function( cell ) {
 		this.log.info( this.constructor.name + '.placeLetterOnBoard(.)');
 
-		if ( this._lettersModel.getSelectedIndex() == null ) { // no letter selected
+		if ( this._lettersModel.getSelectedIndex() === null ) { // no letter selected
 			// nudge the user
 			this._lettersView.flash('flash-selection');
 			return;
@@ -164,7 +173,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
 		this._lettersView.updatePlaced();
-		this._boardController.unhighlightPlaceablePositions();
+		this._boardController.unhighlightPlaceableCells();
 		this._buttonsView.enable( 'move',  true );
 		this._buttonsView.enable( 'reset', true );
 
@@ -234,7 +243,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
 
-		this._boardController.unhighlightPlaceablePositions();
+		this._boardController.unhighlightPlaceableCells();
 
         this._boardView.setStatus( "Waiting for other player" );
         this.state = GameState.REMOTE_MOVE;
@@ -254,7 +263,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         this._audio.resetWord();
 
-		this._boardController.resetWord();
+        var cells = this._boardModel.getPlacedCells();
+		this._boardController.resetWord( cells );
+		this._boardController.unhighlightAttackable();
 
 		this._lettersModel.unplaceAll();
 		this._lettersModel.unselect();
