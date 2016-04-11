@@ -18,9 +18,9 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
 		{ from: 10, to: 99, strategy: new RadiusAttackRangeStrategy(3) },
 	]);
 
-	var scoreStrategy  = new CompositeScoreStrategy( [
-        new TurnPointsEqualsWordPointsScoreStrategy(),
-        new WordLengthBonusScoreStrategy( [
+	var Strategy  = new CompositeStrategy( [
+        new TurnPointsEqualsWordPointsStrategy(),
+        new WordLengthBonusStrategy( [
             { from:  1, to:  1, bonus: 1 },
             { from:  2, to:  2, bonus: 2 },
             { from:  3, to:  3, bonus: 3 },
@@ -32,7 +32,7 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
             { from:  9, to:  9, bonus: 9 },
             { from: 10, to: 99, bonus: 20 },
         ]),
-        new ApplyAttackMulitiplierScoreStrategy(),
+        new ApplyAttackMulitiplierStrategy(),
         
         // turn victory conditions
         new IfThenStrategy( {
@@ -53,18 +53,18 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
                 loser  : _ => { return -1 * _.winner.turnPoints },
             })
         }),                    
-        new SetEndTurnScoreStrategy(),
-        new MinMaxEndTurnScoreStrategy( -99999, 500 ),
-        new LowWaterMarkLoserScoreStrategy( 0 ),
+        new SetEndTurnStrategy(),
+        new MinMaxEndTurnStrategy( -99999, 500 ),
+        new LowWaterMarkLoserStrategy( 0 ),
 
-        new IncrementAttackMultiplierScoreStrategy( 2, -99 ),
-        new MinMaxAttackMultiplierScoreStrategy( 0, 8 ),
+        new IncrementAttackMultiplierStrategy( 2, -99 ),
+        new MinMaxAttackMultiplierStrategy( 0, 8 ),
 
-        new UpdatePositionScoreStrategy(),
-        new KnockBackPlayScoreStrategy(),
+        new UpdatePositionStrategy(),
+        new KnockBackPlayStrategy(),
 	]);
 
-	gc = new GameController( remote, scoreStrategy, attackRangeStrategy );
+	gc = new GameController( remote, Strategy, attackRangeStrategy );
 }
 
 
