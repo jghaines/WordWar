@@ -78,13 +78,12 @@ describe('BoardController', function() {
 
 	});
 
-	describe( '#highlightPlaceablePositions()', function () {
-		it( 'from the start position, it should highlight two adjacent cells', function() {
+	describe( '#getPlaceableCells()', function () {
+		it( 'from the start position, it should return two adjacent cells', function() {
 			this._boardModel._table 			= this.testTables['startPosition'];
 			this._boardModel._placedDirection 	= this.testDirection['startPosition'];
 
-			this._boardController.highlightPlaceablePositions( 0 );
-			var cells = this._boardModel._table.find( 'td.placeable' );
+			var cells = this._boardController.getPlaceableCells( 0 );
 			expect( cells.length ).toEqual( 2 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 4 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 0 );
@@ -92,12 +91,11 @@ describe('BoardController', function() {
 			expect( this._boardModel.getCoordinatesForCell( $( cells[1] )).col ).toEqual( 1 );
 		});
 
-		it( 'should highlight only the next cell, when a single letter is placed', function() {
+		it( 'should retun only the next cell, when a single letter is placed', function() {
 			this._boardModel._table 			= this.testTables['firstLetter'];
 			this._boardModel._placedDirection 	= this.testDirection['firstLetter'];
 
-			this._boardController.highlightPlaceablePositions( 0 );
-			var cells = this._boardModel._table.find( 'td.placeable' );
+			var cells = this._boardController.getPlaceableCells( 0 );
 			expect( cells.length ).toEqual( 1 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 5 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 2 );
@@ -107,19 +105,17 @@ describe('BoardController', function() {
 			this._boardModel._table 			= this.testTables['skipStatic'];
 			this._boardModel._placedDirection 	= this.testDirection['skipStatic'];
 
-			this._boardController.highlightPlaceablePositions( 0 );
-			var cells = this._boardModel._table.find( 'td.placeable' );
+			var cells = this._boardController.getPlaceableCells( 0 );
 			expect( cells.length ).toEqual( 1 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).row ).toEqual( 5 );
 			expect( this._boardModel.getCoordinatesForCell( $( cells[0] )).col ).toEqual( 3 );
 		});
 
-		it( 'should highlight nothing on a full row', function() {
+		it( 'should return nothing on a full row', function() {
 			this._boardModel._table 			= this.testTables['fullRow'];
 			this._boardModel._placedDirection 	= this.testDirection['fullRow'];
 
-			this._boardController.highlightPlaceablePositions( 0 );
-			var cells = this._boardModel._table.find( 'td.placeable' );
+			var cells = this._boardController.getPlaceableCells( 0 );
 			expect( cells.length ).toEqual( 0 );
 		});
 
@@ -127,8 +123,7 @@ describe('BoardController', function() {
 			this._boardModel._table 			= this.testTables['block'];
 			this._boardModel._placedDirection 	= this.testDirection['block'];
 
-			this._boardController.highlightPlaceablePositions( 0 );
-			var cells = this._boardModel._table.find( 'td.placeable' );
+			var cells = this._boardController.getPlaceableCells( 0 );
 			expect( cells.length ).toEqual( 0 );
 		});
 	});

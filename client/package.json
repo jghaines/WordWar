@@ -1,0 +1,17 @@
+{
+  "name": "wordwar-web-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jasmine"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  }
+}

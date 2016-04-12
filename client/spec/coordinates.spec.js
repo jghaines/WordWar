@@ -1,3 +1,4 @@
+
 describe('Coordinates', function() {
 
 	describe("#distanceTo()", function () {
