@@ -19,7 +19,9 @@
   "scripts": {
     "start": "node index.js",
     "echo": "",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-local-lambda-getGame-0" : "./node_modules/lambda-local/bin/lambda-local --eventpath ./restApi/game/findGame/events/getGame.0.js --lambdapath ./restApi/game/findGame/handler.js --timeout 600",
+    "test-local-lambda-getGame-1" : "./node_modules/lambda-local/bin/lambda-local --eventpath ./restApi/game/findGame/events/getGame.1.js --lambdapath ./restApi/game/findGame/handler.js --timeout 600"
   },
   "repository": {
     "type": "git",
