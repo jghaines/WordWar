@@ -48,125 +48,166 @@ var createTurnInfo = function( turnIndex, letterCount ) {
     }
 };
 
-// AWS LAMBDA function
-// @gameInfo - partial Game object defining gameInfo.playerList[0].playerId guid
+// 
+//  [ API Gateway ]
+//      v
+//  [ Lambda ]
+//      v
+//  getGame
+//      v
+//  checkForPendingGame
+//      |
+//      +----(existing)---->+                   found an existing game
+//      |                   v
+//      |               joinExstingGame
+//      |                   |
+//      +<--(double join)---+                   we are already in that game
+//      |                   |
+//      v                   v
+//  createNewGame       removeQueueMessage
+//      |                   |
+//      v                   v
+//  sendGameToQueue     notifyGameStart
+//      |                   |
+//      +------------------>+
+//                          v
+//                      return gameInfo
+// 
+
+
+// AWS LAMBDA entry-point
+// @event.principalId - from API Gateway authorization - Auth0 user id 
+// @event.body - from REST request - optional partial Game object
 //  and (optionally, for dev), gameInfo.board
-// @callback - lambda callback
-var getGame = function( gameInfo, callback ) {    
+// @returns promise
+var getGame = function( event ) {    
     log.info('getGame()');
-    iz.anArray( gameInfo.playerList );
-    var playerId = gameInfo.playerList[0].playerId;
-    iz.uuid( playerId );
+    iz( event ).required();
+    iz( event.principalId ).required();
+    iz( event.body ).required();
+
+
+    var gameRequestInfo = event.body || {};
+    gameRequestInfo.playerList = [ event.principalId ];
 
     var receiveParams = {
         QueueUrl : ENV.sqsUrl,
         VisibilityTimeout : 30 // seconds
     };
-    sqs.receiveMessage( receiveParams, function( err, sqsData ) {
-        getPendingGame( err, gameInfo, sqsData, callback );
-    });
+    
+    return sqs.receiveMessage( receiveParams ).promise()
+        .then( sqsData => checkForPendingGame( gameRequestInfo, sqsData ) );
 }
 
 // see if there is a game on the queue, otherwise create one
-var getPendingGame = function( err, gameInfo, sqsData, callback ) {
-    log.info('getPendingGame()');
-    if ( err !== null) {
-        callback( err, null );
-    }
-    if ( sqsData.Messages !== undefined && sqsData.Messages.length == 1 ) { // found a game on the queue
-        var sqsHandle = sqsData.Messages[0].ReceiptHandle;
-        var body = JSON.parse( sqsData.Messages[0].Body );
-        gameInfo.gameId = body.gameId;
+var checkForPendingGame = function( gameRequestInfo, sqsData ) {
+    log.info('checkForPendingGame()');
+    iz( gameRequestInfo ).required();
+    iz( sqsData ).required();
 
-        addPlayerToExistingGame( gameInfo, sqsHandle, callback );
-    } else if ( sqsData.Messages === undefined ) { // no game found, request one
-        createNewGame( gameInfo, callback );
+    var candidateGame = null;
+    if ( sqsData.Messages && sqsData.Messages.length === 1 ) {
+        candidateGame = JSON.parse( sqsData.Messages[0].Body );
+    }
+
+    if ( candidateGame === null // no game found 
+        || candidateGame.playerList.indexOf( gameRequestInfo.playerList[0]) >= 0 ) { // our OWN game found
+        log.debug('checkForPendingGame() - createGame');
+        return Promise.try( () => createNewGame( gameRequestInfo ));
+    } else if ( sqsData.Messages.length === 1 ) { // found a game on the queue
+        log.debug('checkForPendingGame() - found pending');
+        gameRequestInfo.gameId = candidateGame.gameId;
+        var sqsHandle = sqsData.Messages[0].ReceiptHandle;
+
+        iz( gameRequestInfo.gameId ).required().uuid();
+        iz( sqsHandle ).required().not().blank();
+
+        return Promise.try( () => joinExistingGame( gameRequestInfo, sqsHandle ));
     } else {
-        callback( "getPendingGame() - unexpected SQS data' structure: " + JSON.stringify( sqsData ), null );
+        log.error('checkForPendingGame() - unexpected sqsData');
+        throw new Error( "checkForPendingGame() - unexpected SQS data' structure: " + JSON.stringify( sqsData ));
     }
 }
 
-var addPlayerToExistingGame = function( gameInfo, sqsHandle, callback ) {
+var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
+    log.info('joinExistingGame()');
+    iz( gameRequestInfo.gameId ).required().uuid();
+    iz( gameRequestInfo.playerList ).anArray().minLength( 1 ).maxLength( 1 );
+    iz( sqsHandle ).required();
+    
     // register player for game
     var updateParams = {
         TableName           : ENV.TableName.Game,
-        Key                 : { gameId : gameInfo.gameId },
+        Key                 : { gameId : gameRequestInfo.gameId },
         UpdateExpression    : "SET #playerList = list_append( #playerList, :newPlayerList )",
         ConditionExpression : "NOT contains( #playerList, :newPlayer )",
         ExpressionAttributeNames : {
             "#playerList" : "playerList"
         },
         ExpressionAttributeValues : {
-            ":newPlayer" : gameInfo.playerList[0],
-            ":newPlayerList" : gameInfo.playerList
+            ":newPlayer"        : gameRequestInfo.playerList[0],
+            ":newPlayerList"    : gameRequestInfo.playerList
         },
         ReturnValues        : "ALL_NEW"
     };
 
-    dynamo.update(updateParams, function( err, dbData ) {
-        playerAddedToGameDb( err, gameInfo, dbData, sqsHandle, callback )
-    });
+    return dynamo.update( updateParams ).promise()
+        .catch( err => {
+            if ( err.code === "ConditionalCheckFailedException" ) {
+                // conditon failed - invalid game Id?
+                log.error( "" )  
+                return Promise.try( () => createNewGame( gameRequestInfo ));
+            } else {
+                throw new Error( err );
+            }
+        })
+        .then( dbData => removeQueueMessage( sqsHandle, dbData ) );
 }
 
 // player has been added to game from queue
-var playerAddedToGameDb = function( err, gameInfo, dbData, sqsHandle, callback ) {
-    log.info('playerAddedToGameDb()');
+var removeQueueMessage = function( sqsHandle, dbData ) {
+    log.info('removeQueueMessage()');
+    iz( sqsHandle ).required();
+    iz( dbData ).required()
+    iz( dbData.Attributes ).required();
 
-    if ( null !== err ) {
-        if ( err.code === "ConditionalCheckFailedException" ) {
-            // we have found a game we are already a player in, create a new one instead
-            createNewGame( gameInfo, callback )
-        } else {
-            callback( err, null );
-        }
-    } else { // added successfully    
-        var remoteData =  dbData.Attributes;
+    var gameInfo = dbData.Attributes;
 
-        var deleteParams = {
-            QueueUrl : ENV.sqsUrl, 
-            ReceiptHandle: sqsHandle
-        };
-        sqs.deleteMessage( deleteParams, function( err, sqsData ) {
-            pendingGameDeletedFromQueue( err, remoteData, sqsData, callback );
-        });
-    }
+    var deleteParams = {
+        QueueUrl : ENV.sqsUrl, 
+        ReceiptHandle: sqsHandle
+    };
+    return sqs.deleteMessage( deleteParams ).promise()
+        .then( () => notifyGameStart( gameInfo ))
+        .then( () => gameInfo );
 }
 
-var pendingGameDeletedFromQueue = function( err, remoteData, sqsData, callback ) {
-    log.info('pendingGameDeletedFromQueue()');
-    if ( null !== err ) {
-        callback( err, null );
-    }
+var notifyGameStart = function( gameInfo ) {
+    log.info('notifyGameStart()');
+    iz( gameInfo ).required();
+    iz( gameInfo.gameId ).required().uuid();
+    iz( gameInfo.playerList ).anArray().minLength( 1 );
 
-    if ( remoteData.playerList.length > remoteData.playerCount ) { // shouldn't happen
-        log.error( 'pendingGameDeletedFromQueue() - overfilled game ' + remoteData.GameId );
-        callback( "Overfilled game " + JSON.stringify( remoteData ), null );
-    } else if ( remoteData.playerList.length == remoteData.playerCount ) { // we have filled the game
+    if ( gameInfo.playerList.length > gameInfo.playerCount ) { // shouldn't happen
+        throw new Error( "Overfilled game " + JSON.stringify( gameInfo ));
+    } else if ( gameInfo.playerList.length === gameInfo.playerCount ) { // we have filled the game
         var snsParams = {
-            Message: JSON.stringify( remoteData ),
+            Message: JSON.stringify( gameInfo ),
             TargetArn: ENV.snsArn
         };
-        sns.publish( snsParams, function( err, snsData ) {
-            if ( err !== null ) {
-                log.error( "SNS Publish error: ", err );
-                // fall through; SNS error is not fatal
-            }
-            returnGameInfo( remoteData, callback );
-        });
+        return sns.publish( snsParams ).promise();
     }
 };
 
-var returnGameInfo = function( remoteData, callback ) {
-    log.info('returnGameInfo()');
-    callback( null, remoteData );
-};
-
-var createNewGame = function( gameInfo, callback ) {
-    log.info('createNewGame(..)');
-    var board =  gameInfo.board || ENV.defaultBoard || "/boards/4.html";
-    var remoteData = {
+var createNewGame = function( gameRequestInfo ) {
+    log.info('createNewGame()');
+    iz( gameRequestInfo ).required();
+    iz( gameRequestInfo.playerList ).anArray().minLength( 1 ).maxLength( 1 );
+    
+    var board =  gameRequestInfo.board || ENV.defaultBoard || "/boards/4.html";
+    var gameInfo = {
         gameId          : UUID(),
-        playerList      : gameInfo.playerList,
+        playerList      : gameRequestInfo.playerList,
         playerCount     : 2,
         board           : board,
         letterCount     : 10,
@@ -175,44 +216,32 @@ var createNewGame = function( gameInfo, callback ) {
     };
     
     for (var turnIndex = 0; turnIndex < ENV.TILE_PLAY_BLOCK; turnIndex++) {
-        remoteData.turnInfo.push( createTurnInfo( turnIndex, remoteData.letterCount )); 
+        gameInfo.turnInfo.push( createTurnInfo( turnIndex, gameInfo.letterCount )); 
     }
     
     var putParams = {
         TableName   : ENV.TableName.Game,
-        Item        : remoteData
+        Item        : gameInfo
     };
-    dynamo.put(putParams, function( err, dbData ) {
-        gameAddedToDb( err, remoteData, dbData, callback )
-    });
+    return dynamo.put( putParams ).promise()
+        .then( () => sendGameToQueue( gameInfo ))
+        .then( () => gameInfo );
 }
 
-var gameAddedToDb = function( err, remoteData, dbData, callback ) {
-    log.info('gameAddedToDb()');
-    if ( null !== err ) {
-        callback( err, null );
-    } 
-    
+var sendGameToQueue = function( gameInfo ) {
+    log.info('sendGameToQueue()');
+    iz( gameInfo ).required();
+    iz( gameInfo.gameId ).required().uuid();
+    iz( gameInfo.playerList ).anArray().minLength( 1 );
+
     // advertise pending game on Queue
     var sendParams = {
         QueueUrl : ENV.sqsUrl,
-        MessageBody : JSON.stringify( remoteData )
+        MessageBody : JSON.stringify( gameInfo )
     };
-    sqs.sendMessage( sendParams, function( err, sqsData ) {
-        gameSentToQueue( err, remoteData, sqsData, callback );
-    });
-}
-
-var gameSentToQueue = function( err, remoteData, sqsData, callback ) {
-    log.info('gameSentToQueue()');
-    if ( null !== err ) {
-        callback( err, null );
-    }
-    remoteData.queueMessageId = sqsData.MessageId;
-    callback( null, remoteData );
+    return sqs.sendMessage( sendParams ).promise();
 }
 
 module.exports = {
-    getGame         : getGame,
-    getGameAsync    : Promise.promisify( getGame )
+    getGame         : getGame
 }

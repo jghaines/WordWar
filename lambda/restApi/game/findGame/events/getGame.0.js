@@ -1,7 +1,7 @@
 // Sample event data 
 module.exports = {
-        "playerList" : [
-            { "playerId"	:	"player-xx00000" }
-        ],
-        "board" : "/boards/2.html"
+    "principalId" : "auth0|570d8d3b3cb3aaeb48738a81",    
+    "body" : {
+            "board" : "/boards/2.html"
+    }
 }
