@@ -9,8 +9,6 @@ var Promise = require("bluebird");
 var vowelCountChecker = require('./sowpods-letters-with-tuples').vowelCountChecker;
 var letterGenerator = require('./sowpods-letters-with-tuples').letterGenerator;
 var UUID = require('node-uuid');
-var iz = require('iz');
-require('./iz-uuid')(iz);
 
 var AWS = require('aws-sdk');
 AWS.config.apiVersions = {
@@ -82,10 +80,9 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 // @returns Promise
 var getGame = function( event ) {    
     log.info('getGame()');
-    iz( event ).required();
-    iz( event.principalId ).required();
-    iz( event.body ).required();
-
+    if ( ! event )              throw new TypeError( "Expected 'event' parameter" );
+    if ( ! event.principalId )  throw new TypeError( "Expected 'event.principalId' parameter" );
+    if ( ! event.body )         throw new TypeError( "Expected 'event.body' parameter" );
 
     var gameRequestInfo = event.body || {};
     gameRequestInfo.playerList = [ event.principalId ];
@@ -102,8 +99,8 @@ var getGame = function( event ) {
 // see if there is a game on the queue, otherwise create one
 var checkForPendingGame = function( gameRequestInfo, sqsData ) {
     log.info('checkForPendingGame()');
-    iz( gameRequestInfo ).required();
-    iz( sqsData ).required();
+    if ( ! gameRequestInfo )    throw new TypeError( "Expected 'gameRequestInfo' parameter" );
+    if ( ! sqsData )            throw new TypeError( "Expected 'sqsData' parameter" );
 
     var candidateGame = null;
     if ( sqsData.Messages && sqsData.Messages.length === 1 ) {
@@ -131,10 +128,11 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
 
 var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
     log.info('joinExistingGame()');
-    iz( gameRequestInfo.gameId ).required().uuid();
-    iz( gameRequestInfo.playerList ).anArray().minLength( 1 ).maxLength( 1 );
-    iz( sqsHandle ).required();
-    
+    if ( ! gameRequestInfo )            throw new TypeError( "Expected 'gameRequestInfo' parameter" );
+    if ( ! gameRequestInfo.gameId )     throw new TypeError( "Expected 'gameRequestInfo.gameId' parameter" );
+    if ( ! gameRequestInfo.playerList ) throw new TypeError( "Expected 'gameRequestInfo.playerList' parameter" );
+    if ( ! sqsHandle )                  throw new TypeError( "Expected 'sqsHandle' parameter" );
+
     // register player for game
     var updateParams = {
         TableName           : ENV.TableName.Game,
@@ -167,9 +165,9 @@ var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
 // player has been added to game from queue
 var removeQueueMessage = function( sqsHandle, dbData ) {
     log.info('removeQueueMessage()');
-    iz( sqsHandle ).required();
-    iz( dbData ).required()
-    iz( dbData.Attributes ).required();
+    if ( ! sqsHandle )          throw new TypeError( "Expected 'sqsHandle' parameter" );
+    if ( ! dbData )             throw new TypeError( "Expected 'dbData' parameter" );
+    if ( ! dbData.Attributes )  throw new TypeError( "Expected 'dbData.Attributes' parameter" );
 
     var gameInfo = dbData.Attributes;
 
@@ -184,9 +182,9 @@ var removeQueueMessage = function( sqsHandle, dbData ) {
 
 var notifyGameStart = function( gameInfo ) {
     log.info('notifyGameStart()');
-    iz( gameInfo ).required();
-    iz( gameInfo.gameId ).required().uuid();
-    iz( gameInfo.playerList ).anArray().minLength( 1 );
+    if ( ! gameInfo )            throw new TypeError( "Expected 'gameInfo' parameter" );
+    if ( ! gameInfo.gameId )     throw new TypeError( "Expected 'gameInfo.gameId' parameter" );
+    if ( ! gameInfo.playerList ) throw new TypeError( "Expected 'gameInfo.playerList' parameter" );
 
     if ( gameInfo.playerList.length > gameInfo.playerCount ) { // shouldn't happen
         throw new Error( "Overfilled game " + JSON.stringify( gameInfo ));
@@ -201,8 +199,8 @@ var notifyGameStart = function( gameInfo ) {
 
 var createNewGame = function( gameRequestInfo ) {
     log.info('createNewGame()');
-    iz( gameRequestInfo ).required();
-    iz( gameRequestInfo.playerList ).anArray().minLength( 1 ).maxLength( 1 );
+    if ( ! gameRequestInfo )            throw new TypeError( "Expected 'gameRequestInfo' parameter" );
+    if ( ! gameRequestInfo.playerList ) throw new TypeError( "Expected 'gameRequestInfo.playerList' parameter" );
     
     var board =  gameRequestInfo.board || ENV.defaultBoard || "/boards/4.html";
     var gameInfo = {
@@ -230,9 +228,9 @@ var createNewGame = function( gameRequestInfo ) {
 
 var sendGameToQueue = function( gameInfo ) {
     log.info('sendGameToQueue()');
-    iz( gameInfo ).required();
-    iz( gameInfo.gameId ).required().uuid();
-    iz( gameInfo.playerList ).anArray().minLength( 1 );
+    if ( ! gameInfo )            throw new TypeError( "Expected 'gameInfo' parameter" );
+    if ( ! gameInfo.gameId )     throw new TypeError( "Expected 'gameInfo.gameId' parameter" );
+    if ( ! gameInfo.playerList ) throw new TypeError( "Expected 'gameInfo.playerList' parameter" );
 
     // advertise pending game on Queue
     var sendParams = {
