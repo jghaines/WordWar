@@ -6,8 +6,8 @@ var ENV = require('./lambda-config.json');
 
 var Promise = require("bluebird");
 
-var vowelCountChecker = require('./wordy-letters').vowelCountChecker;
-var letterGenerator = require('./wordy-letters').letterGenerator;
+var vowelCountChecker = require('./sowpods-letters-with-tuples').vowelCountChecker;
+var letterGenerator = require('./sowpods-letters-with-tuples').letterGenerator;
 var UUID = require('node-uuid');
 var iz = require('iz');
 require('./iz-uuid')(iz);
@@ -42,7 +42,7 @@ Promise.promisifyAll( Object.getPrototypeOf( sns ));
 var createTurnInfo = function( turnIndex, letterCount ) {
     return {
         turnIndex : turnIndex,
-        tiles : letterGenerator( letterCount, function(letters) {
+        tiles : letterGenerator( letterCount, 2, function(letters) {
             return vowelCountChecker( letters, ENV.MIN_VOWELS, ENV.MAX_VOWELS );
         })
     }
