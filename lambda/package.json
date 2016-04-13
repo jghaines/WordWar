@@ -4,7 +4,7 @@
   "description": "Lambda functions to support WordWar",
   "main": "index.js",
   "dependencies": {
-    "aws-sdk": "^2.2.41",
+    "aws-sdk": "2.2.48",
     "bluebird": "^3.3.4",
     "iz": "^0.7.1",
     "loglevel": "^1.4.0",

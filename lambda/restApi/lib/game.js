@@ -79,7 +79,7 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 // @event.principalId - from API Gateway authorization - Auth0 user id 
 // @event.body - from REST request - optional partial Game object
 //  and (optionally, for dev), gameInfo.board
-// @returns promise
+// @returns Promise
 var getGame = function( event ) {    
     log.info('getGame()');
     iz( event ).required();
@@ -95,7 +95,7 @@ var getGame = function( event ) {
         VisibilityTimeout : 30 // seconds
     };
     
-    return sqs.receiveMessage( receiveParams ).promise()
+    return sqs.receiveMessageAsync( receiveParams )
         .then( sqsData => checkForPendingGame( gameRequestInfo, sqsData ) );
 }
 
@@ -151,7 +151,7 @@ var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
         ReturnValues        : "ALL_NEW"
     };
 
-    return dynamo.update( updateParams ).promise()
+    return dynamo.updateAsync( updateParams )
         .catch( err => {
             if ( err.code === "ConditionalCheckFailedException" ) {
                 // conditon failed - invalid game Id?
@@ -177,7 +177,7 @@ var removeQueueMessage = function( sqsHandle, dbData ) {
         QueueUrl : ENV.sqsUrl, 
         ReceiptHandle: sqsHandle
     };
-    return sqs.deleteMessage( deleteParams ).promise()
+    return sqs.deleteMessageAsync( deleteParams )
         .then( () => notifyGameStart( gameInfo ))
         .then( () => gameInfo );
 }
@@ -195,7 +195,7 @@ var notifyGameStart = function( gameInfo ) {
             Message: JSON.stringify( gameInfo ),
             TargetArn: ENV.snsArn
         };
-        return sns.publish( snsParams ).promise();
+        return sns.publishAsync( snsParams );
     }
 };
 
@@ -223,7 +223,7 @@ var createNewGame = function( gameRequestInfo ) {
         TableName   : ENV.TableName.Game,
         Item        : gameInfo
     };
-    return dynamo.put( putParams ).promise()
+    return dynamo.putAsync( putParams )
         .then( () => sendGameToQueue( gameInfo ))
         .then( () => gameInfo );
 }
@@ -239,7 +239,7 @@ var sendGameToQueue = function( gameInfo ) {
         QueueUrl : ENV.sqsUrl,
         MessageBody : JSON.stringify( gameInfo )
     };
-    return sqs.sendMessage( sendParams ).promise();
+    return sqs.sendMessageAsync( sendParams );
 }
 
 module.exports = {
