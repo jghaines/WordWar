@@ -101,6 +101,8 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
     log.info('checkForPendingGame()');
     if ( ! gameRequestInfo )    throw new TypeError( "Expected 'gameRequestInfo' parameter" );
     if ( ! sqsData )            throw new TypeError( "Expected 'sqsData' parameter" );
+    var sqsHandle = sqsData.Messages[0].ReceiptHandle;
+    if ( ! sqsHandle )          throw new TypeError( "Expected '...ReceiptHandle' from SQS" );
 
     var candidateGame = null;
     if ( sqsData.Messages && sqsData.Messages.length === 1 ) {
@@ -114,11 +116,7 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
     } else if ( sqsData.Messages.length === 1 ) { // found a game on the queue
         log.debug('checkForPendingGame() - found pending');
         gameRequestInfo.gameId = candidateGame.gameId;
-        var sqsHandle = sqsData.Messages[0].ReceiptHandle;
-
-        iz( gameRequestInfo.gameId ).required().uuid();
-        iz( sqsHandle ).required().not().blank();
-
+        if ( ! gameRequestInfo.gameId )    throw new TypeError( "Expected 'gameId' from SQS" );
         return Promise.try( () => joinExistingGame( gameRequestInfo, sqsHandle ));
     } else {
         log.error('checkForPendingGame() - unexpected sqsData');

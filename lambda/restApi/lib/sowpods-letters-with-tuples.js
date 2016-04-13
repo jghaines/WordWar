@@ -1,7 +1,5 @@
 'use strict';
 
-require('../util/Array.from.polyfill')
-
 var _letterDistribution = [].concat( // distribution-parser.js 1000
    Array.from( { length :  79 }, function() { return 'A' } ),
    Array.from( { length :  18 }, function() { return 'B' } ),
