@@ -101,12 +101,14 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
     log.info('checkForPendingGame()');
     if ( ! gameRequestInfo )    throw new TypeError( "Expected 'gameRequestInfo' parameter" );
     if ( ! sqsData )            throw new TypeError( "Expected 'sqsData' parameter" );
-    var sqsHandle = sqsData.Messages[0].ReceiptHandle;
-    if ( ! sqsHandle )          throw new TypeError( "Expected '...ReceiptHandle' from SQS" );
 
     var candidateGame = null;
+    var sqsHandle = null;
     if ( sqsData.Messages && sqsData.Messages.length === 1 ) {
         candidateGame = JSON.parse( sqsData.Messages[0].Body );
+        sqsHandle = sqsData.Messages[0].ReceiptHandle;
+        if ( ! candidateGame )  throw new TypeError( "Expected '.Messages[0].Body' from SQS" );
+        if ( ! sqsHandle )      throw new TypeError( "Expected '..Messages[0].ReceiptHandle' from SQS" );
     }
 
     if ( candidateGame === null // no game found 
