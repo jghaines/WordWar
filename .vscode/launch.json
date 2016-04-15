@@ -9,7 +9,7 @@
 			"stopOnEntry": false,
 			"args": [
                 "--lambdapath",     "./restApi/game/findGame/handler.js",
-                "--eventpath",      "./restApi/game/findGame/events/getGame.0.js",
+                "--eventpath",      "./restApi/game/findGame/events/getGame.0.json",
                 "--timeout",        "600"
             ],
 			"cwd": "${workspaceRoot}/lambda",
@@ -33,7 +33,7 @@
 			"stopOnEntry": false,
 			"args": [
                 "--lambdapath",     "./restApi/game/findGame/handler.js",
-                "--eventpath",      "./restApi/game/findGame/events/getGame.1.js",
+                "--eventpath",      "./restApi/game/findGame/events/getGame.1.json",
                 "--timeout",        "600"
             ],
 			"cwd": "${workspaceRoot}/lambda",
@@ -58,7 +58,7 @@
 			"args": [
                 "--lambdapath",     "./restApi/game/play/putPlay/handler.js",
                 "--handler",        "handler",
-                "--eventpath",      "./restApi/game/play/putPlay/events/putPlay.0.0.js",
+                "--eventpath",      "./restApi/game/play/putPlay/events/putPlay.0.0.json",
                 "--timeout",        "600"
             ],
 			"cwd": "${workspaceRoot}/lambda",
@@ -125,6 +125,66 @@
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/sns-client.js",
+            "stopOnEntry": false,
+			"args": [
+            ],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},
+        {
+            "name": "promise-simple-aws-class",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/promise-simple-aws-class.js",
+            "stopOnEntry": false,
+			"args": [
+            ],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},
+        {
+            "name": "tileGeneratorChecker.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/misc/tileGeneratorChecker.js",
+            "stopOnEntry": false,
+			"args": [
+            ],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},
+        {
+            "name": "distribution-parser",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/misc/distribution-parser.js",
             "stopOnEntry": false,
 			"args": [
             ],
