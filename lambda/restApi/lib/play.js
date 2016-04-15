@@ -78,12 +78,16 @@ var getKey = function( gameId, turnIndex ) {
 // playParams.turnIndex   requried - integer index of turn in game
 // playParams.playerIndex requried - integer index of player in game
 // playParams.*           optional - other play data
-var putPlay = function( playParams ) {
+var putPlay = function( event ) {
     log.info('putPlay()');
-        
-    if ( ! playParams.gameId )      throw new TypeError( "Expected 'event.gameId' parameter" );
-    if ( ! playParams.turnIndex )   throw new TypeError( "Expected 'event.turnIndex' parameter" );
-    if ( ! playParams.playerIndex ) throw new TypeError( "Expected 'event.playerIndex' parameter" );
+    if ( ! event )              throw new TypeError( "Expected 'event' parameter" );
+    if ( ! event.principalId )  throw new TypeError( "Expected 'event.principalId' parameter" );
+    if ( ! event.body )         throw new TypeError( "Expected 'event.body' parameter" );
+
+    var playParams = event.body;
+    if ( ! playParams.gameId )      throw new TypeError( "Expected 'gameId' parameter" );
+    if ( ! playParams.turnIndex )   throw new TypeError( "Expected 'turnIndex' parameter" );
+    if ( ! playParams.playerIndex ) throw new TypeError( "Expected 'playerIndex' parameter" );
 
     var playerIndex = parseInt( playParams.playerIndex );
 
