@@ -4,11 +4,13 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "auth0-js": "^6.8.0",
     "aws-sdk": "^2.2.42",
     "body-parser": "^1.15.0",
     "cors": "^2.7.1",
     "express": "^4.13.4",
     "http": "0.0.0",
+    "jsonfile": "^2.2.3",
     "loglevel": "^1.4.0",
     "node-uuid": "^1.4.7",
     "socket.io": "^1.4.5"
