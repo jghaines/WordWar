@@ -4,6 +4,5 @@ var lib = require('../../lib');
 
 module.exports.handler = function( event, context ) {
   lib.getGame( event )
-    .then( context.succeed )
-    .catch( context.fail ); 
+    .then( context.succeed ); 
 };
