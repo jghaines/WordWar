@@ -3,8 +3,8 @@
 var lib = require('../../../lib');
 
 module.exports.handler = function( event, context ) {
+  if ( ! event ) throw new TypeError( "Expected 'event' parameter" );
 
-  lib.putPlay( event, function( error, response ) {
-    return context.done( error, response );
-  });
+  lib.putPlay( event )
+    .then( context.succeed ); 
 };

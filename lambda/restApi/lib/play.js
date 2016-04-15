@@ -4,6 +4,8 @@ log.setLevel( log.levels.INFO );
 
 var ENV = require('./lambda-config.json');
 
+var Promise = require("bluebird");
+
 var iz = require('iz');
 require('./iz-uuid')(iz);
 
@@ -30,6 +32,9 @@ var dynamodb = new AWS.DynamoDB( {
 var dynamo = new AWS.DynamoDB.DocumentClient( { service: dynamodb });
 var sqs = new AWS.SQS();
 var sns = new AWS.SNS();
+Promise.promisifyAll( Object.getPrototypeOf( dynamo ));
+Promise.promisifyAll( Object.getPrototypeOf( sqs ));
+Promise.promisifyAll( Object.getPrototypeOf( sns ));
 
 
 var getKey = function( gameId, turnIndex ) {
@@ -37,16 +42,48 @@ var getKey = function( gameId, turnIndex ) {
 };
 
 
+// 
+//  [ API Gateway ]     [ API Gateway ]
+//      v                   v
+//  [ Lambda ]          [ Lambda ]
+//      v                   v
+//      |                putPlay( play )
+//      |                   |
+//      |                ( dbPut )
+//      +<------------------+
+//      v
+//  getTurn( turn)
+//      |
+//      v
+//      +------------------>+                   if the game needs more tiles
+//      |                   v
+//      |               getTilesForTurn
+//      |                   |
+//      +<------------------+
+//      v
+//  getPlaysForTurn
+//      |
+//      v
+//      +----( putPlay )--->+                   if getTurn was invoked by putPlay
+//      |                   v
+//      |               snsPublish
+//      |                   |
+//      +<------------------+
+//      v
+//  return playInfo
+
+
 // AWS LAMBDA endpoint
 // playParams.gameId      requried - guid id of game
 // playParams.turnIndex   requried - integer index of turn in game
 // playParams.playerIndex requried - integer index of player in game
 // playParams.*           optional - other play data
-var putPlay = function( playParams, callback) {
+var putPlay = function( playParams ) {
     log.info('putPlay()');
-    iz.uuid( playParams.gameId );
-    iz.int( playParams.turnIndex );
-    iz.int( playParams.playerIndex );
+        
+    if ( ! playParams.gameId )      throw new TypeError( "Expected 'event.gameId' parameter" );
+    if ( ! playParams.turnIndex )   throw new TypeError( "Expected 'event.turnIndex' parameter" );
+    if ( ! playParams.playerIndex ) throw new TypeError( "Expected 'event.playerIndex' parameter" );
 
     var playerIndex = parseInt( playParams.playerIndex );
 
@@ -58,102 +95,83 @@ var putPlay = function( playParams, callback) {
             play                : playParams
         }
     };
-    
-    dynamo.put( putParams, function( err, dbData ) {
-        if ( null !== err ) {
-            callback( err, null );
-        }
-        var turnParams =  { 
-            gameId:     playParams.gameId,
-            turnIndex:  playParams.turnIndex,
-            snsPublish: true // flag to SNS publish if turn complete
-        };
-        getTurn( turnParams, callback );
-    });
+
+    var getTurnPromise = dynamo.putAsync( putParams )     // store intermediate result - http://stackoverflow.com/a/28252015/358224
+        .then( () => getTurn( playParams.gameId, playParams.turnIndex ));
+
+    return getTurnPromise
+        .then( () => snsPublish( getTurnPromise.value() ))
+        .then( () => getTurnPromise.value() );
 };
 
 // AWS LAMBDA function
 // Also called indirectly by putPlay
 // Get Plays for specified turn and possibly turnInfo
-// @turnParams.gameId:     'guid id of game'
-// @turnParams.turnIndex:  <0-based integer index of turn>,
-// @turnParmas.snsPublish: optional boolean - whether to fire SNS event if turn is complete 
-// @callback - lambda callback
-var getTurn = function( turnParams, callback ) {
+// @param gameId:     'guid id of game'
+// @param turnIndex:  <0-based integer index of turn>,
+// @returns Promise
+var getTurn = function( gameId, turnIndex ) {
     log.info('getTurn()');
-    iz.uuid( turnParams.gameId );
-    iz.int( turnParams.turnIndex );
 
-    var remoteData = {
-        gameId : turnParams.gameId
-    }
-    if ( turnParams.turnIndex % ENV.TILE_PLAY_BLOCK === 0 ) {
-        getTilesForTurn( turnParams, remoteData, callback );
+    if ( ! gameId )      throw new TypeError( "Expected 'gameId' parameter" );
+    if ( ! turnIndex )   throw new TypeError( "Expected 'turnIndex' parameter" );
+
+    if ( turnIndex % ENV.TILE_PLAY_BLOCK === 0 ) {
+        return getTilesForTurn( gameId, turnIndex );
     } else {
-        getPlaysForTurn( turnParams, remoteData, callback );
+        return getPlaysForTurn( gameId, turnIndex );
     }
 }
 
-var getTilesForTurn = function( turnParams, remoteData, callback ) {
+var getTilesForTurn = function( gameId, turnIndex ) {
     log.info('getTilesForTurn()');
 
-    getPlaysForTurn( turnParams, remoteData, callback );
+    // TODO: create additional tiles
+
+    return getPlaysForTurn( gameId, turnIndex );
 }
 
-var getPlaysForTurn = function( turnParams, remoteData, callback ) {
+var getPlaysForTurn = function( gameId, turnIndex ) {
+    log.info('getPlaysForTurn()');
+    
     var queryParams = {
         TableName               : ENV.TableName.Play,
         KeyConditionExpression  : "gameId_turnIndex = :v_Id",
         ExpressionAttributeValues : {
-            ":v_Id" : getKey( turnParams.gameId, turnParams.turnIndex )
+            ":v_Id" : getKey( gameId, turnIndex )
         }
     };
     
-    dynamo.query(queryParams, function( err, dbData ) {
-        gotPlaysForTurnFromDb( err, remoteData, turnParams, dbData, callback );
-    });
+    return dynamo.queryAsync( queryParams )
+        .then( dbData => returnPlayInfo( gameId, dbData ))
 };
 
-var gotPlaysForTurnFromDb = function( err, remoteData, turnParams, dbData, callback ) {
-    log.info('gotPlaysForTurnFromDb()');
-    if ( null !== err ) {
-        callback( err, null );
-    } 
+var returnPlayInfo = function( gameId, dbData ) {
+    log.info('returnPlayInfo()');
         
-    if ( dbData === null || dbData.Items === null || dbData.Items.length <= 0 ) {
-        callback( {
-            message: "Expected at least one Play in turn",
-            turnInfo: turnParams
-        }, null );
-    } else { 
-        remoteData.playList = []; 
-        dbData.Items.forEach( function( item ) {
-           remoteData.playList.push( item.play ); 
-        });
-        
-       if ( typeof turnParams.snsPublish === "boolean" && turnParams.snsPublish && // if this is flagged for SNS 
-            remoteData.playList.length == 2 ) { // and turn complete // TODO: remove hard-coded player count
-                var snsParams = {
-                    Message: JSON.stringify( remoteData ),
-                    TargetArn: ENV.snsArn
-                };
-                sns.publish( snsParams, function( err, snsData ) {
-                    if ( err !== null ) {
-                        log.error( "SNS Publish error: ", err );
-                        // fall through; SNS error is not fatal
-                    }
-                    returnRemoteData( remoteData, callback );
-                });
-        } else { // no SNS, just return
-            returnRemoteData( remoteData, callback );            
-        }
+    if ( ! gameId )      throw new TypeError( "Expected 'gameId' parameter" );
+    if ( ! dbData || !dbData.Items || dbData.Items.length <= 0 ) {
+        throw new Error( "returnPlayInfo - Unexpected dbData results" );
     }
-};
+    return {
+        gameId      : gameId, // gameId_turnIndex
+        playList    : dbData.Items.map( item => item.play ) 
+    }};
 
-var returnRemoteData = function( remoteData, callback ) {
-    log.info( 'returnRemoteData()' );
-    callback( null, remoteData );
-};
+var snsPublish = function( playInfo ) {
+    log.info('snsPublish()');
+    
+    var playerCount = 2; // TODO: remove hard-coded player count
+    if ( playInfo.length !== playerCount ) // don't publish incomplete turn 
+        return Promise.resolve();
+        
+    var snsParams = {
+        Message: JSON.stringify( playInfo ),
+        TargetArn: ENV.snsArn
+    };
+    return sns.publishAsync( snsParams );
+}
+
 
 module.exports = {
     putPlay             : putPlay,
