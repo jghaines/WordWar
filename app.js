@@ -2,6 +2,8 @@
 /* global Buffer */
 /* global process */
 
+require('dotenv').config();
+
 var log = require('loglevel');
 log.setLevel( log.levels.DEBUG );
 
@@ -15,6 +17,8 @@ AWS.config.apiVersions = {
 AWS.config.update({region: 'us-west-2'});
 var mds = new AWS.MetadataService();
 var sns = new AWS.SNS();
+
+var socketioJwt = require("socketio-jwt");
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -95,10 +99,14 @@ app.use('/js/env.js', function(req, res, next) {
 '// development config generated from node:app.js' + '\n' +
 'var ENV = {' + '\n' +
 '    webSocketUrl    : null, // default to localhost' + '\n' +
-'    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/prod",' + '\n' +
+'    restBaseUrl     : "https://fqjtrlps5h.execute-api.us-west-2.amazonaws.com/dev",' + '\n' +
 '    auth0 : {' + '\n' +
-'            clientID    : "M69Mp6BBlK2CYo4MrUkBhiDKUpsg81vn",' + '\n' +
-'            domain      : "jghaines.auth0.com"' + '\n' +
+'        domain              : "jghaines.auth0.com",' + '\n' +
+'        accountClientId     : "dvfcaBbvoarFA2Q6zDZSoGfzLPq2XbXH",' + '\n' +
+'        applicationClientId : "M69Mp6BBlK2CYo4MrUkBhiDKUpsg81vn",' + '\n' +
+'        awsRole             : "arn:aws:iam::458298098107:role/wordwar-api-client",' + '\n' +
+'        awsPrincipal        : "arn:aws:iam::458298098107:saml-provider/jghaines.auth0.com",' + '\n' +
+'        delegationUrl       : "https://jghaines.auth0.com/delegation",' + '\n' +
 '    },' + '\n' +
 '    requestedBoard  : "/boards/2.html"' + '\n' +
 '}' + '\n'
@@ -119,6 +127,11 @@ sio.on('connection', function (client) {
 	log.info('WS.connection()');
 	log.debug('connection - client.id=', client.id);
 
+    socketioJwt.authorize({
+		secret: Buffer(JSON.stringify(process.env.AUTH0_CLIENT_SECRET), 'base64'),
+        timeout: 15000 // 15 seconds to send the authentication message
+    })(client);
+
     // process subscribe events from client
 	client.on('subscribe', function(msg)  {
 	    log.info('WS.subscribe()');
@@ -129,9 +142,16 @@ sio.on('connection', function (client) {
         receiveWebSocketGameEvent(msg, client);
 	});
 });
-
+    
+sio.on('authenticated', function(socket) {
+    //this socket is authenticated, we are good to handle more events from it.
+    socket.client.auth0_sub = socket.decoded_token.sub;
+    console.log('sio.on#authenticated auth0_sub = ' + socket.decoded_token.sub);
+});
+    
 sio.on('reconnection', function (client) {
 	log.info('WS.reconnection()');
+	log.debug('WS.reconnection() - client.id=', client.id);
 	log.debug('WS.reconnection() - client.id=', client.id);
 });
 
@@ -151,9 +171,10 @@ sio.on('disconnect', function (client) {
 var subscribeClient = function(client, msg) {
 	log.info('subscribeClient()');
 	log.debug('subscribeClient( client.id=' + client.id + ', msg = ' + JSON.stringify(msg) + ')');
+    log.debug('subscribeClient auth0_sub = ' + socket.decoded_token.sub);
 
     var gameId = msg.gameId;
-    var playerId = msg.playerId;
+    var playerId = socket.decoded_token.sub;
     subscriptions[gameId] = subscriptions[gameId] || [];
 
     // update existing

@@ -20,6 +20,31 @@ function RemoteProxy( idToken, socket, restBaseUrl ) {
         PLAY_INFO : 'play_info',
         TURN_INFO : 'turn_info',
     };
+
+    // retrieve an AWS JWT token for AWS service calls
+    // Auth0 is giving CORS errors on this request
+    // https://support.auth0.com/#!/tickets/7275    
+    this._getAwsToken = function() {
+        var a0Params = {
+            "client_id":   ENV.auth0.accountClientId,
+            "target":      ENV.auth0.applicationClientId,
+            "grant_type":  "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            "id_token":    this._idToken,
+            "api_type":    "aws",
+            "role":        ENV.auth0.awsRole,
+            "principal":   ENV.auth0.awsPrincipal,
+        }
+        jQuery.ajax({ type:    'POST',
+            url:     ENV.auth0.delegationUrl,
+            data: 	 a0Params,
+            success: function( jqXHR, textStatus, errorThrown ) {
+                console.log( JSON.stringify( jqXHR ));
+            },
+            error: 	 function( jqXHR, textStatus, errorThrown ) {
+                    throw new Error ( errorThrown );
+            }
+        });
+    }
     
     // request a game from the server
     this.getGame = function() {
@@ -34,15 +59,39 @@ function RemoteProxy( idToken, socket, restBaseUrl ) {
         jQuery.ajax({
             type:    'POST',
             url:     this._getGameUrl,
-            headers: {
-                'Authorization': 'Bearer ' + this._idToken
-            },
             data: 	 JSON.stringify( gameInfo ),
                 success: (function( jqXHR, textStatus, errorThrown ) {
                     this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
                 }).bind( this ),
             error: 	 function( jqXHR, textStatus, errorThrown ) {
-                        throw new Error ( errorThrown );
+                console.log( 'getGame() -> error ' + textStatus );
+                // throw new Error ( errorThrown );
+            }
+        });
+    }
+    
+    // test - invoke the server echo endpoint
+    this.echo = function() {
+        this.log.info(this.constructor.name + '.echo()');
+        this.log.debug( this.constructor.name, '() - POST '  ); 
+        var gameInfo = {
+            playerList : [ { playerId : this.playerId } ]
+        }; 
+        if ( ENV && ENV.requestedBoard ) {
+            gameInfo.board = ENV.requestedBoard;
+        }
+        jQuery.ajax({
+            type:    'POST',
+            url:      this._restBaseUrl + '/echo',
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken
+            },
+            data: 	 JSON.stringify( gameInfo ),
+                success: (function( jqXHR, textStatus, errorThrown ) {
+                    console.log( JSON.stringify( jqXHR, null, 2 ));
+                }).bind( this ),
+            error: 	 function( jqXHR, textStatus, errorThrown ) {
+                throw new Error ( errorThrown );
             }
         });
     }
@@ -179,8 +228,19 @@ function RemoteProxy( idToken, socket, restBaseUrl ) {
 		this._receiveRemoteData( this.source.WEBSOCKET, msg );
  	}).bind( this ));
 
-	this._socket.on('connect', (function( msg ) {
+	this._socket.on('connect', (function() {
         log.debug( "WS['connect'] - id=" + this._socket.io.engine.id );
+
+        this._socket.emit('authenticate', { token: this._idToken }); //send the jwt
+    }).bind( this ));
+
+    this._socket.on('authenticated', function (msg) {
+        log.debug( "ws#authenticated" );
+    })
+     
+	this._socket.on('unauthorized', (function( msg ) {
+        console.log("unauthorized: " + JSON.stringify(msg.data));
+        throw new Error(msg.data.type);
  	}).bind( this ));
      
 	this._socket.on('reconnect', (function( msg ) {

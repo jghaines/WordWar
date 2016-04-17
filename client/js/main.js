@@ -3,7 +3,7 @@
 var gc = {};
 var auth0 = new Auth0({
     domain:       ENV.auth0.domain,
-    clientID:     ENV.auth0.clientID,
+    clientID:     ENV.auth0.accountClientId,
     callbackOnLocationHash: true
 });
 

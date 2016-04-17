@@ -13,7 +13,8 @@
     "jsonfile": "^2.2.3",
     "loglevel": "^1.4.0",
     "node-uuid": "^1.4.7",
-    "socket.io": "^1.4.5"
+    "socket.io": "^1.4.5",
+    "socketio-jwt": "^4.3.4"
   },
   "devDependencies": {},
   "engines": {
