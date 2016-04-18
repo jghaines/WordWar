@@ -80,14 +80,14 @@ var getKey = function( gameId, turnIndex ) {
 // playParams.*           optional - other play data
 var putPlay = function( event ) {
     log.info('putPlay()');
-    if ( ! event )              throw new TypeError( "Expected 'event' parameter" );
-    if ( ! event.principalId )  throw new TypeError( "Expected 'event.principalId' parameter" );
-    if ( ! event.body )         throw new TypeError( "Expected 'event.body' parameter" );
+    if ( ! event )      throw new TypeError( "Expected 'event' parameter" );
+    if ( ! event.body ) throw new TypeError( "Expected 'event.body' parameter" );
+    if ( typeof event.principalId !== 'string' )  throw new TypeError( "Expected 'event.principalId' parameter" );
 
     var playParams = event.body;
-    if ( ! playParams.gameId )      throw new TypeError( "Expected 'gameId' parameter" );
-    if ( ! playParams.turnIndex )   throw new TypeError( "Expected 'turnIndex' parameter" );
-    if ( ! playParams.playerIndex ) throw new TypeError( "Expected 'playerIndex' parameter" );
+    if ( typeof playParams.gameId !== 'string' )      throw new TypeError( "Expected 'gameId' parameter" );
+    if ( typeof playParams.turnIndex !== 'number' )   throw new TypeError( "Expected 'turnIndex' parameter" );
+    if ( typeof playParams.playerIndex !== 'number' ) throw new TypeError( "Expected 'playerIndex' parameter" );
 
     var playerIndex = parseInt( playParams.playerIndex );
 
@@ -117,8 +117,8 @@ var putPlay = function( event ) {
 var getTurn = function( gameId, turnIndex ) {
     log.info('getTurn()');
 
-    if ( ! gameId )      throw new TypeError( "Expected 'gameId' parameter" );
-    if ( ! turnIndex )   throw new TypeError( "Expected 'turnIndex' parameter" );
+    if ( typeof gameId !== 'string' )      throw new TypeError( "Expected 'gameId' parameter" );
+    if ( typeof turnIndex !== 'number' )   throw new TypeError( "Expected 'turnIndex' parameter" );
 
     if ( turnIndex % ENV.TILE_PLAY_BLOCK === 0 ) {
         return getTilesForTurn( gameId, turnIndex );
