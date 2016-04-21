@@ -12,38 +12,56 @@
     "Resources" : {
         "GetGameLambda" : {
             "Type" : "AWS::Lambda::Function",
-                "Properties" : {
+            "Properties" : {
+                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "GetGame" ]] },
                 "Code"          : {
-                    "S3Bucket"          : "wordwar-config",
-                    "S3Key"             : { "Fn::Join" : [ "", [ "lambda/lambda", { "Ref" : "Env" }, ".zip" ]]}
+                    "S3Bucket"  : "wordwar-config",
+                    "S3Key"     : "lambda/lambda.zip"
                 },
                 "Description"   : "Connect to a pending game, or create a new one",
-                "Handler"       : "index.getGame",
+                "Handler"       : "restApi/game/findGame/handler.handler",
                 "MemorySize"    : 128,
                 "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
-                "Runtime"       : "nodejs",
+                "Runtime"       : "nodejs4.3",
                 "Timeout"       : 10
             }
         },
         "PutPlayLambda" : {
             "Type" : "AWS::Lambda::Function",
-                "Properties" : {
+            "Properties" : {
+                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "PutPlay" ]] },
                 "Code"          : {
-                    "S3Bucket"          : "wordwar-config",
-                    "S3Key"             : { "Fn::Join" : [ "", [ "lambda/lambda", { "Ref" : "Env" }, ".zip" ]]}
+                    "S3Bucket"  : "wordwar-config",
+                    "S3Key"     : "lambda/lambda.zip"
                 },
                 "Description"   : "Execute a Play from the client",
-                "Handler"       : "index.putPlay",
+                "Handler"       : "restApi/game/play/putPlay/handler.handler",
                 "MemorySize"    : 128,
                 "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
-                "Runtime"       : "nodejs",
+                "Runtime"       : "nodejs4.3",
+                "Timeout"       : 10
+            }
+        },
+        "EchoLambda" : {
+            "Type" : "AWS::Lambda::Function",
+            "Properties" : {
+                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Echo" ]] },
+                "Code"          : {
+                    "S3Bucket"  : "wordwar-config",
+                    "S3Key"     : "lambda/lambda.zip"
+                },
+                "Description"   : "Echo test function",
+                "Handler"       : "restApi/echo/getEcho/handler.handler",
+                "MemorySize"    : 128,
+                "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
+                "Runtime"       : "nodejs4.3",
                 "Timeout"       : 10
             }
         },
         "GameTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : "Game",
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Game" ]] },
                 "KeySchema" : [ {
                     "KeyType" : "HASH",
                     "AttributeName" : "gameId"
@@ -60,10 +78,62 @@
                 }
             }
         },
-       "PlayTable" : {
+        "GamePlayerTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : "Play",
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "GamePlayer" ]] },
+                "KeySchema" : [ 
+                    {
+                        "KeyType" : "HASH",
+                        "AttributeName" : "gameId"
+                    },
+                    {
+                        "AttributeName": "playerIndex", 
+                        "KeyType":  "RANGE" 
+                    }
+                ],
+                "AttributeDefinitions" : [
+                    {
+                        "AttributeName" : "gameId",
+                        "AttributeType" : "S"
+                    },
+                    {
+                        "AttributeName" : "playerIndex",
+                        "AttributeType" : "N"
+                    }
+                ],
+                "ProvisionedThroughput" : {
+                    "ReadCapacityUnits" :  5,
+                    "WriteCapacityUnits" : 5
+                }
+            }
+        },
+        "PlayerTable" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Player" ]] },
+                "KeySchema" : [ 
+                    {
+                        "KeyType" : "HASH",
+                        "AttributeName" : "playerId"
+                    }
+                ],
+                "AttributeDefinitions" : [
+                    {
+                        "AttributeName" : "playerId",
+                        "AttributeType" : "S"
+                    }
+                ],
+                "ProvisionedThroughput" : {
+                    "ReadCapacityUnits" :  5,
+                    "WriteCapacityUnits" : 5
+                }
+            }
+        },
+        "PlayTable" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Play" ]] },
                 "KeySchema" : [
                     {
                         "KeyType" : "HASH",
