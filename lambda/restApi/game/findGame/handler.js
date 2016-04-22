@@ -3,6 +3,6 @@
 var lib = require('../../lib');
 
 module.exports.handler = function( event, context ) {
-  lib.getGame( event )
+  lib.findOrCreateGame( event )
     .then( context.succeed ); 
 };

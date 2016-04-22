@@ -51,7 +51,7 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 //      v
 //  [ Lambda ]
 //      v
-//  getGame
+//  findOrCreateGame
 //      v
 //  checkForPendingGame
 //      |
@@ -62,11 +62,17 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 //      +<--(double join)---+                   we are already in that game
 //      |                   |
 //      v                   v
-//  createNewGame       removeQueueMessage
+//  createNewGame       addPlayerToGamePlayer
 //      |                   |
-//      v                   v
-//  sendGameToQueue     notifyGameStart
+//      |                   ||||| parallel ||||||||||||||
+//      |                   v                   v       v
+//      v               removeQueueMessage  getGame getPlayersForGame
+//  sendGameToQueue         |                   v       v
+//      |                   |||||||||||||||||||||||||||||
 //      |                   |
+//      |               notifyGameStart
+//      |                   |
+//      |                   v
 //      +------------------>+
 //                          v
 //                      return gameInfo
@@ -78,8 +84,8 @@ var createTurnInfo = function( turnIndex, letterCount ) {
 // @event.body - from REST request - optional partial Game object
 //  and (optionally, for dev), gameInfo.board
 // @returns Promise
-var getGame = function( event ) {    
-    log.info('getGame()');
+var findOrCreateGame = function( event ) {    
+    log.info('findOrCreateGame()');
     if ( ! event )              throw new TypeError( "Expected 'event' parameter" );
     if ( ! event.principalId )  throw new TypeError( "Expected 'event.principalId' parameter" );
     if ( ! event.body )         throw new TypeError( "Expected 'event.body' parameter" );
@@ -102,23 +108,26 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
     if ( ! gameRequestInfo )    throw new TypeError( "Expected 'gameRequestInfo' parameter" );
     if ( ! sqsData )            throw new TypeError( "Expected 'sqsData' parameter" );
 
-    var candidateGame = null;
+    var candidateGameSlot = null;
     var sqsHandle = null;
     if ( sqsData.Messages && sqsData.Messages.length === 1 ) {
-        candidateGame = JSON.parse( sqsData.Messages[0].Body );
+        candidateGameSlot = JSON.parse( sqsData.Messages[0].Body );
         sqsHandle = sqsData.Messages[0].ReceiptHandle;
-        if ( ! candidateGame )  throw new TypeError( "Expected '.Messages[0].Body' from SQS" );
-        if ( ! sqsHandle )      throw new TypeError( "Expected '..Messages[0].ReceiptHandle' from SQS" );
+        if ( ! candidateGameSlot )  throw new TypeError( "Expected '.Messages[0].Body' from SQS" );
+        if ( ! sqsHandle )          throw new TypeError( "Expected '..Messages[0].ReceiptHandle' from SQS" );
     }
 
-    if ( candidateGame === null // no game found 
-        || candidateGame.playerList.indexOf( gameRequestInfo.playerList[0]) >= 0 ) { // our OWN game found
+    if ( candidateGameSlot == null // no game found 
+        || candidateGameSlot.playerIdList.indexOf( gameRequestInfo.playerList[0] ) >= 0 ) { // our OWN game found
         log.debug('checkForPendingGame() - createGame');
         return Promise.try( () => createNewGame( gameRequestInfo ));
     } else if ( sqsData.Messages.length === 1 ) { // found a game on the queue
         log.debug('checkForPendingGame() - found pending');
-        gameRequestInfo.gameId = candidateGame.gameId;
-        if ( ! gameRequestInfo.gameId )    throw new TypeError( "Expected 'gameId' from SQS" );
+        gameRequestInfo.gameId          = candidateGameSlot.gameId;
+        gameRequestInfo.playerIndex     = candidateGameSlot.playerIndex;
+        gameRequestInfo.playerId        = gameRequestInfo.playerList[0];
+        if ( ! gameRequestInfo.gameId )         throw new TypeError( "Expected 'gameId' from SQS" );
+        if ( ! gameRequestInfo.playerIndex )    throw new TypeError( "Expected 'playerIndex' from SQS" );
         return Promise.try( () => joinExistingGame( gameRequestInfo, sqsHandle ));
     } else {
         log.error('checkForPendingGame() - unexpected sqsData');
@@ -128,69 +137,135 @@ var checkForPendingGame = function( gameRequestInfo, sqsData ) {
 
 var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
     log.info('joinExistingGame()');
-    if ( ! gameRequestInfo )            throw new TypeError( "Expected 'gameRequestInfo' parameter" );
-    if ( ! gameRequestInfo.gameId )     throw new TypeError( "Expected 'gameRequestInfo.gameId' parameter" );
-    if ( ! gameRequestInfo.playerList ) throw new TypeError( "Expected 'gameRequestInfo.playerList' parameter" );
-    if ( ! sqsHandle )                  throw new TypeError( "Expected 'sqsHandle' parameter" );
-
-    // register player for game
-    var updateParams = {
-        TableName           : ENV.TableName.Game,
-        Key                 : { gameId : gameRequestInfo.gameId },
-        UpdateExpression    : "SET #playerList = list_append( #playerList, :newPlayerList )",
-        ConditionExpression : "NOT contains( #playerList, :newPlayer )",
-        ExpressionAttributeNames : {
-            "#playerList" : "playerList"
-        },
-        ExpressionAttributeValues : {
-            ":newPlayer"        : gameRequestInfo.playerList[0],
-            ":newPlayerList"    : gameRequestInfo.playerList
-        },
-        ReturnValues        : "ALL_NEW"
-    };
-
-    return dynamo.updateAsync( updateParams )
+    if ( ! gameRequestInfo )                throw new TypeError( "Expected 'gameRequestInfo' parameter" );
+    if ( ! gameRequestInfo.gameId )         throw new TypeError( "Expected 'gameRequestInfo.gameId' parameter" );
+    if ( ! gameRequestInfo.playerIndex )    throw new TypeError( "Expected 'gameRequestInfo.playerIndex' parameter" );
+    if ( ! gameRequestInfo.playerId )       throw new TypeError( "Expected 'gameRequestInfo.playerId' parameter" );
+    if ( ! sqsHandle )                      throw new TypeError( "Expected 'sqsHandle' parameter" );
+    var returnInfoPromise = Promise
+        .resolve( addPlayerToGamePlayer( gameRequestInfo ))
         .catch( err => {
             if ( err.code === "ConditionalCheckFailedException" ) {
-                // conditon failed - invalid game Id?
-                log.error( "" )  
+                // conditon failed - game slot already filled or invalid gameId
+                log.error( "joinExistingGame() - ConditionalCheckFailedException" ); 
+                log.error( err );  
                 return Promise.try( () => createNewGame( gameRequestInfo ));
             } else {
                 throw new Error( err );
             }
         })
-        .then( dbData => removeQueueMessage( sqsHandle, dbData ) );
+        .then( () => [
+            removeQueueMessage( sqsHandle ),
+            getGame( gameRequestInfo.gameId ),
+            getPlayersForGame( gameRequestInfo.gameId ),
+        ])
+        .spread(
+            ( sqsData, dbGameData, dbGamePlayerData ) => ({
+                gameInfo    : dbGameData.Item,
+                playerList  : dbGamePlayerData.Responses[ ENV.TableName.Player ]
+            })
+        )
+
+    return returnInfoPromise.then( notifyGameStart )
+        .then( () => returnInfoPromise.value() );
+}
+
+var addPlayerToGamePlayer = function( gameRequestInfo ) {
+    log.info('addPlayerToGamePlayer()');
+    if ( ! gameRequestInfo )                throw new TypeError( "Expected 'gameRequestInfo' parameter" );
+    if ( ! gameRequestInfo.gameId )         throw new TypeError( "Expected 'gameRequestInfo.gameId' parameter" );
+    if ( ! gameRequestInfo.playerIndex )    throw new TypeError( "Expected 'gameRequestInfo.playerIndex' parameter" );
+    if ( ! gameRequestInfo.playerId )       throw new TypeError( "Expected 'gameRequestInfo.playerId' parameter" );
+
+    // register player for game
+    var updateParams = {
+        TableName       : ENV.TableName.GamePlayer,
+        Key : { 
+            gameId      : gameRequestInfo.gameId,
+            playerIndex : gameRequestInfo.playerIndex
+        },
+
+        UpdateExpression    : 'SET playerId = :playerId', 
+        ConditionExpression : 'attribute_not_exists(playerId)',
+        ExpressionAttributeValues: {
+            ':playerId' : gameRequestInfo.playerId
+        },
+        ReturnValues        : "ALL_NEW"
+    };
+
+    return dynamo.updateAsync( updateParams )
 }
 
 // player has been added to game from queue
-var removeQueueMessage = function( sqsHandle, dbData ) {
+var removeQueueMessage = function( sqsHandle ) {
     log.info('removeQueueMessage()');
-    if ( ! sqsHandle )          throw new TypeError( "Expected 'sqsHandle' parameter" );
-    if ( ! dbData )             throw new TypeError( "Expected 'dbData' parameter" );
-    if ( ! dbData.Attributes )  throw new TypeError( "Expected 'dbData.Attributes' parameter" );
-
-    var gameInfo = dbData.Attributes;
+    if ( ! sqsHandle ) throw new TypeError( "Expected 'sqsHandle' parameter" );
 
     var deleteParams = {
-        QueueUrl : ENV.sqsUrl, 
-        ReceiptHandle: sqsHandle
+        QueueUrl        : ENV.sqsUrl, 
+        ReceiptHandle   : sqsHandle
     };
-    return sqs.deleteMessageAsync( deleteParams )
-        .then( () => notifyGameStart( gameInfo ))
-        .then( () => gameInfo );
+    return sqs.deleteMessageAsync( deleteParams );
+}   
+
+var getGame = function( gameId ) {
+    log.info('getGame()');
+    if ( ! gameId ) throw new TypeError( "Expected 'gameId' parameter" );
+    
+    var getParams = {
+        TableName: ENV.TableName.Game,
+        Key: { gameId : gameId }
+    };
+    return dynamo.getAsync( getParams );
 }
 
-var notifyGameStart = function( gameInfo ) {
-    log.info('notifyGameStart()');
-    if ( ! gameInfo )            throw new TypeError( "Expected 'gameInfo' parameter" );
-    if ( ! gameInfo.gameId )     throw new TypeError( "Expected 'gameInfo.gameId' parameter" );
-    if ( ! gameInfo.playerList ) throw new TypeError( "Expected 'gameInfo.playerList' parameter" );
+var getPlayersForGame = function( gameId ) {
+    log.info('getPlayersForGame()');
+    if ( ! gameId ) throw new TypeError( "Expected 'gameId' parameter" );
 
-    if ( gameInfo.playerList.length > gameInfo.playerCount ) { // shouldn't happen
+    return getGamePlayers( gameId )
+        .then( dbData => dbData.Items.map( item => item.playerId ) )
+        .then( getPlayers )
+}
+
+var getGamePlayers = function( gameId ) {
+    log.info('getGamePlayers()');
+    if ( ! gameId ) throw new TypeError( "Expected 'gameId' parameter" );
+
+    var queryParams = {
+        TableName                   : ENV.TableName.GamePlayer,
+        KeyConditionExpression      : 'gameId = :gameId',
+        ExpressionAttributeValues   : { ':gameId': gameId }
+    };
+    return dynamo.queryAsync( queryParams );
+}
+
+var getPlayers = function( playerIdList ) {
+    log.info('getPlayers()');
+    if ( ! Array.isArray( playerIdList ) ) throw new TypeError( "Expected 'playerIdList' array parameter" );
+
+    var batchGetParams = {
+        RequestItems: { // map of TableName to list of Key to get from each table
+            [ ENV.TableName.Player ]: {
+                Keys: playerIdList.map( id => ({ playerId : id }) ),
+                AttributesToGet : [
+                    'playerId', 'age_range', 'family_name', 'given_name', 'nickname', 'picture'
+                ]
+            }
+        }
+    };
+    return dynamo.batchGetAsync( batchGetParams );
+}
+
+var notifyGameStart = function( returnInfo ) {
+    log.info('notifyGameStart()');
+    if ( ! returnInfo ) throw new TypeError( "Expected 'returnInfo' parameter" );
+
+    if ( returnInfo.playerList.length > returnInfo.gameInfo.playerCount ) { // shouldn't happen
         throw new Error( "Overfilled game " + JSON.stringify( gameInfo ));
-    } else if ( gameInfo.playerList.length === gameInfo.playerCount ) { // we have filled the game
+    } else if ( returnInfo.playerList.length === returnInfo.gameInfo.playerCount ) { // we have filled the game
         var snsParams = {
-            Message: JSON.stringify( gameInfo ),
+            Message: JSON.stringify( returnInfo ),
             TargetArn: ENV.snsArn
         };
         return sns.publishAsync( snsParams );
@@ -205,7 +280,6 @@ var createNewGame = function( gameRequestInfo ) {
     var board =  gameRequestInfo.board || ENV.defaultBoard || "/boards/4.html";
     var gameInfo = {
         gameId          : UUID(),
-        playerList      : gameRequestInfo.playerList,
         playerCount     : 2,
         board           : board,
         letterCount     : 10,
@@ -216,30 +290,55 @@ var createNewGame = function( gameRequestInfo ) {
     for (var turnIndex = 0; turnIndex < ENV.TILE_PLAY_BLOCK; turnIndex++) {
         gameInfo.turnInfo.push( createTurnInfo( turnIndex, gameInfo.letterCount )); 
     }
-    
-    var putParams = {
-        TableName   : ENV.TableName.Game,
-        Item        : gameInfo
+
+    var gamePlayers = Array.from( { length : gameInfo.playerCount }, ( val, index ) => ({ 
+        gameId      : gameInfo.gameId,
+        playerIndex : index
+    }));
+    gamePlayers[0].playerId = gameRequestInfo.playerList[0]; 
+        
+    var batchWriteParams = {
+        RequestItems: {
+            [ ENV.TableName.Game ] : [ {
+                PutRequest : {
+                    Item: gameInfo
+                }    
+            }],
+            [ ENV.TableName.GamePlayer ] : gamePlayers.map( player => ({
+                PutRequest : { 
+                    Item : player
+                }
+            }))
+        }
     };
-    return dynamo.putAsync( putParams )
-        .then( () => sendGameToQueue( gameInfo ))
-        .then( () => gameInfo );
+    
+    return dynamo.batchWriteAsync( batchWriteParams )
+        .then( () => sendGameToQueue( gamePlayers ))
+        .then( () => (gameInfo) );
 }
 
-var sendGameToQueue = function( gameInfo ) {
+var sendGameToQueue = function( gamePlayers ) {
     log.info('sendGameToQueue()');
-    if ( ! gameInfo )            throw new TypeError( "Expected 'gameInfo' parameter" );
-    if ( ! gameInfo.gameId )     throw new TypeError( "Expected 'gameInfo.gameId' parameter" );
-    if ( ! gameInfo.playerList ) throw new TypeError( "Expected 'gameInfo.playerList' parameter" );
+    if ( ! Array.isArray( gamePlayers )) throw new TypeError( "Expected array 'gamePlayers' parameter" );
+
+    var nextPlayerSlot = gamePlayers.find( gamePlayer => gamePlayer.playerId == null )
+    
+    if ( nextPlayerSlot == null) {
+        return;
+    }
 
     // advertise pending game on Queue
     var sendParams = {
         QueueUrl : ENV.sqsUrl,
-        MessageBody : JSON.stringify( gameInfo )
+        MessageBody : JSON.stringify( {
+            gameId          : nextPlayerSlot.gameId,
+            playerIndex     : nextPlayerSlot.playerIndex,
+            playerIdList    : gamePlayers.map( gamePlayer => ( gamePlayer.playerId != null ) )
+        } )
     };
     return sqs.sendMessageAsync( sendParams );
 }
 
 module.exports = {
-    getGame         : getGame
+    findOrCreateGame : findOrCreateGame
 }

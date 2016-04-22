@@ -5,8 +5,10 @@
     "s3configbucketUri" : "s3://wordwar-config/",
 
     "TableName" : {
-        "Game"     : "Game",
-        "Play"     : "Play"
+        "Game"          : "dev_Game",
+        "GamePlayer"    : "dev_GamePlayer",
+        "Player"        : "dev_Player",
+        "Play"          : "dev_Play"
     },
 
     "TILE_PLAY_BLOCK"   : 50,

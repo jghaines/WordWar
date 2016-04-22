@@ -1,8 +1,7 @@
 'use strict';
 
 module.exports = {
-    getGame             : require( './game.js' ).getGame,
-    getGameAsync        : require( './game.js' ).getGameAsync,
-    putPlay             : require( './play.js' ).putPlay,
-    findGamesForPlayer  : null
+    findOrCreateGame        : require( './game.js' ).findOrCreateGame,
+    putPlay                 : require( './play.js' ).putPlay,
+    findGamesForPlayer      : null
 };
