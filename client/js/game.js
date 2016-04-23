@@ -6,11 +6,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
     // Play state for this player
     this._getCurrentPlayForPlayer = function() {
-        return this._plays[this.turnIndex][this._gameInfo.playerIndex];
+        return this._plays[this.turnIndex][this._playerIndex];
     }
 
     // remote callback when we receive gameInfo from remote
-    // will start the game when required
     this._receiveGameInfo = function( gameInfo ) {
 		this.log.info( this.constructor.name + '._receiveGameInfo(.)' );
         if ( this.state !== GameState.NOT_STARTED ) {
@@ -18,16 +17,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         }
         
         this._gameInfo = gameInfo;        
-        // set this._gameInfo.playerIndex - index of local player
-        this._gameInfo.playerList.forEach( (function( playerInList, indexInList ) {
-            if ( playerInList.playerId === this._remote.playerId ) {
-                this._gameInfo.playerIndex = indexInList;
-            }
-        }).bind(this));
-        if ( this._gameInfo.playerIndex === null ) {
-            throw new Error( "Received gameInfo for gameId=" + gameInfo.gameId + " which we (playerId=" + this._remote.playerId + ") are not a member" );
-        }
-
         if ( ! this._isBoardLoaded ) {
     		this._boardModel.loadBoard(	this._gameInfo.board );
         }
@@ -38,9 +27,31 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         this.checkForGameStart();
     }
 
+    // remote callback when we receive gamePlayerList from remote
+    this._receiveGamePlayerList = function( gamePlayerList ) {
+        // set this._playerIndex - index of local player
+		this._playerCount = 0;
+		this._playerIndex = null;
+		gamePlayerList.forEach( ( gamePlayer, index ) => {
+			if ( gamePlayer.playerId ) {
+				++this._playerCount;
+				if ( gamePlayer.playerId === this._remote.playerId ) {
+					this._playerIndex = index;
+				}
+			}
+		})
+		
+		if ( this._playerIndex == null ) {
+            throw new Error( "Received gamePlayerList which we (playerId=" + this._remote.playerId + ") are not a member" );
+		}
+
+        this.checkForGameStart();
+    }
+
 	// called back when board has loaded
 	this._boardLoaded = function() {
         this._isBoardLoaded = true;
+
         this.checkForGameStart();
 	}
     
@@ -51,8 +62,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         // if we aren't ready yet, just return
         if ( this.state !== GameState.NOT_STARTED ||
             ! this._isBoardLoaded ||
-            this._gameInfo.playerCount !== this._gameInfo.playerList.length ||
-            typeof this._gameInfo.playerIndex !== 'number' ||
+            this._gameInfo.playerCount !== this._playerCount ||
+            typeof this._playerIndex !== 'number' ||
             this._letterTiles.length < 1 
         ) {
             this.log.debug( this.constructor.name + '.checkForGameStart() - not ready yet' );
@@ -70,8 +81,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             this._audio.newGame();
 
             this._boardView.setStateMood( this.state );
-            this._boardView.flashPlayer( this._gameInfo.playerIndex );
-            this._scoreView.flashScore( this._gameInfo.playerIndex );
+            this._boardView.flashPlayer( this._playerIndex );
+            this._scoreView.flashScore( this._playerIndex );
 
             this.newTurn();
         }).bind( this ), 500 );
@@ -136,7 +147,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		}
 
 		
-        var placeableCells = this._boardController.getPlaceableCells( this._gameInfo.playerIndex ); 
+        var placeableCells = this._boardController.getPlaceableCells( this._playerIndex ); 
 		this._boardController.highlightPlaceableCells( placeableCells );
 
 		// if we have started placing, just auto-place next tile in the direction
@@ -188,7 +199,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 			this._buttonsView.enable( 'attack', true );
 
-			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this._gameInfo.playerIndex ))
+			var localPlayerCoords = this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this._playerIndex ))
 			var placedRange = this._boardModel.getPlacedRange();
 			var strategy = this._attackRangeStrategy;
 			this._boardController.highlightAttackableWhere( function( _ignore_cell, coords ) {
@@ -201,9 +212,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
 	this.isAttackInRange = function() {
 		for (var p = this._gameInfo.playerCount - 1; p >= 0; p--) { // check the other players
-			if ( 	p != this._gameInfo.playerIndex && // can't attack ourself
+			if ( 	p != this._playerIndex && // can't attack ourself
 					this._attackRangeStrategy.isAttackInRange(
-						this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this._gameInfo.playerIndex )),
+						this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( this._playerIndex )),
 						this._boardModel.getCoordinatesForCell( this._boardModel.getPlayerCell( p )),
 						this._boardModel.getPlacedRange() )) {
 				return true;
@@ -219,7 +230,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	// user has clicked Move or Attack
 	this.playWord = function( playType ) {
 		this.log.info( this.constructor.name + '.playWord(' + playType + ')');
-		var wordPlaced = this._boardModel.getPlayedWord( this._gameInfo.playerIndex );
+		var wordPlaced = this._boardModel.getPlayedWord( this._playerIndex );
 
 		if ( ! this.validWord( wordPlaced ) ) {
             // try reverse
@@ -237,8 +248,8 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		myPlay.playComplete     = true,
 		myPlay.playType         = playType,
         myPlay.word             = wordPlaced,
-		myPlay.wordPoints       = this._boardController.getPlayedScore( this._gameInfo.playerIndex ),
-		myPlay.endWordPosition  = this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this._gameInfo.playerIndex ) ),
+		myPlay.wordPoints       = this._boardController.getPlayedScore( this._playerIndex ),
+		myPlay.endWordPosition  = this._boardModel.getCoordinatesForCell( this._boardController.getEndOfWordCell( this._playerIndex ) ),
 
 		this._lettersModel.unselect();
 		this._lettersView.updateSelection();
@@ -299,7 +310,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
                 return notNull(play) && play.playComplete; 
             });
 
-            if ( playsForThisTurnCount >= this._gameInfo.playerCount ) {
+            if ( playsForThisTurnCount > this._gameInfo.playerCount ) {
+				throw new Error( "_receivePlayList() - too many player's plays received" );
+			} else if ( playsForThisTurnCount >= this._gameInfo.playerCount ) {
                 this.endTurn();
             }
          }
@@ -377,7 +390,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		for (var i = plays.length - 1; i >= 0; i--) {
             if ( plays[i].lost ) {
                 endGame = true;              
-                if ( i === this._gameInfo.playerIndex ) { // if WE lost
+                if ( i === this._playerIndex ) { // if WE lost
                     this._audio.lose();
                     this.state = GameState.REMOTE_WIN;
                 } else { // must be the other guy
@@ -411,6 +424,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     this.state = GameState.NOT_STARTED;
     this._isBoardLoaded = false;
     this.turnIndex = 0;
+    this._playerIndex = null;
 
     // 2 dimensional array of Play objects - plays[turnIndex][playerIndex]
     this._plays = [];
@@ -447,6 +461,10 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     // remote bindings
 	this._remote.on( this._remote.Event.GAME_INFO, (function(msg) {
         this._receiveGameInfo(msg);
+	}).bind(this));
+
+	this._remote.on( this._remote.Event.GAME_PLAYER_LIST, (function(msg) {
+        this._receiveGamePlayerList(msg);
 	}).bind(this));
 
 	this._remote.on( this._remote.Event.PLAY_INFO, (function(msg) {

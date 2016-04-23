@@ -8,7 +8,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	this.log.setLevel( log.levels.DEBUG );
     this.swaggerUrl = '/js/swagger.json';
 
-    // enum for remote source
+    // enum for remote data sources
     this.source = {
         WEBSOCKET   : { id:1, name: "WEBSOCKET" },
         API         : { id:2, name: "API" }
@@ -16,10 +16,17 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     
     // enum for EventEmitter types
     this.Event = {
-        GAME_INFO : 'game_info',
-        PLAY_INFO : 'play_info',
-        TURN_INFO : 'turn_info',
+        GAME_INFO           : 'game_info',
+        GAME_PLAYER_LIST    : 'game_player_list',
+        PLAY_INFO           : 'play_info',
+        TURN_INFO           : 'turn_info',
     };
+
+    this._SocketEvent = {
+        SUBSCRIBE   : 'subscribe',
+        GAME_EVENT  : 'gameEvent',
+        PLAY        : 'play message',
+    }
 
     // retrieve an AWS JWT token for AWS service calls
     // Auth0 is giving CORS errors on this request
@@ -59,6 +66,10 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         jQuery.ajax({
             type:    'POST',
             url:     this._getGameUrl,
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken,
+                'Content-type' : 'application/json'
+            },
             data: 	 JSON.stringify( gameInfo ),
                 success: (function( jqXHR, textStatus, errorThrown ) {
                     this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
@@ -84,7 +95,8 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             type:    'POST',
             url:      this._restBaseUrl + '/echo',
             headers: {
-                'Authorization': 'Bearer ' + this._idToken
+                'Authorization': 'Bearer ' + this._idToken,
+                'Content-type' : 'application/json'
             },
             data: 	 JSON.stringify( gameInfo ),
                 success: (function( jqXHR, textStatus, errorThrown ) {
@@ -113,70 +125,100 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 			throw new Error( "HTTP call error" + data );
 		}
 
-        if ( data.errorMessage ) { // API Gateway-Lambda error
+        if ( data == null ) { 
+            throw new Error( "_receiveRemoteData() - received null data result" );
+        }
+
+        if ( data.hasOwnProperty( 'errorMessage' )) { // API Gateway-Lambda error
             throw new Error( data.errorMessage );
         }
-        
-        this._gameInfoReceived( data );
 
-        if ( data.hasOwnProperty( 'turnInfo' )) {
-            this._turnInfoReceived( data.turnInfo );
+        // do this first in case subsequent events look up the player data        
+        if ( data.hasOwnProperty( 'PlayerList' )) {
+            this._playerListReceived( data.PlayerList );
         }
+
+        if ( data.hasOwnProperty( 'GameItem' )) {
+            this._gameItemReceived( data.GameItem );
+
+            if ( data.GameItem.hasOwnProperty( 'turnInfo' )) {
+                this._turnListReceived( data.GameItem.turnInfo );
+            }
+        }
+
         if ( data.hasOwnProperty( 'playList' )) {
-            this._playsReceived( data.playList );
+            this._playListReceived( data.playList );
         }
+
+        // do this last as it may trigger game start
+        if ( data.hasOwnProperty( 'GamePlayerList' )) {
+            this._gamePlayerListReceived( data.GamePlayerList );
+        }
+
         
         // postback to notification websocket if the data didn't already come from there 
         if ( source != this.source.WEBSOCKET ) {
-            this._socket.emit('gameEvent', data);
+            this._socket.emit( this._SocketEvent.GAME_EVENT, data);
         }
     }
 
     // we have received game info from remote, send it on
-    this._gameInfoReceived = function( data ) {
-        this.log.info( this.constructor.name + '._gameInfoReceived()' );
+    this._gameItemReceived = function( gameItem ) {
+        this.log.info( this.constructor.name + '._gameItemReceived()' );
 
         // when we first receive our gameId, store it and subscribe
-        if ( this.gameId !== data.gameId ) {
-            this.gameId = data.gameId;
+        if ( this.gameId !== gameItem.gameId ) {
+            this.gameId = gameItem.gameId;
             this._subscribeGameNotifications();
         }
 
         // don't send the turn and play data with this callback
-        var gameInfo = JSON.parse(JSON.stringify(data)); // ugh - Javascript object copy - http://stackoverflow.com/a/18359187/358224
-        delete gameInfo.turnInfo;
-        delete gameInfo.plays;
-		this.emit( this.Event.GAME_INFO, gameInfo );
+        var gameItemCopy = Object.assign( {}, gameItem );
+        delete gameItemCopy.turnInfo;
+        delete gameItemCopy.plays;
+		this.emit( this.Event.GAME_INFO, gameItemCopy );
+    }
+
+    // we have received game player list from remote, send it on
+    this._gamePlayerListReceived = function( gamePlayerList ) {
+        this.log.info( this.constructor.name + '._gamePlayerListReceived()' );
+
+		this.emit( this.Event.GAME_PLAYER_LIST, gamePlayerList );
+    }
+    
+    // we have received game info from remote, send it on
+    this._playerListReceived = function( playerList ) {
+        this.log.info( this.constructor.name + '._playerListReceived()' );
+
+        playerList.forEach( player => {
+            this.players[ player.playerId ] = player;   
+        })
+        
     }
 
     // we have received Play info from remote, parse and send on
-    this._playsReceived = function( playList ) {
-        this.log.info( this.constructor.name + '._playsReceived()' );
-
-        var playInfo = [];
-        playList.forEach( function( play ) {
-            playInfo.push( new Play( play ));
-        });
-		this.emit( this.Event.PLAY_INFO, playInfo );
+    this._playListReceived = function( playList ) {
+        this.log.info( this.constructor.name + '._playListReceived()' );
+		this.emit( this.Event.PLAY_INFO, playList.map( play => new Play( play )) );
     }
     
     // we have received turn info from remote, send it on
-    this._turnInfoReceived = function( turnInfoList ) {
-        this.log.info( this.constructor.name + '._turnInfoReceived()' );
-		this.emit( this.Event.TURN_INFO, turnInfoList );
+    this._turnListReceived = function( turnList ) {
+        this.log.info( this.constructor.name + '._turnListReceived()' );
+		this.emit( this.Event.TURN_INFO, turnList );
     }
     
     // create a subscription on the game server for game event updates
     this._subscribeGameNotifications = function() {
         this.log.info( this.constructor.name + '._subscribeGameNotifications()' );
 		// let the server know who we are
-        var subscriptionData = { 
-            gameId : this.gameId,
-            playerId : this.playerId
+        var subscriptionParams = { 
+            gameId      : this.gameId,
+            playerId    : this.playerId
         }
-        this.log.debug( this.constructor.name, '_subscribeGameNotifications() - subscriptionData=', JSON.stringify( subscriptionData ));
-        if ( subscriptionData.gameId && subscriptionData.playerId ) {
-            this._socket.emit( 'subscribe', subscriptionData );            
+        this.log.debug( this.constructor.name, '_subscribeGameNotifications() - subscriptionParams=', JSON.stringify( subscriptionParams ));
+        if ( subscriptionParams.gameId && subscriptionParams.playerId ) {
+            this._socket.emit( this._SocketEvent.SUBSCRIBE, subscriptionParams );            
         }
     }
 
@@ -193,13 +235,14 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	//
 	this.executeLocalPlay = function( localPlay ) {
 		this.log.info( this.constructor.name + '.executeLocalPlay(.)');
-		this._socket.emit('play message', JSON.stringify( localPlay ));
+		this._socket.emit( this._SocketEvent.PLAY, JSON.stringify( localPlay ));
 
 		jQuery.ajax({
 			type:    'POST',
 			url:     this._executePlayUrl,
             headers: {
-                'Authorization': 'Bearer ' + this._idToken
+                'Authorization': 'Bearer ' + this._idToken,
+                'Content-type' : 'application/json'
             },
 			data: 	 JSON.stringify( localPlay ),
 			success: (function( jqXHR, textStatus, errorThrown ) {
@@ -235,7 +278,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         this._socket.emit('authenticate', { token: this._idToken }); //send the jwt
     }).bind( this ));
 
-    this._socket.on('authenticated', function (msg) {
+    this._socket.on('authenticated', function () { // no parameters
         log.debug( "ws#authenticated" );
     })
      
