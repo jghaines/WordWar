@@ -4,8 +4,8 @@
    "Parameters" : {
       "Env" : {
         "Type" : "String",
-        "Default" : "",
-        "Description" : "Name of the environment. Default is empty (=> prod). e.g. dev_ test_"
+        "Default" : "prod",
+        "Description" : "Name of the environment. e.g. dev test prod"
       }
    },
 
@@ -13,7 +13,7 @@
         "GetGameLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
-                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "GetGame" ]] },
+                "FunctionName" : "GetGame",
                 "Code"          : {
                     "S3Bucket"  : "wordwar-config",
                     "S3Key"     : "lambda/lambda.zip"
@@ -29,7 +29,7 @@
         "PutPlayLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
-                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "PutPlay" ]] },
+                "FunctionName"  : "PutPlay",
                 "Code"          : {
                     "S3Bucket"  : "wordwar-config",
                     "S3Key"     : "lambda/lambda.zip"
@@ -45,7 +45,7 @@
         "EchoLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
-                "FunctionName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Echo" ]] },
+                "FunctionName"  : "Echo",
                 "Code"          : {
                     "S3Bucket"  : "wordwar-config",
                     "S3Key"     : "lambda/lambda.zip"
@@ -61,7 +61,7 @@
         "GameTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Game" ]] },
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "_Game" ]] },
                 "KeySchema" : [ {
                     "KeyType" : "HASH",
                     "AttributeName" : "gameId"
@@ -81,7 +81,7 @@
         "GamePlayerTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "GamePlayer" ]] },
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "_GamePlayer" ]] },
                 "KeySchema" : [ 
                     {
                         "KeyType" : "HASH",
@@ -133,7 +133,7 @@
         "PlayerTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Player" ]] },
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "_Player" ]] },
                 "KeySchema" : [ 
                     {
                         "KeyType" : "HASH",
@@ -155,7 +155,7 @@
         "PlayTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
-                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "Play" ]] },
+                "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "_Play" ]] },
                 "KeySchema" : [
                     {
                         "KeyType" : "HASH",
