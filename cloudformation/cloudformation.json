@@ -26,6 +26,14 @@
                 "Timeout"       : 10
             }
         },
+        "GetGameLambdaDevAlias" : {
+            "Type" : "AWS::Lambda::Alias",
+            "Properties" : {
+                "Name"              : "dev",
+                "FunctionName"      : "GetGame",
+                "FunctionVersion"   : "$LATEST"
+            }
+        },        
         "PutPlayLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
@@ -42,6 +50,14 @@
                 "Timeout"       : 10
             }
         },
+        "PutPlayLambdaDevAlias" : {
+            "Type" : "AWS::Lambda::Alias",
+            "Properties" : {
+                "Name"              : "dev",
+                "FunctionName"      : "PutPlay",
+                "FunctionVersion"   : "$LATEST"
+            }
+        },        
         "EchoLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
@@ -58,6 +74,14 @@
                 "Timeout"       : 10
             }
         },
+        "EchoLambdaDevAlias" : {
+            "Type" : "AWS::Lambda::Alias",
+            "Properties" : {
+                "Name"              : "dev",
+                "FunctionName"      : "Echo",
+                "FunctionVersion"   : "$LATEST"
+            }
+        },        
         "GameTable" : {
             "Type" : "AWS::DynamoDB::Table",
             "Properties" : {
