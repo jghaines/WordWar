@@ -7,9 +7,9 @@ var auth0 = new Auth0({
     callbackOnLocationHash: true
 });
 
-function createGame( idToken, webSocketUrl, restBaseUrl ) {
+function createGame( idToken, userId, webSocketUrl, restBaseUrl ) {
 	var socket = io( webSocketUrl );
-	var remote = new RemoteProxy( idToken, socket, restBaseUrl );
+	var remote = new RemoteProxy( idToken, userId, socket, restBaseUrl );
 
 	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
 		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
@@ -70,20 +70,23 @@ function createGame( idToken, webSocketUrl, restBaseUrl ) {
 
 
 function showLogin() {
-	localStorage.removeItem('idToken');
+	localStorage.removeItem('auth0.idToken' );
+	localStorage.removeItem('auth0.userId' );
     auth0.login({
-      connection: 'facebook'
+        icon : '/images/shortcut-icon.png',
+        connections: [ 'facebook', 'auth0' ]
     });
 }
 
 window.onload = function() {
-	var idToken = localStorage.getItem('idToken');
+	var idToken = localStorage.getItem( 'auth0.idToken' );
+	var userId  = localStorage.getItem( 'auth0.userId' );
 	var windowHash = window.location.hash;
 
 	if ( windowHash === '#logout' ) {
 		showLogin();
-	} else if ( idToken ) {
-		createGame( idToken, ENV.webSocketUrl, ENV.restBaseUrl )
+	} else if ( idToken != null && userId != null ) {
+		createGame( idToken, userId, ENV.webSocketUrl, ENV.restBaseUrl )
 	} else { // no token ; need to log in
 		var hash = auth0.parseHash( windowHash );
 		if ( hash ) { // callback from authentication
@@ -92,8 +95,8 @@ window.onload = function() {
 				alert('There was an error: ' + hash.error + '\n' + hash.error_description);
 				return;
 			} else {
-				idToken = hash.id_token;
-				localStorage.setItem( 'idToken', idToken );
+				localStorage.setItem( 'auth0.idToken', hash.id_token );
+				localStorage.setItem( 'auth0.userId',  hash.profile.sub );
                 window.location.replace("#");
                 window.onload();
 			}

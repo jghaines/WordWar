@@ -3,7 +3,7 @@
 'use strict';
 
 
-function RemoteProxy( idToken, socket, restBaseUrl ) {
+function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.DEBUG );
     this.swaggerUrl = '/js/swagger.json';
@@ -213,8 +213,9 @@ function RemoteProxy( idToken, socket, restBaseUrl ) {
 
 
 	// constructor code
-    this.playerId = guid();
+    this.playerId = userId;
     this.gameId = null;
+    this.players = []
     
     this._idToken = idToken;
 	this._socket = socket;
