@@ -92,6 +92,28 @@
                         "KeyType":  "RANGE" 
                     }
                 ],
+                "GlobalSecondaryIndexes": [
+                    { 
+                        "IndexName": "playerId.gameId", 
+                        "KeySchema": [
+                            {
+                                "AttributeName": "playerId",
+                                "KeyType": "HASH"
+                            },
+                            {
+                                "AttributeName": "gameId", 
+                                "KeyType": "RANGE" 
+                            }
+                        ],
+                        "Projection": {
+                            "ProjectionType": "KEYS_ONLY"
+                        },
+                        "ProvisionedThroughput": {
+                            "ReadCapacityUnits": 5,
+                            "WriteCapacityUnits": 5
+                        }
+                    }
+                ],
                 "AttributeDefinitions" : [
                     {
                         "AttributeName" : "gameId",
