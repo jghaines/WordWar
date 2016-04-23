@@ -2,6 +2,14 @@
 /* global Buffer */
 /* global process */
 
+const _SocketEvent = {
+        SUBSCRIBE   : 'subscribe',
+        GAME_EVENT  : 'gameEvent',
+        PLAY        : 'play message',
+    }
+
+
+
 require('dotenv').config();
 
 var log = require('loglevel');
@@ -78,10 +86,10 @@ app.post(SNS_ENDPOINT, function(req, res){
         });        
     } else if ( req.body.Type === "Notification" ) {
         log.info( '/GameEvent Notification' );
-        var gameInfo = JSON.parse( req.body.Message ); // SNS stringifies the (JSON) Message (idiots)
-        log.debug( '/GameEvent Notification: ', JSON.stringify( gameInfo ));
+        var remoteBundle = JSON.parse( req.body.Message ); // SNS stringifies the (JSON) Message (idiots)
+        log.debug( '/GameEvent Notification: ', JSON.stringify( remoteBundle ));
         
-        notifySubscribers( gameInfo, null );
+        notifySubscribers( remoteBundle, null );
     }
     // just return the body for debugging
     res.json( req.body );
@@ -127,17 +135,17 @@ sio.on('connection', function (client) {
 	log.info('WS.connection()');
 	log.debug('connection - client.id=', client.id);
 
-    socketioJwt.authorize({
+    var res = ( socketioJwt.authorize({
 		secret: Buffer(JSON.stringify(process.env.AUTH0_CLIENT_SECRET), 'base64'),
         timeout: 15000 // 15 seconds to send the authentication message
-    })(client);
+    }) )(client);
 
     // process subscribe events from client
-	client.on('subscribe', function(msg)  {
+	client.on( _SocketEvent.SUBSCRIBE, function(msg)  {
 	    log.info('WS.subscribe()');
         subscribeClient(client, msg);
 	});
-	client.on('gameEvent', function(msg)  {
+	client.on( _SocketEvent.GAME_EVENT, function(msg)  {
         log.info( 'WS.gameEvent()' );
         receiveWebSocketGameEvent(msg, client);
 	});
@@ -168,13 +176,13 @@ sio.on('disconnect', function (client) {
 // subscribe the given client to events from given game
 // msg.gameId UUID of game
 // msg.playerId UUID of player
-var subscribeClient = function(client, msg) {
+var subscribeClient = function(socket, msg) {
 	log.info('subscribeClient()');
-	log.debug('subscribeClient( client.id=' + client.id + ', msg = ' + JSON.stringify(msg) + ')');
-    log.debug('subscribeClient auth0_sub = ' + socket.decoded_token.sub);
+	log.debug('subscribeClient( client.id=' + socket.id + ', msg = ' + JSON.stringify(msg) + ')');
+    log.debug('subscribeClient auth0_sub = ' + socket.client.auth0_sub);
 
     var gameId = msg.gameId;
-    var playerId = socket.decoded_token.sub;
+    var playerId = socket.client.auth0_sub;
     subscriptions[gameId] = subscriptions[gameId] || [];
 
     // update existing
@@ -189,33 +197,41 @@ var subscribeClient = function(client, msg) {
     if ( ! found ) {
         subscriptions[gameId].push( {
             playerId : playerId,
-            client : client
+            socket : socket
         })
     }
 }
 
 // callback on receipt of GameEvent from a websocket client
-var receiveWebSocketGameEvent = function(msg, client) {
+var receiveWebSocketGameEvent = function(msg, socket) {
 	log.info('receiveWebSocketGameEvent(..)');
     if ( !snsActive ) { // if we are in SNS mode, don't propagate websocket GameEvents
-        notifySubscribers(msg, client);
+        notifySubscribers(msg, socket.client.auth0_sub);
     }
 }
 
 
 // we have SNS/websocket received a game update - distribute it
-// @gameInfo - object
-// @exceptClient - optional - don't notify this client
-var notifySubscribers = function( gameInfo, exceptClient ) {
+// @param remoteBundle object
+// @param exceptClient optional - don't notify this client
+var notifySubscribers = function( remoteBundle, exceptPlayerId ) {
 	log.info('notifySubscribers()');
-	log.debug('notifySubscribers( exceptClient.id=' + ( exceptClient ? exceptClient.id : 'null' ) + ', gameInfo=' + JSON.stringify(gameInfo) + ')' );
 
-    var gameId = gameInfo.gameId;
+    var gameId;
+    if ( remoteBundle.hasOwnProperty( 'gameId' ) ) {
+        gameId = remoteBundle.gameId;
+    } else if ( remoteBundle.hasOwnProperty( 'GameItem' ) && remoteBundle.GameItem.hasOwnProperty( 'gameId' ) ) {
+        gameId = remoteBundle.GameItem.gameId;
+    } else {
+        throw new Error( "No gameId found in remoteBundle" );
+    }
+    
+ 	log.debug('notifySubscribers( exceptPlayerId.=' + exceptPlayerId  + ', gameId=' + gameId + ')' );
     if ( subscriptions[gameId] ) {
-        subscriptions[gameId].forEach( function( subscriber ) {
-            if ( subscriber.client !== exceptClient ) {
-            	log.debug('notifySubscribers() - emit to client.id ' + subscriber.client.id + ' client.playerId=' + subscriber.playerId );
-                subscriber.client.emit( 'gameEvent', gameInfo ); 
+        subscriptions[gameId].forEach( subscriber => {
+            if ( subscriber.playerId !== exceptPlayerId ) {
+            	log.debug('notifySubscribers() - emit to client.playerId=' + subscriber.playerId );
+                subscriber.socket.emit( _SocketEvent.GAME_EVENT, remoteBundle ); 
             }
         });
     } 
