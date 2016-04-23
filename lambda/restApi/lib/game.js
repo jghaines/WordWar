@@ -153,7 +153,7 @@ var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
     if ( ! gameRequestInfo.playerId )       throw new TypeError( "Expected 'gameRequestInfo.playerId' parameter" );
     if ( ! sqsHandle )                      throw new TypeError( "Expected 'sqsHandle' parameter" );
 
-    var returnInfoPromise = Promise
+    return Promise
         .resolve( addPlayerToGamePlayer( gameRequestInfo ))
         .catch( err => {
             if ( err.code === "ConditionalCheckFailedException" ) {
@@ -178,9 +178,11 @@ var joinExistingGame = function( gameRequestInfo, sqsHandle ) {
         .spread( ( sqsData, gameInfo, playerList, gamePlayerList ) => 
             jsonReturnBundle( gameInfo, gamePlayerList, playerList ) 
         )
-
-    return returnInfoPromise.then( notifyGameStart )
-        .then( () => returnInfoPromise.value() );
+        .then( returnBundle => [
+            notifyGameStart( returnBundle ),
+            returnBundle
+        ])
+        .spread( ( sqs, returnBundle ) => returnBundle );
 }
 
 var addPlayerToGamePlayer = function( gameRequestInfo ) {
