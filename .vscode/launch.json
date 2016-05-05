@@ -1,104 +1,6 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-		{
-			"name": "Lambda getGame 0",
-			"type": "node",
-			"request": "launch",
-			"program": "${workspaceRoot}/lambda/node_modules/lambda-local/bin/lambda-local", 
-			"stopOnEntry": false,
-			"args": [
-                "--lambdapath",     "./restApi/game/findGame/handler.js",
-                "--eventpath",      "./restApi/game/findGame/events/getGame.0.json",
-                "--timeout",        "600"
-            ],
-			"cwd": "${workspaceRoot}/lambda",
-			"runtimeExecutable": null,
-			"runtimeArgs": [
-				"--nolazy"
-			],
-			"env": {
-				"NODE_ENV": "development",
-                "AWS_PROFILE": "wordwar"
-			},
-			"externalConsole": false,
-			"sourceMaps": false,
-			"outDir": null
-		},
-        {
-			"name": "Lambda getGame 1",
-			"type": "node",
-			"request": "launch",
-			"program": "${workspaceRoot}/lambda/node_modules/lambda-local/bin/lambda-local", 
-			"stopOnEntry": false,
-			"args": [
-                "--lambdapath",     "./restApi/game/findGame/handler.js",
-                "--eventpath",      "./restApi/game/findGame/events/getGame.1.json",
-                "--timeout",        "600"
-            ],
-			"cwd": "${workspaceRoot}/lambda",
-			"runtimeExecutable": null,
-			"runtimeArgs": [
-				"--nolazy"
-			],
-			"env": {
-				"NODE_ENV": "development",
-                "AWS_PROFILE": "wordwar"
-			},
-			"externalConsole": false,
-			"sourceMaps": false,
-			"outDir": null
-		},
-		{
-			"name": "Lambda putPlay 0.0",
-			"type": "node",
-			"request": "launch",
-			"program": "${workspaceRoot}/lambda/node_modules/lambda-local/bin/lambda-local", 
-			"stopOnEntry": false,
-			"args": [
-                "--lambdapath",     "./restApi/game/play/putPlay/handler.js",
-                "--handler",        "handler",
-                "--eventpath",      "./restApi/game/play/putPlay/events/putPlay.0.0.json",
-                "--timeout",        "600"
-            ],
-			"cwd": "${workspaceRoot}/lambda",
-			"runtimeExecutable": null,
-			"runtimeArgs": [
-				"--nolazy"
-			],
-			"env": {
-				"NODE_ENV": "development",
-                "AWS_PROFILE": "wordwar"
-			},
-			"externalConsole": false,
-			"sourceMaps": false,
-			"outDir": null
-		},
-		{
-			"name": "Lambda putPlay 0.1",
-			"type": "node",
-			"request": "launch",
-			"program": "${workspaceRoot}/lambda/node_modules/lambda-local/bin/lambda-local", 
-			"stopOnEntry": false,
-			"args": [
-                "--lambdapath",     "./restApi/game/play/putPlay/handler.js",
-                "--handler",        "handler",
-                "--eventpath",      "./restApi/game/play/putPlay/events/putPlay.0.1.js",
-                "--timeout",        "600"
-            ],
-			"cwd": "${workspaceRoot}/lambda",
-			"runtimeExecutable": null,
-			"runtimeArgs": [
-				"--nolazy"
-			],
-			"env": {
-				"NODE_ENV": "development",
-                "AWS_PROFILE": "wordwar"
-			},
-			"externalConsole": false,
-			"sourceMaps": false,
-			"outDir": null
-		},
         {
             "name": "Node",
 			"type": "node",
@@ -189,6 +91,26 @@
 			"args": [
             ],
 			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},
+		{
+            "name": "socketsio-auth0-sample",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/node_modules/socketio-jwt/example/socketsio-auth0-sample/index.js",
+            "stopOnEntry": false,
+			"args": [
+            ],
+			"cwd": "${workspaceRoot}/node_modules/socketio-jwt/example/socketsio-auth0-sample",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"

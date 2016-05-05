@@ -10,6 +10,24 @@
    },
 
     "Resources" : {
+        "APIGatewayLambdaInvokeRole" : {
+            "Type" : "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17", 
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole", 
+                            "Principal": {
+                                "Service": "apigateway.amazonaws.com"
+                            }, 
+                            "Effect": "Allow", 
+                            "Sid": ""
+                        }
+                    ]
+                }
+            }
+        },
         "FindGameLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
@@ -128,9 +146,35 @@
         },
         "EchoLambdaDevAlias" : {
             "Type" : "AWS::Lambda::Alias",
+            "DependsOn" : "EchoLambda",
             "Properties" : {
                 "Name"              : "dev",
                 "FunctionName"      : "Echo",
+                "FunctionVersion"   : "$LATEST"
+            }
+        },        
+        "Auth0AuthenticateLambda" : {
+            "Type" : "AWS::Lambda::Function",
+            "Properties" : {
+                "FunctionName"  : "Auth0Authenticate",
+                "Code"          : {
+                    "S3Bucket"  : "wordwar-config",
+                    "S3Key"     : "lambda/lambda.zip"
+                },
+                "Description"   : "Auth0 Custom Authorizer",
+                "Handler"       : "index.handler",
+                "MemorySize"    : 128,
+                "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
+                "Runtime"       : "nodejs4.3",
+                "Timeout"       : 10
+            }
+        },
+        "Auth0AuthenticateDevAlias" : {
+            "Type" : "AWS::Lambda::Alias",
+            "DependsOn" : "Auth0AuthenticateLambda",
+            "Properties" : {
+                "Name"              : "dev",
+                "FunctionName"      : "Auth0Authenticate",
                 "FunctionVersion"   : "$LATEST"
             }
         },        
@@ -260,6 +304,43 @@
                     "ReadCapacityUnits" :  5,
                     "WriteCapacityUnits" : 5
                 }
+            }
+        },
+        "RestApi" : {
+            "Type" : "AWS::ApiGateway::RestApi",
+            "DependsOn" : "Auth0AuthenticateLambda",
+            "Properties" : {
+                "Name" : "WordWarRestApi",
+                "Description" : "WordWar game management API"
+            }
+        },
+        "Auth0Authorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "DependsOn" : "Auth0AuthenticateLambda",
+            "Properties": { 
+                "Name": "Auth0Authorizer",
+                "AuthorizerCredentials": { "Fn::GetAtt": ["APIGatewayLambdaInvokeRole", "Arn"] },
+                "AuthorizerResultTtlInSeconds": 3600,
+                "AuthorizerUri" : { "Fn::Join" : ["", [
+                    "arn:aws:apigateway:",
+                    { "Ref" : "AWS::Region" },
+                    ":lambda:path/2015-03-31/functions/",
+                    { "Fn::GetAtt" : [ "Auth0AuthenticateLambda", "Arn" ] }, "/invocations"
+                ]]},
+                "Type": "TOKEN",
+                "IdentitySource": "method.request.header.Authorization",
+                "IdentityValidationExpression" : "^Bearer [-0-9a-zA-z\\.]*$",
+                "RestApiId": {
+                    "Ref": "RestApi"
+                }
+            }
+        },
+        "GameResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": { "Ref": "RestApi" },
+                "ParentId": { "Fn::GetAtt": ["RestApi", "RootResourceId"] },
+                "PathPart": "Game"
             }
         }
     }

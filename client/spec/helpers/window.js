@@ -1,6 +1,17 @@
 // mock objects - auth0 hits these
-window = {};
+window = {
+    location : {}
+};
+
+global = {
+    window : window
+};
 
 document = {
-    byTag : function(){}
+    getElementsByTagName : () => []
 };
+
+navigator = {
+    userAgent : []
+};
+

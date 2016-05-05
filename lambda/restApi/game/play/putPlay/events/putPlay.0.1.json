@@ -1,9 +1,0 @@
-{
-    "principalId" : "auth0|570d8d3b3cb3aaeb48738a81",    
-    "body" : {
-        "playerIndex"	:	"1",
-        "gameId"		:	"aa00",
-        "turnIndex"		:	"0",
-        "word"			:	"YANG"
-        }
-}
