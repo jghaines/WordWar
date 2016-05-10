@@ -56,7 +56,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     // request a game from the server
     this.getGame = function() {
         this.log.info(this.constructor.name + '.getGame()');
-        this.log.debug( this.constructor.name, '() - POST ' + this._getGameUrl ); 
+        this.log.debug( this.constructor.name, '() - ' + this._endpoint.getGame ); 
         var gameInfo = {
             playerList : [ { playerId : this.playerId } ]
         }; 
@@ -64,8 +64,8 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             gameInfo.board = ENV.requestedBoard;
         }
         jQuery.ajax({
-            type:    'POST',
-            url:     this._getGameUrl,
+            type:    this._endpoint.getGame.method,
+            url:     this._endpoint.getGame.url,
             headers: {
                 'Authorization': 'Bearer ' + this._idToken,
                 'Content-type' : 'application/json'
@@ -235,11 +235,13 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	//
 	this.executeLocalPlay = function( localPlay ) {
 		this.log.info( this.constructor.name + '.executeLocalPlay(.)');
+		this.log.debug( this.constructor.name, 'executeLocalPlay() - ', this._endpoint.putPlay);
+
 		this._socket.emit( this._SocketEvent.PLAY, JSON.stringify( localPlay ));
 
 		jQuery.ajax({
-			type:    'POST',
-			url:     this._executePlayUrl,
+			type:    this._endpoint.putPlay.method,
+			url:     this._endpoint.putPlay.url,
             headers: {
                 'Authorization': 'Bearer ' + this._idToken,
                 'Content-type' : 'application/json'
@@ -263,8 +265,11 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     this._idToken = idToken;
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
-    this._getGameUrl = this._restBaseUrl + '/Game';
-    this._executePlayUrl = this._restBaseUrl + '/Game/{gameId}/Play';
+    this._endpoint = {
+        getGame             : { method : 'POST',   url : this._restBaseUrl + '/Game' },
+        getGamesForPlayer   : { method : 'GET',    url : this._restBaseUrl + '/Game' },
+        putPlay             : { method : 'POST',   url : this._restBaseUrl + '/Game/{gameId}/Play' }
+    }
 
 	// event bindings - connection management 
 	this._socket.on('gameEvent', (function( msg ) {
