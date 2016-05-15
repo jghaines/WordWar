@@ -20,31 +20,16 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         if ( ! this._isBoardLoaded ) {
     		this._boardModel.loadBoard(	this._gameInfo.board );
         }
+
+		this._playerCount = gameInfo.playerIdList.length;
+		this._playerIndex = gameInfo.playerIdList.findIndex( listId => ( listId && listId === this._remote.playerId ) );
+		if ( this._playerIndex < 0 ) {
+            throw new Error( "Received gamePlayerList which we (playerId=" + this._remote.playerId + ") are not a member" );
+		}
         
         this._lettersModel.setLetterCount( gameInfo.letterCount );
         this._lettersView.updateLetters();
         
-        this.checkForGameStart();
-    }
-
-    // remote callback when we receive gamePlayerList from remote
-    this._receiveGamePlayerList = function( gamePlayerList ) {
-        // set this._playerIndex - index of local player
-		this._playerCount = 0;
-		this._playerIndex = null;
-		gamePlayerList.forEach( ( gamePlayer, index ) => {
-			if ( gamePlayer.playerId ) {
-				++this._playerCount;
-				if ( gamePlayer.playerId === this._remote.playerId ) {
-					this._playerIndex = index;
-				}
-			}
-		})
-		
-		if ( this._playerIndex == null ) {
-            throw new Error( "Received gamePlayerList which we (playerId=" + this._remote.playerId + ") are not a member" );
-		}
-
         this.checkForGameStart();
     }
 
@@ -461,10 +446,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     // remote bindings
 	this._remote.on( this._remote.Event.GAME_INFO, (function(msg) {
         this._receiveGameInfo(msg);
-	}).bind(this));
-
-	this._remote.on( this._remote.Event.GAME_PLAYER_LIST, (function(msg) {
-        this._receiveGamePlayerList(msg);
 	}).bind(this));
 
 	this._remote.on( this._remote.Event.PLAY_INFO, (function(msg) {
