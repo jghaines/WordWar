@@ -146,8 +146,8 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             }
         }
 
-        if ( data.hasOwnProperty( 'playList' )) {
-            this._playListReceived( data.playList );
+        if ( data.hasOwnProperty( 'PlayList' )) {
+            this._playListReceived( data.PlayList );
         }
 
         // do this last as it may trigger game start
