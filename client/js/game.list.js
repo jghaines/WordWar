@@ -4,14 +4,12 @@ function GameListController( remoteProxy, gameListView ) {
 	this.log = log.getLogger( this.constructor.name );
 
     this.getGames = function() {
-        this._remoteProxy.getGamesForPlayer( ( err, gameList ) => {
-            this.populateGameList( gameList );
-        }); 
+        this.log.info(this.constructor.name + '.getGames()');
+        this._remoteProxy.getGamesForPlayer();
     }
     
-    
-    
-    this.populateGameList = function( gameList ) {
+    this._populateGameList = function( gameList ) {
+        this.log.info(this.constructor.name + '._populateGameList()');
         const playerId = this._remoteProxy.playerId; 
         
         gameList
@@ -22,6 +20,7 @@ function GameListController( remoteProxy, gameListView ) {
      * @returns simple gameInfo object suitable for list population
      */
     this._gameToGameInfo = function( game ) {
+        this.log.info(this.constructor.name + '._gameToGameInfo()');
         const minTurnIndex = Math.min.apply( null, game.lastPlayedTurnIndexList );
 
         if ( game.playerIdList.length > game.playerCount ) {
@@ -48,37 +47,65 @@ function GameListController( remoteProxy, gameListView ) {
         const opponentInfo = this._remoteProxy.players[ opponentId ];
         
         return {
-            turnNumber : minTurnIndex + 2,
-            whoseTurn : whoseTurn,
-            opponentPicture : ( opponentInfo ? opponentInfo.picture : this._remoteProxy.defaultPicture )
+            gameId          : game.gameId,
+            turnNumber      : minTurnIndex + 2,
+            whoseTurn       : whoseTurn,
+            opponentName    : ( opponentInfo && opponentInfo.wwNickname ? opponentInfo.wwNickname : 'Opponent' ),
+            opponentPicture : ( opponentInfo && opponentInfo.picture ? opponentInfo.picture : this._remoteProxy.defaultPicture )
         };
     }
     
+    this._loadGame = function( gameId ) {
+        console.log( gameId );
+    }
+    
+    
     this._remoteProxy = remoteProxy;
     this._gameListView = gameListView;
+
+    this._gameListView.on( 'CLICKED', this._loadGame.bind(this) );
+    this._remoteProxy.on( this._remoteProxy.Event.GAME_LIST, (function(msg) {
+        this._populateGameList( msg );
+	}).bind(this));
 }
 
 function GameListView() {
 	this.log = log.getLogger( this.constructor.name );
 
     this.clearGames = function() {
+        this.log.info(this.constructor.name + '.clearGames()');
         this._ui.empty();
     }
     
     this.appendGame = function( gameInfo ) {
+        this.log.info(this.constructor.name + '.appendGame()');
+
         if ( !gameInfo ) return;
         
-        $("<div>", {class: "game-info"}).append(
+        $("<div>", {class: "game-info", id : gameInfo.gameId }).append(
             $("<img>", {class: "avatar", src : gameInfo.opponentPicture }),
-            $("<span>", {class: "turn-number"}).text(
-                gameInfo.turnNumber
+            $("<span>", {class: "opponent-name"}).text(
+                gameInfo.opponentName
             ),
-            $("<span>", {class: "whose-turn"}).text(
-                gameInfo.whoseTurn
+            $("<span>", {class: "turn-info"}).append(
+                $("<span>", {class: "turn-number"}).text(
+                    gameInfo.turnNumber
+                ),
+                $("<span>", {class: "whose-turn"}).text(
+                    gameInfo.whoseTurn
+                )
             )
-        ).appendTo( this._ui );
+        )
+        .click( () => {
+            console.log( gameInfo.gameId );
+            this.emit( 'CLICKED', gameInfo.gameId );
+        })
+        .appendTo( this._ui );
     }
     
 
     this._ui = $( '.game-list' );
 }
+
+// make the class an EventEmitter
+GameListView.prototype = Object.create(EventEmitter.prototype);

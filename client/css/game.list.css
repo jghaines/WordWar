@@ -1,0 +1,16 @@
+div.game-info {    border-style: solid;
+    border-width: 1px;
+}
+
+span.turn-info {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+span.turn-number {
+    display: block;
+}
+
+span.turn-number::before {
+    content: "Turn: ";
+}

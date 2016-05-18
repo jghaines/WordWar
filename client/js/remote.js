@@ -18,6 +18,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     this.Event = {
         GAME_INFO           : 'game_info',
         GAME_PLAYER_LIST    : 'game_player_list',
+        GAME_LIST           : 'game_list',
         PLAY_INFO           : 'play_info',
         TURN_INFO           : 'turn_info',
     };
@@ -77,6 +78,27 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             error: 	 function( jqXHR, textStatus, errorThrown ) {
                 console.log( 'getGame() -> error ' + textStatus );
                 // throw new Error ( errorThrown );
+            }
+        });
+    }
+    
+    // get our list of games
+    this.getGamesForPlayer = function() {
+        this.log.info(this.constructor.name + '.getGamesForPlayer()');
+        this.log.debug( this.constructor.name, '() - ' + this._endpoint.getGamesForPlayer ); 
+
+        jQuery.ajax({
+            type:    this._endpoint.getGamesForPlayer.method,
+            url:     this._endpoint.getGamesForPlayer.url,
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken
+            },
+            success: (function( jqXHR, textStatus, errorThrown ) {
+                this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
+            }).bind( this ),
+            error: 	 function( jqXHR, textStatus, errorThrown ) {
+                console.log( 'getGamesForPlayer() -> error ' + textStatus );
+                callback( errorThrown || 'Error ' + textStatus, jqXHR );
             }
         });
     }
@@ -146,6 +168,10 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             }
         }
 
+        if ( data.hasOwnProperty( 'GameList' )) {
+            this._gameListReceived( data.GameList );
+        }
+
         if ( data.hasOwnProperty( 'PlayList' )) {
             this._playListReceived( data.PlayList );
         }
@@ -191,7 +217,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         this.log.info( this.constructor.name + '._playerListReceived()' );
 
         playerList.forEach( player => {
-            this.players[ player.playerId ] = player;   
+            this.players[ player.userId ] = player;   
         })
         
     }
@@ -200,6 +226,12 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     this._playListReceived = function( playList ) {
         this.log.info( this.constructor.name + '._playListReceived()' );
 		this.emit( this.Event.PLAY_INFO, playList.map( play => new Play( play )) );
+    }
+    
+    // we have received Game list from remote, parse and send on
+    this._gameListReceived = function( gameList ) {
+        this.log.info( this.constructor.name + '._gameListReceived()' );
+		this.emit( this.Event.GAME_LIST, gameList );
     }
     
     // we have received turn info from remote, send it on
@@ -260,7 +292,8 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	// constructor code
     this.playerId = userId;
     this.gameId = null;
-    this.players = []
+    this.players = {};
+    this.defaultPicture = '/images/player-1.png';
     
     this._idToken = idToken;
 	this._socket = socket;
