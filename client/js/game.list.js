@@ -48,7 +48,7 @@ function GameListController( remoteProxy, gameListView ) {
         const opponentInfo = this._remoteProxy.players[ opponentId ];
         
         return {
-            turnIndex : minTurnIndex,
+            turnNumber : minTurnIndex + 2,
             whoseTurn : whoseTurn,
             opponentPicture : ( opponentInfo ? opponentInfo.picture : this._remoteProxy.defaultPicture )
         };
@@ -70,8 +70,8 @@ function GameListView() {
         
         $("<div>", {class: "game-info"}).append(
             $("<img>", {class: "avatar", src : gameInfo.opponentPicture }),
-            $("<span>", {class: "turn-index"}).text(
-                gameInfo.turnIndex
+            $("<span>", {class: "turn-number"}).text(
+                gameInfo.turnNumber
             ),
             $("<span>", {class: "whose-turn"}).text(
                 gameInfo.whoseTurn
