@@ -342,6 +342,17 @@
                 "ParentId": { "Fn::GetAtt": ["RestApi", "RootResourceId"] },
                 "PathPart": "Game"
             }
+        },
+        "GameFindGameMethod" : {
+            "Type" : "AWS::ApiGateway::Method",
+            "Properties" : {
+                "AuthorizationType" : "CUSTOM",
+                "AuthorizerId" : { "Ref" : "Auth0Authorizer" },
+                "HttpMethod" : "POST",
+                "ResourceId" : {
+                    "Ref": "GameResource"
+                }
+            }
         }
     }
 }
