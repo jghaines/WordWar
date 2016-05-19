@@ -1,7 +1,12 @@
 "use strict";
 
-function GameListController( remoteProxy, gameListView ) {
+function GameListController( gameListView ) {
 	this.log = log.getLogger( this.constructor.name );
+
+    this.setRemote = function( remoteProxy ) {
+        this._remoteProxy = remoteProxy;
+        this._remoteProxy.on( this._remoteProxy.Event.GAME_LIST, this._populateGameList.bind( this ));
+    }
 
     this.getGames = function() {
         this.log.info(this.constructor.name + '.getGames()');
@@ -56,18 +61,17 @@ function GameListController( remoteProxy, gameListView ) {
     }
     
     this._loadGame = function( gameId ) {
-        console.log( gameId );
+        this.emit( 'GAME_SELECTED', gameId );
     }
     
-    
-    this._remoteProxy = remoteProxy;
     this._gameListView = gameListView;
 
-    this._gameListView.on( 'CLICKED', this._loadGame.bind(this) );
-    this._remoteProxy.on( this._remoteProxy.Event.GAME_LIST, (function(msg) {
-        this._populateGameList( msg );
-	}).bind(this));
+    this._gameListView.on( 'GAME_SELECTED', this._loadGame.bind(this) );
 }
+
+// make the class an EventEmitter
+GameListController.prototype = Object.create(EventEmitter.prototype);
+
 
 function GameListView() {
 	this.log = log.getLogger( this.constructor.name );
@@ -97,8 +101,7 @@ function GameListView() {
             )
         )
         .click( () => {
-            console.log( gameInfo.gameId );
-            this.emit( 'CLICKED', gameInfo.gameId );
+            this.emit( 'GAME_SELECTED', gameInfo.gameId );
         })
         .appendTo( this._ui );
     }
