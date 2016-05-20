@@ -22,7 +22,8 @@ function MainController() {
         var socket = io( ENV.webSocketUrl );
         this.remote = new RemoteProxy( idToken, userId, socket, ENV.restBaseUrl );
 
-        this.createGame( idToken, userId, ENV.webSocketUrl, ENV.restBaseUrl )
+        this.glc.setRemote( this.remote );
+        this.glc.getGames();
     }
 
     this.createGame = function() {
@@ -82,6 +83,23 @@ function MainController() {
 
         this.gc = new GameController( this.remote, Strategy, attackRangeStrategy );
     }
+    
+    this._gameSelected = function( gameId ) {
+        this.createGame();
+    }
+    
+    this._newGame = function() {
+        this.glc.setVisibility( false );
+//        this.gc.setVisibility( true );
+        this.createGame();
+    }
+    
+    this.glc = new GameListController( new GameListView());
+    this.glc.on( 'NEW_GAME', this._newGame.bind(this) );
+    this.glc.on( 'GAME_SELECTED', this._gameSelected.bind(this) );
+
+    this.glc.setVisibility( true );
+//        this.gc.setVisibility( false );
     
     this.gc = null;
 }

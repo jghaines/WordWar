@@ -1,0 +1,26 @@
+div.game-info,
+div.new-game {
+    border-style: solid;
+    border-width: 1px;
+}
+
+div.new-game {
+    text-align: center;
+}
+
+span.new-game::before {
+    content: "<< New game >>";
+}
+
+span.turn-info {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+span.turn-number {
+    display: block;
+}
+
+span.turn-number::before {
+    content: "Turn: ";
+}

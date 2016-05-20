@@ -8,6 +8,10 @@ function GameListController( gameListView ) {
         this._remoteProxy.on( this._remoteProxy.Event.GAME_LIST, this._populateGameList.bind( this ));
     }
 
+    this.setVisibility = function( isVisible ) {
+        this._gameListView.setVisibility( isVisible );
+    }
+
     this.getGames = function() {
         this.log.info(this.constructor.name + '.getGames()');
         this._remoteProxy.getGamesForPlayer();
@@ -17,6 +21,9 @@ function GameListController( gameListView ) {
         this.log.info(this.constructor.name + '._populateGameList()');
         const playerId = this._remoteProxy.playerId; 
         
+        this._gameListView.clearGames()
+        this._gameListView.appendNewGame();
+
         gameList
             .map( game => this._gameToGameInfo( game, this._remoteProxy.playerId ))
             .forEach( gameInfo => this._gameListView.appendGame( gameInfo ) );
@@ -64,8 +71,13 @@ function GameListController( gameListView ) {
         this.emit( 'GAME_SELECTED', gameId );
     }
     
+    this._newGame = function() {
+        this.emit( 'NEW_GAME' );
+    }
+    
     this._gameListView = gameListView;
 
+    this._gameListView.on( 'NEW_GAME', this._newGame.bind(this) );
     this._gameListView.on( 'GAME_SELECTED', this._gameSelected.bind(this) );
 }
 
@@ -76,17 +88,43 @@ GameListController.prototype = Object.create(EventEmitter.prototype);
 function GameListView() {
 	this.log = log.getLogger( this.constructor.name );
 
+    this.setVisibility = function( isVisible ) {
+        if ( isVisible ) {
+            this._ui.show();
+        } else {
+            this._ui.hide();
+        }
+    }
+
     this.clearGames = function() {
         this.log.info(this.constructor.name + '.clearGames()');
         this._ui.empty();
+    }
+    
+    this.appendNewGame = function( gameInfo ) {
+        this.log.info(this.constructor.name + '.appendNewGame()');
+        
+        // this shouldn't be needed
+        this._ui = $( '.game-list' );
+
+        var gameItemUi = $("<div>", { class: "new-game" }).append(
+            $( '<span>', { class: "new-game" } )
+        )
+        .click( () => {
+            this.emit( 'NEW_GAME' );
+        })
+        .appendTo( this._ui );
     }
     
     this.appendGame = function( gameInfo ) {
         this.log.info(this.constructor.name + '.appendGame()');
 
         if ( !gameInfo ) return;
+
+        // this shouldn't be needed
+        this._ui = $( '.game-list' );
         
-        $("<div>", {class: "game-info", id : gameInfo.gameId }).append(
+        var gameItemUi = $("<div>", {class: "game-info", id : gameInfo.gameId }).append(
             $("<img>", {class: "avatar", src : gameInfo.opponentPicture }),
             $("<span>", {class: "opponent-name"}).text(
                 gameInfo.opponentName
@@ -106,7 +144,6 @@ function GameListView() {
         .appendTo( this._ui );
     }
     
-
     this._ui = $( '.game-list' );
 }
 
