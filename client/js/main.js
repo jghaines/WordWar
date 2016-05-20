@@ -1,82 +1,92 @@
 'use strict';
 
-var gc = {};
 var auth0 = new Auth0({
     domain:       ENV.auth0.domain,
     clientID:     ENV.auth0.accountClientId,
     callbackOnLocationHash: true
 });
 
-function createGame( idToken, userId, webSocketUrl, restBaseUrl ) {
-	var socket = io( webSocketUrl );
-	var remote = new RemoteProxy( idToken, userId, socket, restBaseUrl );
 
-	var attackRangeStrategy = new CompositeAttackRangeStrategy( [
-		{ from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
-		{ from:  6, to:  7, strategy: new RadiusAttackRangeStrategy(1) },
-		{ from:  8, to:  9, strategy: new RadiusAttackRangeStrategy(2) },
-		{ from: 10, to: 99, strategy: new RadiusAttackRangeStrategy(3) },
-	]);
+function MainController() {
 
-	var Strategy  = new CompositeStrategy( [
-        new TurnPointsEqualsWordPointsStrategy(),
-        new WordLengthBonusStrategy( [
-            { from:  1, to:  1, bonus: 1 },
-            { from:  2, to:  2, bonus: 2 },
-            { from:  3, to:  3, bonus: 3 },
-            { from:  4, to:  4, bonus: 4 },
-            { from:  5, to:  5, bonus: 5 },
-            { from:  6, to:  6, bonus: 6 },
-            { from:  7, to:  7, bonus: 7 },
-            { from:  8, to:  8, bonus: 8 },
-            { from:  9, to:  9, bonus: 9 },
-            { from: 10, to: 99, bonus: 20 },
-        ]),
-        new ApplyAttackMulitiplierStrategy(),
-        
-        // turn victory conditions
-        new IfThenStrategy( {
-            ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
-            thenDo : []
-        }),
-        new IfThenStrategy( { 
-            ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
-            thenDo : new AttackWinsMetaStrategy( {
-                winner : _ => { return 0 },
-                loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
-            })
-        }),
-        new IfThenStrategy( { 
-            ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
-            thenDo : new HighScoreWinsMetaStrategy( {
-                winner : _ => { return 0 },
-                loser  : _ => { return -1 * _.winner.turnPoints },
-            })
-        }),                    
-        new SetEndTurnStrategy(),
-        new MinMaxEndTurnStrategy( -999, 800 ),
-        new EndGameLowWaterMarkLoserStrategy( 0 ),
-        new EndGameMaxTurnsStrategy( 50 ),
+    this.showLogin = function() {
+        localStorage.removeItem('auth0.idToken' );
+        localStorage.removeItem('auth0.userId' );
+        auth0.login({
+            icon : '/images/shortcut-icon.png',
+            connections: [ 'facebook', 'auth0' ]
+        });
+    }
 
-        new IncrementAttackMultiplierStrategy( 2, -99 ),
-        new MinMaxAttackMultiplierStrategy( 0, 8 ),
+    this.doLogin = function( idToken, userId ) {
+        var socket = io( ENV.webSocketUrl );
+        this.remote = new RemoteProxy( idToken, userId, socket, ENV.restBaseUrl );
 
-        new UpdatePositionStrategy(),
-        new KnockBackPlayStrategy(),
-	]);
+        this.createGame( idToken, userId, ENV.webSocketUrl, ENV.restBaseUrl )
+    }
 
-	gc = new GameController( remote, Strategy, attackRangeStrategy );
+    this.createGame = function() {
+        var attackRangeStrategy = new CompositeAttackRangeStrategy( [
+            { from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
+            { from:  6, to:  7, strategy: new RadiusAttackRangeStrategy(1) },
+            { from:  8, to:  9, strategy: new RadiusAttackRangeStrategy(2) },
+            { from: 10, to: 99, strategy: new RadiusAttackRangeStrategy(3) },
+        ]);
+
+        var Strategy  = new CompositeStrategy( [
+            new TurnPointsEqualsWordPointsStrategy(),
+            new WordLengthBonusStrategy( [
+                { from:  1, to:  1, bonus: 1 },
+                { from:  2, to:  2, bonus: 2 },
+                { from:  3, to:  3, bonus: 3 },
+                { from:  4, to:  4, bonus: 4 },
+                { from:  5, to:  5, bonus: 5 },
+                { from:  6, to:  6, bonus: 6 },
+                { from:  7, to:  7, bonus: 7 },
+                { from:  8, to:  8, bonus: 8 },
+                { from:  9, to:  9, bonus: 9 },
+                { from: 10, to: 99, bonus: 20 },
+            ]),
+            new ApplyAttackMulitiplierStrategy(),
+            
+            // turn victory conditions
+            new IfThenStrategy( {
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'move', 'move' ] ),
+                thenDo : []
+            }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'move' ] ),
+                thenDo : new AttackWinsMetaStrategy( {
+                    winner : _ => { return 0 },
+                    loser  : _ => { return _.loser.turnPoints - _.winner.turnPoints }
+                })
+            }),
+            new IfThenStrategy( { 
+                ifTrue : new PlayTypeCombinationConditionalStrategy( [ 'attack', 'attack' ] ),
+                thenDo : new HighScoreWinsMetaStrategy( {
+                    winner : _ => { return 0 },
+                    loser  : _ => { return -1 * _.winner.turnPoints },
+                })
+            }),                    
+            new SetEndTurnStrategy(),
+            new MinMaxEndTurnStrategy( -999, 800 ),
+            new EndGameLowWaterMarkLoserStrategy( 0 ),
+            new EndGameMaxTurnsStrategy( 50 ),
+
+            new IncrementAttackMultiplierStrategy( 2, -99 ),
+            new MinMaxAttackMultiplierStrategy( 0, 8 ),
+
+            new UpdatePositionStrategy(),
+            new KnockBackPlayStrategy(),
+        ]);
+
+        this.gc = new GameController( this.remote, Strategy, attackRangeStrategy );
+    }
+    
+    this.gc = null;
 }
 
-
-function showLogin() {
-	localStorage.removeItem('auth0.idToken' );
-	localStorage.removeItem('auth0.userId' );
-    auth0.login({
-        icon : '/images/shortcut-icon.png',
-        connections: [ 'facebook', 'auth0' ]
-    });
-}
+var mc = new MainController();
 
 window.onload = function() {
 	var idToken = localStorage.getItem( 'auth0.idToken' );
@@ -84,9 +94,9 @@ window.onload = function() {
 	var windowHash = window.location.hash;
 
 	if ( windowHash === '#logout' ) {
-		showLogin();
+		mc.showLogin();
 	} else if ( idToken != null && userId != null ) {
-		createGame( idToken, userId, ENV.webSocketUrl, ENV.restBaseUrl )
+        mc.doLogin( idToken, userId );
 	} else { // no token ; need to log in
 		var hash = auth0.parseHash( windowHash );
 		if ( hash ) { // callback from authentication
@@ -101,7 +111,7 @@ window.onload = function() {
                 window.onload();
 			}
 		} else { 
-			showLogin();
+			mc.showLogin();
 		}
 	}
 }
