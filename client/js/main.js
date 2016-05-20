@@ -26,7 +26,7 @@ function MainController() {
         this.glc.getGames();
     }
 
-    this.createGame = function() {
+    this._getGame = function() {
         var attackRangeStrategy = new CompositeAttackRangeStrategy( [
             { from:  1, to: 99, strategy: new OverlappingAttackRangeStrategy() },
             { from:  6, to:  7, strategy: new RadiusAttackRangeStrategy(1) },
@@ -81,17 +81,18 @@ function MainController() {
             new KnockBackPlayStrategy(),
         ]);
 
-        this.gc = new GameController( this.remote, Strategy, attackRangeStrategy );
+        return new GameController( this.remote, Strategy, attackRangeStrategy );
     }
     
     this._gameSelected = function( gameId ) {
-        this.createGame();
+        this.gc = this._getGame();
     }
     
     this._newGame = function() {
         this.glc.setVisibility( false );
 //        this.gc.setVisibility( true );
-        this.createGame();
+        this.gc = this._getGame();
+        this.gc.createNewGame();
     }
     
     this.glc = new GameListController( new GameListView());

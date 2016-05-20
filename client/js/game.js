@@ -4,6 +4,12 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );
 
+
+    // get ourselves a game
+	this.createNewGame = function() {
+	    this._remote.getGame();
+	}
+
     // Play state for this player
     this._getCurrentPlayForPlayer = function() {
         return this._plays[this.turnIndex][this._playerIndex];
@@ -480,9 +486,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this._buttonsView.on( 'reset', (function() {
 		this.resetWord();
 	}).bind(this) );
-
-    // get ourselves a game
-    this._remote.getGame();
 }
 
 // make the class an EventEmitter
