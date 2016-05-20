@@ -54,10 +54,10 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         });
     }
     
-    // request a game from the server
+    // request a new game from the server
     this.getGame = function() {
         this.log.info(this.constructor.name + '.getGame()');
-        this.log.debug( this.constructor.name, '() - ' + this._endpoint.getGame ); 
+        this.log.debug( this.constructor.name, '() - ' + this._endpoint.findNewGame ); 
         var gameInfo = {
             playerList : [ { playerId : this.playerId } ]
         }; 
@@ -65,8 +65,8 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             gameInfo.board = ENV.requestedBoard;
         }
         jQuery.ajax({
-            type:    this._endpoint.getGame.method,
-            url:     this._endpoint.getGame.url,
+            type:    this._endpoint.findNewGame.method,
+            url:     this._endpoint.findNewGame.url,
             headers: {
                 'Authorization': 'Bearer ' + this._idToken,
                 'Content-type' : 'application/json'
@@ -102,6 +102,27 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             }
         });
     }
+
+	this.loadGame = function( gameId ) {
+        this.log.info(this.constructor.name + `.loadGame( gameId: ${ gameId} )`);
+        this.log.debug( this.constructor.name, '() - ' + this._endpoint.getGame ); 
+        var url = this._endpoint.getGame.url.replace( /{\s*gameId\s*}/, gameId );
+
+        jQuery.ajax({
+            type:    this._endpoint.getGame.method,
+            url:     url,
+            headers: {
+                'Authorization': 'Bearer ' + this._idToken
+            },
+            success: (function( jqXHR, textStatus, errorThrown ) {
+                this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
+            }).bind( this ),
+            error: 	 function( jqXHR, textStatus, errorThrown ) {
+                console.log( 'loadGame() -> error ' + textStatus );
+                callback( errorThrown || 'Error ' + textStatus, jqXHR );
+            }
+        });
+	}
     
     // test - invoke the server echo endpoint
     this.echo = function() {
@@ -268,12 +289,13 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	this.executeLocalPlay = function( localPlay ) {
 		this.log.info( this.constructor.name + '.executeLocalPlay(.)');
 		this.log.debug( this.constructor.name, 'executeLocalPlay() - ', this._endpoint.putPlay);
+        var url = this._endpoint.putPlay.url.replace( /{\s*gameId\s*}/, localPlay.gameId );
 
 		this._socket.emit( this._SocketEvent.PLAY, JSON.stringify( localPlay ));
 
 		jQuery.ajax({
 			type:    this._endpoint.putPlay.method,
-			url:     this._endpoint.putPlay.url,
+			url:     url,
             headers: {
                 'Authorization': 'Bearer ' + this._idToken,
                 'Content-type' : 'application/json'
@@ -299,9 +321,10 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
 	this._socket = socket;
 	this._restBaseUrl = restBaseUrl;
     this._endpoint = {
-        getGame             : { method : 'POST',   url : this._restBaseUrl + '/Game' },
+        findNewGame         : { method : 'POST',   url : this._restBaseUrl + '/Game' },
         getGamesForPlayer   : { method : 'GET',    url : this._restBaseUrl + '/Game' },
-        putPlay             : { method : 'POST',   url : this._restBaseUrl + '/Game/{gameId}/Play' }
+        getGame             : { method : 'GET',   url : this._restBaseUrl + '/Game/{gameId}' },
+        putPlay             : { method : 'POST',   url : this._restBaseUrl + '/Game/{gameId}/Play' },
     }
 
 	// event bindings - connection management 

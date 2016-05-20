@@ -86,6 +86,7 @@ function MainController() {
     
     this._gameSelected = function( gameId ) {
         this.gc = this._getGame();
+        this.gc.loadGame( gameId );
     }
     
     this._newGame = function() {

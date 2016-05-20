@@ -5,9 +5,13 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log.setLevel( log.levels.INFO );
 
 
-    // get ourselves a game
+    // get ourselves a new game
 	this.createNewGame = function() {
 	    this._remote.getGame();
+	}
+
+	this.loadGame = function( gameId ) {
+	    this._remote.loadGame( gameId );
 	}
 
     // Play state for this player
