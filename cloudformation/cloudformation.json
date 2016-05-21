@@ -53,28 +53,28 @@
                 "FunctionVersion"   : "$LATEST"
             }
         },        
-        "GetGameLambda" : {
+        "GetGameWithPlaysLambda" : {
             "Type" : "AWS::Lambda::Function",
             "Properties" : {
-                "FunctionName" : "GetGame",
+                "FunctionName" : "GetGameWithPlays",
                 "Code"          : {
                     "S3Bucket"  : "wordwar-config",
                     "S3Key"     : "lambda/lambda.zip"
                 },
-                "Description"   : "Return a Game by gameId",
-                "Handler"       : "restApi/game/getGame/handler.handler",
+                "Description"   : "Return a Game with Plays by gameId",
+                "Handler"       : "restApi/game/getGameWithPlays/handler.handler",
                 "MemorySize"    : 128,
                 "Role"          : "arn:aws:iam::458298098107:role/lambda_dynamo",
                 "Runtime"       : "nodejs4.3",
                 "Timeout"       : 10
             }
         },
-        "GetGameLambdaDevAlias" : {
+        "GetGameWithPlaysLambdaDevAlias" : {
             "Type" : "AWS::Lambda::Alias",
-            "DependsOn" : "GetGameLambda",
+            "DependsOn" : "GetGameWithPlaysLambda",
             "Properties" : {
                 "Name"              : "dev",
-                "FunctionName"      : "GetGame",
+                "FunctionName"      : "GetGameWithPlays",
                 "FunctionVersion"   : "$LATEST"
             }
         },        
