@@ -282,12 +282,30 @@
                 "TableName" : { "Fn::Join" : [ "", [ { "Ref" : "Env" }, "_Play" ]] },
                 "KeySchema" : [
                     {
-                        "KeyType" : "HASH",
-                        "AttributeName" : "gameId_turnIndex"
+                        "AttributeName" : "gameId_turnIndex",
+                        "KeyType"       : "HASH"
                     },
                     {
-                        "KeyType" : "RANGE",
-                        "AttributeName" : "playerIndex"
+                        "AttributeName" : "playerIndex",
+                        "KeyType"       : "RANGE"
+                    }
+                ],
+                "GlobalSecondaryIndexes": [
+                    { 
+                        "IndexName" : "gameId", 
+                        "KeySchema" : [
+                            {
+                                "AttributeName" : "gameId",
+                                "KeyType"       : "HASH"
+                            }
+                        ],
+                        "Projection": {
+                            "ProjectionType": "KEYS_ONLY"
+                        },
+                        "ProvisionedThroughput" : {
+                            "ReadCapacityUnits" : 5,
+                            "WriteCapacityUnits": 5
+                        }
                     }
                 ],
                 "AttributeDefinitions" : [
@@ -296,13 +314,17 @@
                         "AttributeType" : "S"
                     },
                     {
+                        "AttributeName" : "gameId",
+                        "AttributeType" : "S"
+                    },
+                    {
                         "AttributeName" : "playerIndex",
                         "AttributeType" : "N"
                     }
                 ],
                 "ProvisionedThroughput" : {
-                    "ReadCapacityUnits" :  5,
-                    "WriteCapacityUnits" : 5
+                    "ReadCapacityUnits" : 5,
+                    "WriteCapacityUnits": 5
                 }
             }
         },
