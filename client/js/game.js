@@ -68,6 +68,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 
         this.state = GameState.PLAYER_MOVE;
         this.turnIndex = 0;
+		this._processPlays();
 
         this.emit( 'gameInfo', this._gameInfo );
 
@@ -290,6 +291,9 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
         }).bind( this ));
     }
     
+	/**
+	 * receive playList (from remote). Store it and process
+	 */
     this._receivePlayList = function( playList ) {
  		this.log.info( this.constructor.name + '._receivePlayList(.)');
          var _plays = this._plays;
@@ -297,20 +301,36 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
             _plays[ play.turnIndex ] = _plays[ play.turnIndex ] || [];
             _plays[ play.turnIndex ][ play.playerIndex ] = play;            
          });
-         
-         // have we receieved enough Plays to end this turn
-         var playsForThisTurn = this._plays[ this.turnIndex ];
-         if ( playsForThisTurn !== undefined ) {
-            var playsForThisTurnCount = playsForThisTurn.countWhere( (play) => {
-                return notNull(play) && play.playComplete; 
-            });
 
-            if ( playsForThisTurnCount > this._gameInfo.playerCount ) {
+		 if ( this.state == GameState.NOT_STARTED ) {
+			 return;
+		 } else {
+			 this._processPlays();
+		 }
+    }
+
+	this._getPlayCountForTurn = function( turnIndex ) {
+		var playsForThisTurn = this._plays[ turnIndex ];
+		if ( ! playsForThisTurn ) return 0;
+
+		return playsForThisTurn.countWhere( (play) => ( notNull(play) && play.playComplete )); 
+	}
+    
+    this._processPlays = function() {         
+		var playsForThisTurn = this._plays[ this.turnIndex ];
+		var playsForThisTurnCount = playsForThisTurn.countWhere( (play) => {
+			return notNull(play) && play.playComplete; 
+		});
+		// while we have completed turns
+		while ( this._getPlayCountForTurn( this.turnIndex ) >= this._gameInfo.playerCount ) {
+			if ( this._getPlayCountForTurn( this.turnIndex ) > this._gameInfo.playerCount ) {
 				throw new Error( "_receivePlayList() - too many player's plays received" );
-			} else if ( playsForThisTurnCount >= this._gameInfo.playerCount ) {
-                this.endTurn();
-            }
-         }
+			}
+
+			this.endTurn();
+	        ++this.turnIndex;
+		}
+        this.newTurn();
      }
 
     this.endTurn = function() {
@@ -363,9 +383,6 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			this._boardView.addPlayedItem( play );
             this.emit( 'endTurn', play );            
         } ).bind( this ));
-
-        ++this.turnIndex;
-        this.newTurn();
 	}
 
 	this.executeMove = function( play ) {

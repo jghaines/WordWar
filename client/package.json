@@ -12,6 +12,7 @@
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
+    "grunt-contrib-jshint": "^1.0.0",
     "jasmine": "^2.4.1"
   }
 }

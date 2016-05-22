@@ -97,14 +97,13 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
                 this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
             }).bind( this ),
             error: 	 function( jqXHR, textStatus, errorThrown ) {
-                console.log( 'getGamesForPlayer() -> error ' + textStatus );
-                callback( errorThrown || 'Error ' + textStatus, jqXHR );
+                console.error( 'getGamesForPlayer() -> error ' + textStatus );
             }
         });
     }
 
 	this.loadGame = function( gameId ) {
-        this.log.info(this.constructor.name + `.loadGame( gameId: ${ gameId} )`);
+        this.log.info(this.constructor.name + `.loadGame( gameId: ${ gameId } )`);
         this.log.debug( this.constructor.name, '() - ' + this._endpoint.getGame ); 
         var url = this._endpoint.getGame.url.replace( /{\s*gameId\s*}/, gameId );
 
@@ -118,8 +117,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
                 this._receiveRemoteData( this.source.API, jqXHR, textStatus, errorThrown );
             }).bind( this ),
             error: 	 function( jqXHR, textStatus, errorThrown ) {
-                console.log( 'loadGame() -> error ' + textStatus );
-                callback( errorThrown || 'Error ' + textStatus, jqXHR );
+                console.error( 'loadGame() -> error ' + textStatus );
             }
         });
 	}
@@ -173,7 +171,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         }
 
         if ( data.hasOwnProperty( 'errorMessage' )) { // API Gateway-Lambda error
-            throw new Error( data.errorMessage );
+            throw new Error( `Remote reports error message: ${ data.errorMessage }` );
         }
 
         // do this first in case subsequent events look up the player data        
@@ -325,6 +323,7 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
         getGamesForPlayer   : { method : 'GET',    url : this._restBaseUrl + '/Game' },
         getGame             : { method : 'GET',   url : this._restBaseUrl + '/Game/{gameId}' },
         putPlay             : { method : 'POST',   url : this._restBaseUrl + '/Game/{gameId}/Play' },
+        getPlays            : { method : 'GET',    url : this._restBaseUrl + '/Game/{gameId}/Play' },
     }
 
 	// event bindings - connection management 

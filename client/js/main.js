@@ -85,6 +85,9 @@ function MainController() {
     }
     
     this._gameSelected = function( gameId ) {
+        this.glc.setVisibility( false );
+//        this.gc.setVisibility( true );
+
         this.gc = this._getGame();
         this.gc.loadGame( gameId );
     }
@@ -94,6 +97,11 @@ function MainController() {
 //        this.gc.setVisibility( true );
         this.gc = this._getGame();
         this.gc.createNewGame();
+    }
+    
+    this._backToList = function() {
+        this.glc.setVisibility( true );
+//        this.gc.setVisibility( false );
     }
     
     this.glc = new GameListController( new GameListView());
