@@ -121,6 +121,9 @@ function MainController() {
 
     this.gameView = new GameView();
 
+    this._bbv = new BackButtonView();
+    this._bbv.on( 'CLICK', this._backToList.bind( this ));
+
     this.glc.setVisibility( true );
     this.gameView.setVisibility( false );
     

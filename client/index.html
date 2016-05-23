@@ -63,60 +63,64 @@
 	<body>
 		<div class="game-list"></div>
 
-		<table class="game-area"><!-- ugh table layout :-( -->
-			<tr>
-				<td colspan='2' rowspan='2'>
-					<table class="gameboard">
-						<!-- Gamboard will be populated by script -->
-					</table>
-				</td>
-				<td>
-                    <div>
-                        <span class="score player-1"></span>
-                        <span style="float : right">
-                            <span class="attackMultiplier player-1"></span>
-                            <img class="score avatar" src="./images/player-1.png" />
-                        </span>
-                    </div>
-					<div class="playedwords player-1">
-						<ul />
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td>
-                    <div>
-                        <span class="score player-0"></span>
-                        <span style="float : right">
-                            <span class="attackMultiplier player-0"></span>
-                            <img class="score avatar" src="./images/player-0.png" />
-                        </span>
-                    </div>
-					<div class="playedwords player-0">
-						<ul />
-					</div>
-				</td>
-			</tr>
+ 		<div  class="game-area">
+			<div class="back-button"></div>
+			 
+			<table><!-- ugh table layout :-( -->
+				<tr>
+					<td colspan='2' rowspan='2'>
+						<table class="gameboard">
+							<!-- Gamboard will be populated by script -->
+						</table>
+					</td>
+					<td>
+						<div>
+							<span class="score player-1"></span>
+							<span style="float : right">
+								<span class="attackMultiplier player-1"></span>
+								<img class="score avatar" src="./images/player-1.png" />
+							</span>
+						</div>
+						<div class="playedwords player-1">
+							<ul />
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div>
+							<span class="score player-0"></span>
+							<span style="float : right">
+								<span class="attackMultiplier player-0"></span>
+								<img class="score avatar" src="./images/player-0.png" />
+							</span>
+						</div>
+						<div class="playedwords player-0">
+							<ul />
+						</div>
+					</td>
+				</tr>
 
-			<tr>
-				<td>
-					<div class="status"></div>
-					<table class="letters">
-						<tbody>
-							<!-- Letters will be populated by script -->
-						</tbody>
-					</table>
-				</td>
-				<td colspan='2'>
-					<span class="buttons">
-						<button type="button" id="attack">Attack (x2)</button>
-						<button type="button" id="move">Move</button>
-						<button type="button" id="reset">Reset</button>
-					</span>
-				</td>
-			</tr>
+				<tr>
+					<td>
+						<div class="status"></div>
+						<table class="letters">
+							<tbody>
+								<!-- Letters will be populated by script -->
+							</tbody>
+						</table>
+					</td>
+					<td colspan='2'>
+						<span class="buttons">
+							<button type="button" id="attack">Attack (x2)</button>
+							<button type="button" id="move">Move</button>
+							<button type="button" id="reset">Reset</button>
+						</span>
+					</td>
+				</tr>
 
-		</table>
+			</table>
+		</div>
 	</body>
 </html>
 

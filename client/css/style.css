@@ -92,7 +92,7 @@ button#attack {
 }
 
 button#move {
-	background-color: #73AD21; // green-ish
+	background-color: #73AD21; /* green-ish */
 }
 
 button#reset {
@@ -102,4 +102,14 @@ button#reset {
 img.avatar {
 	width: 		25px;
 	height: 	25px;
+}
+
+.back-button {
+    border-style: solid;
+    border-width: 1px;
+    text-align: left;
+}
+
+.back-button::before {
+    content: "<< Back";
 }

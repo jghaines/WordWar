@@ -17,6 +17,15 @@ function GameView() {
     this._ui = $( '.game-area' );	
 }
 
+function BackButtonView() {
+    this._ui = $( '.back-button' );
+	this._ui.click( () => {
+		this.emit( 'CLICK' )
+	});
+}
+// make the class an EventEmitter
+BackButtonView.prototype = Object.create(EventEmitter.prototype);
+
 
 function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
