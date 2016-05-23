@@ -6,6 +6,7 @@ var auth0 = new Auth0({
     callbackOnLocationHash: true
 });
 
+var mc;
 
 function MainController() {
 
@@ -94,7 +95,7 @@ function MainController() {
     
     this._gameSelected = function( gameId ) {
         this.glc.setVisibility( false );
-//        this.gc.setVisibility( true );
+        this.gameView.setVisibility( true );
 
         this.gc = this._getGame();
         this.gc.loadGame( gameId );
@@ -102,29 +103,32 @@ function MainController() {
     
     this._newGame = function() {
         this.glc.setVisibility( false );
-//        this.gc.setVisibility( true );
+        this.gameView.setVisibility( true );
         this.gc = this._getGame();
         this.gc.createNewGame();
     }
     
     this._backToList = function() {
         this.glc.setVisibility( true );
-//        this.gc.setVisibility( false );
+        this.gameView.setVisibility( false );
     }
     
     this.glc = new GameListController( new GameListView());
     this.glc.on( 'NEW_GAME', this._newGame.bind(this) );
     this.glc.on( 'GAME_SELECTED', this._gameSelected.bind(this) );
 
-    this.glc.setVisibility( true );
-//        this.gc.setVisibility( false );
-    
     this.gc = null;
+
+    this.gameView = new GameView();
+
+    this.glc.setVisibility( true );
+    this.gameView.setVisibility( false );
+    
 }
 
-var mc = new MainController();
-
 window.onload = function() {
+	var mc = new MainController();
+
 	var idToken = localStorage.getItem( 'auth0.idToken' );
 	var userId  = localStorage.getItem( 'auth0.userId' );
 	var windowHash = window.location.hash;

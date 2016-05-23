@@ -1,5 +1,23 @@
 "use strict";
 
+function GameView() {
+	this.log = log.getLogger( this.constructor.name );
+	this.log.setLevel( log.levels.INFO );
+
+    this.setVisibility = function( isVisible ) {
+        this.log.info(this.constructor.name + '.setVisibility(.)');
+
+        if ( isVisible ) {
+            this._ui.show();
+        } else {
+            this._ui.hide();
+        }
+    }
+
+    this._ui = $( '.game-area' );	
+}
+
+
 function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	this.log = log.getLogger( this.constructor.name );
 	this.log.setLevel( log.levels.INFO );

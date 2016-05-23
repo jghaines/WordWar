@@ -89,6 +89,8 @@ function GameListView() {
 	this.log = log.getLogger( this.constructor.name );
 
     this.setVisibility = function( isVisible ) {
+        this.log.info(this.constructor.name + '.setVisibility(.)');
+
         if ( isVisible ) {
             this._ui.show();
         } else {
