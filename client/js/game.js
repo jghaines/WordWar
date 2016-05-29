@@ -345,17 +345,20 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
     
     this._processPlays = function() {         
 		var playsForThisTurn = this._plays[ this.turnIndex ];
-		var playsForThisTurnCount = playsForThisTurn.countWhere( (play) => {
-			return notNull(play) && play.playComplete; 
-		});
-		// while we have completed turns
-		while ( this._getPlayCountForTurn( this.turnIndex ) >= this._gameInfo.playerCount ) {
-			if ( this._getPlayCountForTurn( this.turnIndex ) > this._gameInfo.playerCount ) {
-				throw new Error( "_receivePlayList() - too many player's plays received" );
-			}
+		
+		if ( playsForThisTurn ) {
+			var playsForThisTurnCount = playsForThisTurn.countWhere( (play) => {
+				return notNull(play) && play.playComplete; 
+			});
+			// while we have completed turns
+			while ( this._getPlayCountForTurn( this.turnIndex ) >= this._gameInfo.playerCount ) {
+				if ( this._getPlayCountForTurn( this.turnIndex ) > this._gameInfo.playerCount ) {
+					throw new Error( "_receivePlayList() - too many player's plays received" );
+				}
 
-			this.endTurn();
-	        ++this.turnIndex;
+				this.endTurn();
+				++this.turnIndex;
+			}
 		}
         this.newTurn();
      }
