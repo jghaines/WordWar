@@ -353,7 +353,7 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 			// while we have completed turns
 			while ( this._getPlayCountForTurn( this.turnIndex ) >= this._gameInfo.playerCount ) {
 				if ( this._getPlayCountForTurn( this.turnIndex ) > this._gameInfo.playerCount ) {
-					throw new Error( "_receivePlayList() - too many player's plays received" );
+					throw new Error( "_processPlays() - too many player's plays received" );
 				}
 
 				this.endTurn();
