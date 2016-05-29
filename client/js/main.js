@@ -23,10 +23,9 @@ function MainController() {
         var socket = io( ENV.webSocketUrl );
         this.remote = new RemoteProxy( idToken, userId, socket, ENV.restBaseUrl );
         
-        var jwt = jwt_decode( idToken );
-        console.log( JSON.stringify( jwt, null, 2 ));
         
         // 10 seconds before Token expires
+        var jwt = jwt_decode( idToken );
         var timeout = jwt.exp*1000 - Date.now() - 10/*seconds*/ * 1000;
 
         setTimeout( this.showLogin.bind(this), timeout );
