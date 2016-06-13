@@ -129,7 +129,7 @@ function MainController() {
 }
 
 window.onload = function() {
-	var mc = new MainController();
+	mc = new MainController();
 
 	var idToken = localStorage.getItem( 'auth0.idToken' );
 	var userId  = localStorage.getItem( 'auth0.userId' );
