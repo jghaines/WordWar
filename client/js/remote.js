@@ -179,27 +179,34 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
             this._playerListReceived( data.PlayerList );
         }
 
-        if ( data.hasOwnProperty( 'GameItem' )) {
-            this._gameItemReceived( data.GameItem );
-
-            if ( data.GameItem.hasOwnProperty( 'turnInfo' )) {
-                this._turnListReceived( data.GameItem.turnInfo );
-            }
-        }
-
         if ( data.hasOwnProperty( 'GameList' )) {
             this._gameListReceived( data.GameList );
         }
 
-        if ( data.hasOwnProperty( 'PlayList' )) {
-            this._playListReceived( data.PlayList );
+        // game specific data
+        var gameId = null;
+        if ( data.hasOwnProperty( 'gameId' )) {
+            gameId = data.gameId;
         }
 
-        // do this last as it may trigger game start
-        if ( data.hasOwnProperty( 'GamePlayerList' )) {
-            this._gamePlayerListReceived( data.GamePlayerList );
+        if ( data.hasOwnProperty( 'GameItem' )) {
+            gameId = data.GameItem.gameId;
+            this._gameItemReceived( data.GameItem );
+
+            if ( data.GameItem.hasOwnProperty( 'turnInfo' )) {
+                this._turnListReceived( gameId, data.GameItem.turnInfo );
+            }
         }
 
+        if ( gameId ) {
+            if ( data.hasOwnProperty( 'PlayList' )) {
+                this._playListReceived( gameId, data.PlayList );
+            }
+
+            if ( data.hasOwnProperty( 'GamePlayerList' )) {
+                this._gamePlayerListReceived( gameId, data.GamePlayerList );
+            }
+        }
         
         // postback to notification websocket if the data didn't already come from there 
         if ( source != this.source.WEBSOCKET ) {
@@ -225,10 +232,13 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     }
 
     // we have received game player list from remote, send it on
-    this._gamePlayerListReceived = function( gamePlayerList ) {
+    this._gamePlayerListReceived = function( gameId, gamePlayerList ) {
         this.log.info( this.constructor.name + '._gamePlayerListReceived()' );
 
-		this.emit( this.Event.GAME_PLAYER_LIST, gamePlayerList );
+		this.emit( this.Event.GAME_PLAYER_LIST, {
+            gameId  : gameId,
+            Items   : gamePlayerList 
+        });
     }
     
     // we have received game info from remote, send it on
@@ -242,9 +252,12 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     }
 
     // we have received Play info from remote, parse and send on
-    this._playListReceived = function( playList ) {
-        this.log.info( this.constructor.name + '._playListReceived()' );
-		this.emit( this.Event.PLAY_INFO, playList.map( play => new Play( play )) );
+    this._playListReceived = function( gameId, playList ) {
+        this.log.info( `${ this.constructor.name }._playListReceived( gameId: ${ gameId })` );
+		this.emit( this.Event.PLAY_INFO, {
+            gameId  : gameId,
+            Items   : playList.map( play => new Play( play )) 
+        });
     }
     
     // we have received Game list from remote, parse and send on
@@ -254,9 +267,12 @@ function RemoteProxy( idToken, userId, socket, restBaseUrl ) {
     }
     
     // we have received turn info from remote, send it on
-    this._turnListReceived = function( turnList ) {
-        this.log.info( this.constructor.name + '._turnListReceived()' );
-		this.emit( this.Event.TURN_INFO, turnList );
+    this._turnListReceived = function( gameId, turnList ) {
+        this.log.info( this.constructor.name + `._turnListReceived(${ gameId })` );
+		this.emit( this.Event.TURN_INFO, {
+            gameId  : gameId,
+            Items   : turnList 
+        });
     }
     
     // create a subscription on the game server for game event updates

@@ -311,20 +311,20 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 		this._buttonsView.enable( 'reset',  false );
     }
      
-    this._receiveTurnList = function( turnList ) {
- 		this.log.info( this.constructor.name + '._receiveTurnList(.)');
-       turnList.forEach( (function( turn ) {
+    this._receiveTurnInfo = function( turnInfo ) {
+ 		this.log.info( this.constructor.name + '._receiveTurnInfo(.)');
+       turnInfo.Items.forEach( turn => {
             this._letterTiles[ turn.turnIndex ] = turn.tiles;
-        }).bind( this ));
+        });
     }
     
 	/**
 	 * receive playList (from remote). Store it and process
 	 */
-    this._receivePlayList = function( playList ) {
- 		this.log.info( this.constructor.name + '._receivePlayList(.)');
+    this._receivePlayInfo = function( playInfo ) {
+ 		this.log.info( this.constructor.name + '._receivePlayInfo(.)');
          var _plays = this._plays;
-         playList.forEach( function( play ) {
+         playInfo.Items.forEach( function( play ) {
             _plays[ play.turnIndex ] = _plays[ play.turnIndex ] || [];
             _plays[ play.turnIndex ][ play.playerIndex ] = play;            
          });
@@ -506,11 +506,11 @@ function GameController( remoteProxy, scoreStrategy, attackRangeStrategy ) {
 	}).bind(this));
 
 	this._remote.on( this._remote.Event.PLAY_INFO, (function(msg) {
-        this._receivePlayList(msg);
+        this._receivePlayInfo(msg);
 	}).bind(this));
 
 	this._remote.on( this._remote.Event.TURN_INFO, (function(msg) {
-        this._receiveTurnList( msg );
+        this._receiveTurnInfo( msg );
 	}).bind(this));
 
     // UI bindings
