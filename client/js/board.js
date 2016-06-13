@@ -295,6 +295,13 @@ function BoardView( boardModel ) {
         this._body.addClass( "state_" + gameState.name );
     }
 
+	this.clearPlayedItems = function() {
+		this.log.info( this.constructor.name + '.clearPlayedItems()' );
+		this._wordLists.forEach( 
+			wordList => wordList.empty() 
+		);
+    }
+
 	this.addPlayedItem = function( play ) {
 		this.log.info( this.constructor.name + '.addPlayedItem(play=.)' );
         var mouseOver = '(' + play.wordPoints + ')';

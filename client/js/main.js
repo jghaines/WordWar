@@ -32,6 +32,8 @@ function MainController() {
 
         this.glc.setRemote( this.remote );
         this.glc.getGames();
+
+        this.gc = this._getGame();
     }
 
     this._getGame = function() {
@@ -95,15 +97,12 @@ function MainController() {
     this._gameSelected = function( gameId ) {
         this.glc.setVisibility( false );
         this.gameView.setVisibility( true );
-
-        this.gc = this._getGame();
         this.gc.loadGame( gameId );
     }
     
     this._newGame = function() {
         this.glc.setVisibility( false );
         this.gameView.setVisibility( true );
-        this.gc = this._getGame();
         this.gc.createNewGame();
     }
     
