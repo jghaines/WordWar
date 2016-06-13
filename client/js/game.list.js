@@ -26,6 +26,7 @@ function GameListController( gameListView ) {
 
         gameList
             .map( game => this._gameToGameInfo( game, this._remoteProxy.playerId ))
+            .sort( this._gameSort )
             .forEach( gameInfo => this._gameListView.appendGame( gameInfo ) );
     }
     /**
@@ -55,16 +56,28 @@ function GameListController( gameListView ) {
         }
         
         const ourTurnIndex = game.lastPlayedTurnIndexList[ playerIndex ];
-        const whoseTurn = ( ourTurnIndex === minTurnIndex ? "Your turn" : "Opponent's turn" );
+        game.isOurTurn = ( ourTurnIndex === minTurnIndex );
+        const whoseTurn = ( game.isOurTurn ? "Your turn" : "Opponent's turn" );
         const opponentInfo = this._remoteProxy.players[ opponentId ];
         
         return {
             gameId          : game.gameId,
             turnNumber      : minTurnIndex + 2,
+            isOurTurn       : game.isOurTurn,
             whoseTurn       : whoseTurn,
             opponentName    : ( opponentInfo && opponentInfo.wwNickname ? opponentInfo.wwNickname : 'Opponent' ),
             opponentPicture : ( opponentInfo && opponentInfo.picture ? opponentInfo.picture : this._remoteProxy.defaultPicture )
         };
+    }
+
+    this._gameSort = function( a, b ) {
+        if ( a.isOurTurn != b.isOurTurn ) {
+            return ( a.isOurTurn ? -1 : 1 );
+        } else if ( a.turnNumber != b.turnNumber ) {
+            return ( a.turnNumber < b.turnNumber ? -1 : 1 );
+        } else {
+            return ( a.gameId < b.gameId ? -1 : 1 );
+        }
     }
     
     this._gameSelected = function( gameId ) {
